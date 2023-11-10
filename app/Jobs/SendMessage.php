@@ -55,7 +55,19 @@ class SendMessage implements ShouldQueue
             $wam->data = serialize($this->messageData);
             $wam->save();
         } catch (Exception $e) {
-            Log::error('Error sending message: ' . $e->getMessage());
+            // Captura la excepción y registra un mensaje de error detallado
+        $errorMessage = 'Error handling SendMessage job: ' . $e->getMessage();
+
+        // Agrega información adicional al mensaje de error
+        $errorMessage .= "\nPayload: " . json_encode($this->payload);
+        $errorMessage .= "\nBody: " . $this->body;
+        $errorMessage .= "\nMessage Data: " . json_encode($this->messageData);
+
+        Log::error($errorMessage);
+
+        // Opcional: puedes volver a encolar el trabajo si falla
+        $this->release(60); // Vuelve a intentar después de 60 segundos
+
         }
     }
 }

@@ -310,7 +310,7 @@ class MessageController extends Controller
             $template = $wp->loadTemplateByName($templateName, $templateLang);
 
             if (!$template) {
-                throw new Exception("Invalid template.");
+                throw new Exception("Invalid template or template not found.");
             }
 
             $templateBody = '';
@@ -338,7 +338,7 @@ class MessageController extends Controller
                     $payload['template']['components'][] = [
                         'type' => 'header',
                         'parameters' => [[
-                            'type' => $type,                        
+                            'type' => $type,
                             $type => [
                                 "filename" => "Contrato.pdf",
                                 'link' => $input['header_url'],
@@ -349,7 +349,7 @@ class MessageController extends Controller
                     $payload['template']['components'][] = [
                         'type' => 'header',
                         'parameters' => [[
-                            'type' => $type,                        
+                            'type' => $type,
                             $type => [
                                 'link' => $input['header_url'],
                             ]
@@ -389,6 +389,8 @@ class MessageController extends Controller
                 'data' => count($recipients) . ' messages were enqueued.',
             ], 200);
         } catch (Exception $e) {
+            // Captura la excepción y registra un mensaje de error detallado
+            Log::error('Error in sendMessageTemplate: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
