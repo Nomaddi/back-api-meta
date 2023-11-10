@@ -14,9 +14,9 @@ class Whatsapp
 
     public function __construct()
     {
-        $this->accessToken = env('WHATSAPP_API_TOKEN');
-        $this->phoneId = env('WHATSAPPI_API_PHONE_ID');
-        $this->wabaId = env('WHATSAPP_BUSINESS_ID');
+        $this->accessToken = 'EAAVGPBd0gvkBO7kWVSz5E8tTEZBcwC86fkK3JwsUeYCxZA04aHWaOyvkpmQu94lZC6BViNmZAZA9jHilijZA1nFXdDqrlXGItIUFikMY4JM0tNJlzBGAOkOXZA1lgH4ZAd7y37WSqYXLggZAYu4x5nzZCtsi2amDY3ZBnIngGXVAwaZCTp0UOsvyIWE35hTYE10wcFZBH8nXA2E6p4M2GkRWD';
+        $this->phoneId = '131481643386780';
+        $this->wabaId = '143864792140466';
     }
 
     public function sendText($to, $text) {
@@ -64,9 +64,31 @@ class Whatsapp
         return Http::withToken($this->accessToken)->get($this->baseUrl . '/' . $this->wabaId . '/message_templates?limit=250')->throw()->json();
     }
 
+    // public function genericPayload($payload) {
+    //     return Http::withToken($this->accessToken)->post($this->baseUrl . '/' . $this->phoneId . '/messages', $payload)->throw()->json();
+    // }
     public function genericPayload($payload) {
-        return Http::withToken($this->accessToken)->post($this->baseUrl . '/' . $this->phoneId . '/messages', $payload)->throw()->json();
+        try {
+            // Agrega un registro para mostrar el payload antes de enviar la solicitud
+            Log::info('Sending WhatsApp API request with payload:', ['payload' => $payload]);
+
+            // Realiza la solicitud HTTP POST
+            $response = Http::withToken($this->accessToken)
+                ->post($this->baseUrl . '/' . $this->phoneId . '/messages', $payload)
+                ->throw(); // Lanza una excepción si la respuesta no es exitosa
+
+            // Agrega un registro para mostrar la respuesta después de recibir la respuesta
+            Log::info('WhatsApp API response:', ['response' => $response]);
+
+            // Convierte la respuesta JSON en un arreglo asociativo
+            return $response->json();
+        } catch (Throwable $e) {
+            // Captura y registra cualquier excepción que ocurra durante la solicitud
+            Log::error('Error in WhatsApp API request:', ['error' => $e->getMessage()]);
+            throw $e; // Vuelve a lanzar la excepción para que se pueda manejar en el código que llama a esta función
+        }
     }
+
 
     /**
      * Convert mime to extension.

@@ -65,9 +65,6 @@ class SendMessage implements ShouldQueue
 
         Log::error($errorMessage);
 
-        // Opcional: puedes volver a encolar el trabajo si falla
-        $this->release(60); // Vuelve a intentar después de 60 segundos
-
         }
     }
 }
