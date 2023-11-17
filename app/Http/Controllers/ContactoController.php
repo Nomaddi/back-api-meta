@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Exception;
 use App\Models\Contacto;
 use App\Models\Tag;
+use App\Imports\ContactosImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ContactoController extends Controller
 {
@@ -142,5 +144,22 @@ class ContactoController extends Controller
             'success' => true,
             'message' => 'Contacto eliminado correctamente.',
         ], 200);
+    }
+
+    public function uploadUsers(Request $request)
+    {
+        try {
+            Excel::import(new ContactosImport, $request->file);
+            return response()->json([
+                'success' => true,
+                'message' => 'Importación correcta.',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error en la importación: ' . $e->getMessage(),
+                'trace' => $e->getTraceAsString(), // Añade el trace para obtener más detalles
+            ], 500);
+        }
     }
 }

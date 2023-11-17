@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\ContactoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,10 @@ Route::apiResources([
 Route::get('/message-templates', [MessageController::class, 'loadMessageTemplates']);
 Route::post('/send-message-templates', [MessageController::class, 'sendMessageTemplate']);
 
+//estadisticas
+
+Route::get('/statistics', [MessageController::class, 'getStatistics']);
+
 //Contactos
 Route::get('/contactos', 'App\Http\Controllers\ContactoController@index');//mostrar todos los registros
 Route::post('/contactos', 'App\Http\Controllers\ContactoController@store');//crear un registro
@@ -40,3 +45,6 @@ Route::post('/tags', 'App\Http\Controllers\TagController@store');//crear un regi
 Route::put('/tags/{id}', 'App\Http\Controllers\TagController@update');//actualizare un registro
 Route::delete('/tags/{id}', 'App\Http\Controllers\TagController@destroy');//actualizare un registro
 
+//import
+// Route::get('/import-users', [ContactoController::class, 'importUsers'])->name('import');
+Route::post('/upload-contactos', [ContactoController::class, 'uploadUsers']);

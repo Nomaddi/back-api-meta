@@ -209,10 +209,14 @@ class MessageController extends Controller
 
             if (!empty($value['statuses'])) {
                 $status = $value['statuses'][0]['status']; // sent, delivered, read, failed
+                if($status == 'failed'){
+                    $failedEnvio = $value['statuses'][0]['errors']['message'];
+                }
                 $wam = Message::where('wam_id', $value['statuses'][0]['id'])->first();
 
                 if (!empty($wam->id)) {
                     $wam->status = $status;
+                    $wam->caption = $failedEnvio;
                     $wam->save();
                     Webhook::dispatch($wam, true);
                 }
@@ -345,7 +349,7 @@ class MessageController extends Controller
                             ]
                         ]],
                     ];
-                }else{
+                } else {
                     $payload['template']['components'][] = [
                         'type' => 'header',
                         'parameters' => [[
@@ -389,8 +393,6 @@ class MessageController extends Controller
                 'data' => count($recipients) . ' messages were enqueued.',
             ], 200);
         } catch (Exception $e) {
-            // Captura la excepción y registra un mensaje de error detallado
-            Log::error('Error in sendMessageTemplate: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
@@ -417,5 +419,31 @@ class MessageController extends Controller
         $wam->save();
 
         return $wam;
+    }
+
+    public function getStatistics(Request $request)
+    {
+        $this->validate($request, [
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ]);
+        try {
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+
+            $statistics = Message::whereBetween('created_at', [$startDate, $endDate])
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(outgoing) as outgoing, status')
+                ->groupBy('date', 'status')
+                ->get();
+
+            if ($statistics->isEmpty()) {
+                return response()->json(['message' => 'No hay estadísticas disponibles para el rango de fechas proporcionado.']);
+            }
+
+            return response()->json(['statistics' => $statistics]);
+            
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error al obtener estadísticas.'], 500);
+        }
     }
 }
