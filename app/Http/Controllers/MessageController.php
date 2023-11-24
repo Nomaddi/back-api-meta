@@ -78,6 +78,7 @@ class MessageController extends Controller
                 'data' => $message,
             ], 200);
         } catch (Exception $e) {
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
@@ -111,6 +112,7 @@ class MessageController extends Controller
                 'data' => $messages,
             ], 200);
         } catch (Exception $e) {
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
@@ -169,6 +171,7 @@ class MessageController extends Controller
                 'data' => $message,
             ], 200);
         } catch (Exception $e) {
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
@@ -194,6 +197,7 @@ class MessageController extends Controller
 
             throw new Exception('Invalid request');
         } catch (Exception $e) {
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
@@ -284,6 +288,7 @@ class MessageController extends Controller
                 'data' => $body,
             ], 200);
         } catch (Exception $e) {
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
@@ -302,6 +307,7 @@ class MessageController extends Controller
                 'data' => $templates['data'],
             ], 200);
         } catch (Exception $e) {
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
@@ -399,6 +405,7 @@ class MessageController extends Controller
                 'data' => count($recipients) . ' messages were enqueued.',
             ], 200);
         } catch (Exception $e) {
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
@@ -450,6 +457,7 @@ class MessageController extends Controller
             return response()->json(['statistics' => $statistics]);
 
         } catch (\Exception $e) {
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json(['error' => 'Error al obtener datos.'], 500);
         }
     }
