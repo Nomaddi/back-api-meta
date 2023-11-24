@@ -35,10 +35,10 @@ class MessageController extends Controller
                 'data' => $messages,
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes: ' . $e->getMessage());
+            Log::error('Error al obtener mensajes: ' . json_encode($e->getMessage()));
 
             // Utilizar el mensaje de la excepción o un mensaje predeterminado
-            $errorMessage = $e->getMessage() ?: 'Error interno del servidor';
+            $errorMessage = isset($e->getMessage()['message']) ? $e->getMessage()['message'] : 'Error interno del servidor';
 
             return response()->json([
                 'success' => false,
