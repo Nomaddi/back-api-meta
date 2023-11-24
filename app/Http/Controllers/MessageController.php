@@ -292,10 +292,11 @@ class MessageController extends Controller
                 'data' => $body,
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes6: ' . $e->getMessage());
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTrace(),
             ], 500);
         }
     }
