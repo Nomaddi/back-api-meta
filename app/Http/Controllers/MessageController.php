@@ -427,23 +427,24 @@ class MessageController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
+
         try {
             $startDate = $request->input('start_date');
             $endDate = $request->input('end_date');
 
+            // Obtener todos los datos en el rango de fechas sin aplicar el filtro
             $statistics = Message::whereBetween('created_at', [$startDate, $endDate])
-                ->selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(outgoing) as outgoing, status')
-                ->groupBy('date', 'status')
-                ->get();
+            ->where('outgoing', 1)
+            ->get();
 
             if ($statistics->isEmpty()) {
-                return response()->json(['message' => 'No hay estadísticas disponibles para el rango de fechas proporcionado.']);
+                return response()->json(['message' => 'No hay datos disponibles para el rango de fechas proporcionado.']);
             }
 
             return response()->json(['statistics' => $statistics]);
-            
+
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error al obtener estadísticas.'], 500);
+            return response()->json(['error' => 'Error al obtener datos.'], 500);
         }
     }
 }
