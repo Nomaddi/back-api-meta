@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use PhpParser\Node\Expr;
+use Illuminate\Support\Facades\Log;
+
 
 class MessageController extends Controller
 {
@@ -33,6 +35,7 @@ class MessageController extends Controller
                 'data' => $messages,
             ], 200);
         } catch (Exception $e) {
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
@@ -209,14 +212,17 @@ class MessageController extends Controller
 
             if (!empty($value['statuses'])) {
                 $status = $value['statuses'][0]['status']; // sent, delivered, read, failed
-                if($status == 'failed'){
+                if ($status == 'failed') {
                     $failedEnvio = $value['statuses'][0]['errors']['message'];
                 }
                 $wam = Message::where('wam_id', $value['statuses'][0]['id'])->first();
 
                 if (!empty($wam->id)) {
                     $wam->status = $status;
-                    $wam->caption = $failedEnvio;
+                    if ($status == 'failed') {
+                        $wam->caption = $failedEnvio;
+                    }
+
                     $wam->save();
                     Webhook::dispatch($wam, true);
                 }
@@ -431,17 +437,16 @@ class MessageController extends Controller
             $startDate = $request->input('start_date');
             $endDate = $request->input('end_date');
 
+            // Obtener todos los datos en el rango de fechas sin aplicar el filtro
             $statistics = Message::whereBetween('created_at', [$startDate, $endDate])
-                ->selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(outgoing) as outgoing, status')
-                ->groupBy('date', 'status')
+                ->where('outgoing', 1)
                 ->get();
 
             if ($statistics->isEmpty()) {
-                return response()->json(['message' => 'No hay estadísticas disponibles para el rango de fechas proporcionado.']);
+                return response()->json(['message' => 'No hay datos disponibles para el rango de fechas proporcionado.']);
             }
 
             return response()->json(['statistics' => $statistics]);
-            
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error al obtener estadísticas.'], 500);
         }
