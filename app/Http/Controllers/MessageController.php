@@ -227,7 +227,7 @@ class MessageController extends Controller
 
                 if (!empty($wam->id)) {
                     $wam->status = $status;
-                    if ($failedEnvio) {
+                    if (!empty($failedEnvio)) {
                         $wam->caption = $failedEnvio;
                     }
                     $wam->save();
