@@ -27,6 +27,7 @@ class MessageController extends Controller
         try {
             $messages = DB::table('messages', 'm')
                 ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 GROUP BY wa_id)')
+                ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
                 ->orderByDesc('m.id')
                 ->get();
 
@@ -450,9 +451,9 @@ class MessageController extends Controller
 
             // Obtener todos los datos en el rango de fechas sin aplicar el filtro
             $statistics = Message::whereBetween('created_at', [$startDate, $endDate])
-            ->where('outgoing', 1)
-            ->select('wa_id', 'type', 'status', 'created_at')
-            ->get();
+                ->where('outgoing', 1)
+                ->select('wa_id', 'type', 'status', 'created_at')
+                ->get();
 
             if ($statistics->isEmpty()) {
                 return response()->json(['message' => 'No hay datos disponibles para el rango de fechas proporcionado.']);
