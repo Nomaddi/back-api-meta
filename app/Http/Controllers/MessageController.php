@@ -292,11 +292,10 @@ class MessageController extends Controller
                 'data' => $body,
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes: ' . $e->getMessage());
+            Log::error('Error al obtener mensajes6: ' . $e->getMessage());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTrace(),
             ], 500);
         }
     }
@@ -452,8 +451,9 @@ class MessageController extends Controller
 
             // Obtener todos los datos en el rango de fechas sin aplicar el filtro
             $statistics = Message::whereBetween('created_at', [$startDate, $endDate])
-                ->where('outgoing', 1)
-                ->get();
+            ->where('outgoing', 1)
+            ->select('wa_id', 'type', 'status', 'created_at')
+            ->get();
 
             if ($statistics->isEmpty()) {
                 return response()->json(['message' => 'No hay datos disponibles para el rango de fechas proporcionado.']);

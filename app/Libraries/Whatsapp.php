@@ -4,6 +4,8 @@ namespace App\Libraries;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Exception;
+use Illuminate\Support\Facades\Log;
 
 class Whatsapp
 {
@@ -65,7 +67,15 @@ class Whatsapp
     }
 
     public function genericPayload($payload) {
-        return Http::withToken($this->accessToken)->post($this->baseUrl . '/' . $this->phoneId . '/messages', $payload)->throw()->json();
+        try {
+            return Http::withToken($this->accessToken)->post($this->baseUrl . '/' . $this->phoneId . '/messages', $payload)->throw()->json();
+        } catch (Exception $e) {
+            Log::error('Error al obtener mensajes8: ' . $e->getMessage());
+            return response()->json([
+                'success'  => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 
