@@ -227,9 +227,7 @@ class MessageController extends Controller
 
                 if (!empty($wam->id)) {
                     $wam->status = $status;
-                    if ($status == 'failed') {
-                        $wam->caption = $failedEnvio;
-                    }
+                    $wam->caption = $failedEnvio;
 
                     $wam->save();
                     Webhook::dispatch($wam, true);
