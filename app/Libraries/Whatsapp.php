@@ -21,7 +21,8 @@ class Whatsapp
         $this->wabaId = '143864792140466';
     }
 
-    public function sendText($to, $text) {
+    public function sendText($to, $text)
+    {
         $payload = [
             'messaging_product' => 'whatsapp',
             'recipient_type' => 'individual',
@@ -36,7 +37,8 @@ class Whatsapp
         return Http::withToken($this->accessToken)->post($this->baseUrl . '/' . $this->phoneId . '/messages', $payload)->throw()->json();
     }
 
-    public function downloadMedia($mediaId) {
+    public function downloadMedia($mediaId)
+    {
         $media = Http::withToken($this->accessToken)->get($this->baseUrl . '/' . $mediaId)->throw()->json();
         if (!empty($media['url'])) {
             $req = Http::withToken($this->accessToken)->get($media['url'])->throw();
@@ -51,7 +53,8 @@ class Whatsapp
         return null;
     }
 
-    public function loadTemplateByName($name, $language) {
+    public function loadTemplateByName($name, $language)
+    {
         $templates = $this->loadTemplates();
         foreach ($templates['data'] as $template) {
             if ($template['name'] == $name && $template['language'] == $language) {
@@ -62,20 +65,22 @@ class Whatsapp
         return null;
     }
 
-    public function loadTemplates() {
+    public function loadTemplates()
+    {
         return Http::withToken($this->accessToken)->get($this->baseUrl . '/' . $this->wabaId . '/message_templates?limit=250')->throw()->json();
     }
 
-    public function genericPayload($payload) {
-        try {
-            return Http::withToken($this->accessToken)->post($this->baseUrl . '/' . $this->phoneId . '/messages', $payload)->throw()->json();
-        } catch (Exception $e) {
-            Log::error('Error al obtener mensajes8: ' . $e->getMessage());
-            return response()->json([
-                'success'  => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+    public function genericPayload($payload)
+    {
+        // try {
+        return Http::withToken($this->accessToken)->post($this->baseUrl . '/' . $this->phoneId . '/messages', $payload)->throw()->json();
+        // } catch (Exception $e) {
+        //     Log::error('Error al obtener mensajes8: ' . $e->getMessage());
+        //     return response()->json([
+        //         'success'  => false,
+        //         'error' => $e->getMessage(),
+        //     ], 500);
+        // }
     }
 
 
