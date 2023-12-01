@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ContactoController;
+use App\Http\Controllers\AplicacionesController;
+use App\Http\Controllers\NumerosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,3 +50,11 @@ Route::delete('/tags/{id}', 'App\Http\Controllers\TagController@destroy');//actu
 //import
 // Route::get('/import-users', [ContactoController::class, 'importUsers'])->name('import');
 Route::post('/upload-contactos', [ContactoController::class, 'uploadUsers']);
+
+Route::apiResources([
+    'aplicaciones' => AplicacionesController::class,
+]);
+
+Route::apiResources([
+    'numeros' => NumerosController::class,
+]);

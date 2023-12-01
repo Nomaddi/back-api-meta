@@ -221,16 +221,10 @@ class MessageController extends Controller
 
             if (!empty($value['statuses'])) {
                 $status = $value['statuses'][0]['status']; // sent, delivered, read, failed
-                if ($status == 'failed') {
-                    $failedEnvio = !empty($value['statuses'][0]['errors']) ? $value['statuses'][0]['errors'] : 'algo esta mal';
-                }
                 $wam = Message::where('wam_id', $value['statuses'][0]['id'])->first();
 
                 if (!empty($wam->id)) {
                     $wam->status = $status;
-                    if (!empty($failedEnvio)) {
-                        $wam->caption = $failedEnvio;
-                    }
                     $wam->save();
                     Webhook::dispatch($wam, true);
                 }
@@ -263,7 +257,7 @@ class MessageController extends Controller
 
                         if (!is_null($file)) {
                             $message = $this->_saveMessage(
-                                env('APP_URL') . ':8000' . '/storage/' . $file,
+                                env('APP_URL') . '/storage/' . $file,
                                 $mediaType,
                                 $value['messages'][0]['from'],
                                 $value['messages'][0]['id'],
