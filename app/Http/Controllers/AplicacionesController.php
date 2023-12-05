@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Libraries\Whatsapp;
 use App\Models\Aplicaciones;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 
 class AplicacionesController extends Controller
@@ -131,6 +133,26 @@ class AplicacionesController extends Controller
                 'success' => false,
                 'message' => 'Aplicación no encontrada.',
             ], 404);
+        }
+    }
+
+    public function Numbers(Request $request)
+    {
+        try {
+            $wp = new Whatsapp();
+            $token = $request->query('token_api');
+            $waba_id = $request->query('id_c_business');
+            $number = $wp->numbersLoad($token, $waba_id);
+            return response()->json([
+                'success' => true,
+                'data' => $number,
+            ], 200);
+        } catch (Exception $e) {
+            Log::error('Error al obtener mensajes Aplicaciones 4: ' . $e->getMessage());
+            return response()->json([
+                'success'  => false,
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 }

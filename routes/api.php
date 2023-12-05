@@ -54,6 +54,8 @@ Route::post('/upload-contactos', [ContactoController::class, 'uploadUsers']);
 Route::apiResources([
     'aplicaciones' => AplicacionesController::class,
 ]);
+//obteniendo numeros telefonicos
+Route::get('/numbers', [AplicacionesController::class, 'numbers']);
 
 Route::apiResources([
     'numeros' => NumerosController::class,

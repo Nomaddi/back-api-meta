@@ -40,17 +40,17 @@ class NumerosController extends Controller
     public function store(Request $request)
     {
         try {
-            $numero = new Numeros();
-            $numero->nombre = $request->nombre;
-            $numero->numero = $request->numero;
-            $numero->id_telefono = $request->id_telefono;
-            $numero->aplicacion = $request->aplicacion;
-            $numero->calidad = $request->calidad;
-            $numero->save();
+            $numeros = new Numeros();
+            $numeros->nombre = $request->nombre;
+            $numeros->numero = $request->numero;
+            $numeros->id_telefono = $request->id_telefono;
+            $numeros->aplicacion = $request->aplicacion;
+            $numeros->calidad = $request->calidad;
+            $numeros->save();
 
             return response()->json([
                 'success' => true,
-                'data' => $numero,
+                'data' => $numeros,
             ], 200);
         } catch (Exception $e) {
             return response()->json([
