@@ -254,6 +254,7 @@ class MessageController extends Controller
                                 $value['messages'][0]['timestamp'],
                                 $caption
                             );
+                        Webhook::dispatch($message, false);
                         }
                     } else {
                         $type = $value['messages'][0]['type'];
