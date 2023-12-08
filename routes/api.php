@@ -7,6 +7,8 @@ use App\Http\Controllers\NumerosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use Illuminate\Support\Facades\Artisan;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -60,3 +62,13 @@ Route::get('/numbers', [AplicacionesController::class, 'numbers']);
 Route::apiResources([
     'numeros' => NumerosController::class,
 ]);
+
+//reiniciar servicio de colas
+Route::get('/restart-worker', function () {
+    try {
+        Artisan::call('queue:restart');
+        return response()->json(['success' => true, 'message' => 'Envios reiniciados.']);
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+});

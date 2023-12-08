@@ -6,6 +6,8 @@ use App\Events\Webhook;
 use App\Jobs\SendMessage;
 use App\Libraries\Whatsapp;
 use App\Models\Message;
+use App\Models\Numeros;
+use App\Models\Aplicaciones;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -22,14 +24,24 @@ class MessageController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $input = $request->all();
+        $phone_id = $input['id_phone'];
+
         try {
             $messages = DB::table('messages', 'm')
-                ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 GROUP BY wa_id)')
+                ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
+                ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 WHERE m2.phone_id = ? GROUP BY wa_id)', [$phone_id])
                 ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
                 ->orderByDesc('m.id')
                 ->get();
+            // $messages = DB::table('messages', 'm')
+            //     ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
+            //     ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
+            //     ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 GROUP BY wa_id)')
+            //     ->orderByDesc('m.id')
+            //     ->get();
 
             return response()->json([
                 'success' => true,
@@ -65,11 +77,12 @@ class MessageController extends Controller
 
             $input = $request->all();
             $wp = new Whatsapp();
-            $response = $wp->sendText($input['wa_id'], $input['body']);
+            $response = $wp->sendText($input['wa_id'], $input['body'], $input['id_phone'], $input['token_api']);
 
             $message = new Message();
             $message->wa_id = $input['wa_id'];
             $message->wam_id = $response["messages"][0]["id"];
+            $message->phone_id = $input['id_phone'];
             $message->type = 'text';
             $message->outgoing = true;
             $message->body = $input['body'];
@@ -99,9 +112,12 @@ class MessageController extends Controller
      */
     public function show($waId, Request $request)
     {
+        $input = $request->all();
+        $phone_id = $input['id_phone'];
         try {
             $messages = DB::table('messages', 'm')
                 ->where('wa_id', $waId)
+                ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
                 ->orderBy('created_at')
                 ->get();
 
@@ -146,42 +162,6 @@ class MessageController extends Controller
     public function destroy(Message $message)
     {
         //
-    }
-
-    public function sendMessages()
-    {
-        try {
-            // $token = env('WHATSAPP_API_TOKEN');
-            // $phoneId = env('WHATSAPPI_API_PHONE_ID');
-            // $version = 'v15.0';
-            // $payload = [
-            //     'messaging_product' => 'whatsapp',
-            //     'to' => '14842918777',
-            //     'type' => 'template',
-            //     "template" => [
-            //         "name" => "hello_world",
-            //         "language" => [
-            //             "code" => "en_US"
-            //         ]
-            //     ]
-            // ];
-
-            // $message = Http::withToken($token)->post('https://graph.facebook.com/' . $version . '/' . $phoneId . '/messages', $payload)->throw()->json();
-
-            $wp = new Whatsapp();
-            $message = $wp->sendText('14842918777', 'Is this working?');
-
-            return response()->json([
-                'success' => true,
-                'data' => $message,
-            ], 200);
-        } catch (Exception $e) {
-            Log::error('Error al obtener mensajes4: ' . $e->getMessage());
-            return response()->json([
-                'success'  => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
     }
 
     public function verifyWebhook(Request $request)
@@ -240,6 +220,7 @@ class MessageController extends Controller
                             'text',
                             $value['messages'][0]['from'],
                             $value['messages'][0]['id'],
+                            $value['metadata']['phone_number_id'],
                             $value['messages'][0]['timestamp']
                         );
 
@@ -248,7 +229,15 @@ class MessageController extends Controller
                         $mediaType = $value['messages'][0]['type'];
                         $mediaId = $value['messages'][0][$mediaType]['id'];
                         $wp = new Whatsapp();
-                        $file = $wp->downloadMedia($mediaId);
+                        //consulta para traer token
+                        $num = Numeros::where('id_telefono', $value['metadata']['phone_number_id'])->first();
+
+                        $app = Aplicaciones::where('id', $num->aplicacion)->first();
+
+                        $tk = $app->token_api;
+
+                        //fin de consulta
+                        $file = $wp->downloadMedia($mediaId, $tk);
 
                         $caption = null;
                         if (!empty($value['messages'][0][$mediaType]['caption'])) {
@@ -261,6 +250,7 @@ class MessageController extends Controller
                                 $mediaType,
                                 $value['messages'][0]['from'],
                                 $value['messages'][0]['id'],
+                                $value['metadata']['phone_number_id'],
                                 $value['messages'][0]['timestamp'],
                                 $caption
                             );
@@ -273,6 +263,7 @@ class MessageController extends Controller
                                 'other',
                                 $value['messages'][0]['from'],
                                 $value['messages'][0]['id'],
+                                $value['metadata']['phone_number_id'],
                                 $value['messages'][0]['timestamp']
                             );
                         }
@@ -294,11 +285,13 @@ class MessageController extends Controller
         }
     }
 
-    public function loadMessageTemplates()
+    public function loadMessageTemplates(Request $request)
     {
         try {
             $wp = new Whatsapp();
-            $templates = $wp->loadTemplates();
+            $token = $request->query('token_api');
+            $waba_id = $request->query('id_c_business');
+            $templates = $wp->loadTemplates($token, $waba_id);
 
             return response()->json([
                 'success' => true,
@@ -321,7 +314,10 @@ class MessageController extends Controller
             $wp = new Whatsapp();
             $templateName = $input['template_name'];
             $templateLang = $input['template_language'];
-            $template = $wp->loadTemplateByName($templateName, $templateLang);
+            $tokenApp     = $input['token_api'];
+            $phone_id     = $input['phone_id'];
+            $waba_id_app  = $input['id_c_business'];
+            $template = $wp->loadTemplateByName($templateName, $templateLang, $tokenApp, $waba_id_app);
 
             if (!$template) {
                 throw new Exception("Invalid template or template not found.");
@@ -395,7 +391,7 @@ class MessageController extends Controller
                 $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
                 $payload['to'] = $phone;
 
-                SendMessage::dispatch($payload, $body, $messageData);
+                SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData);
             }
 
             return response()->json([
@@ -411,7 +407,7 @@ class MessageController extends Controller
         }
     }
 
-    private function _saveMessage($message, $messageType, $waId, $wamId, $timestamp = null, $caption = null, $data = '')
+    private function _saveMessage($message, $messageType, $waId, $wamId, $phoneId, $timestamp = null, $caption = null, $data = '')
     {
         $wam = new Message();
         $wam->body = $message;
@@ -419,6 +415,7 @@ class MessageController extends Controller
         $wam->type = $messageType;
         $wam->wa_id = $waId;
         $wam->wam_id = $wamId;
+        $wam->phone_id = $phoneId;
         $wam->status = 'sent';
         $wam->caption = $caption;
         $wam->data = $data;

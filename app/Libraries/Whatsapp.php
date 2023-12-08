@@ -21,7 +21,7 @@ class Whatsapp
         $this->wabaId = '143864792140466';
     }
 
-    public function sendText($to, $text)
+    public function sendText($to, $text, $phone_id, $tokenApp)
     {
         $payload = [
             'messaging_product' => 'whatsapp',
@@ -34,14 +34,14 @@ class Whatsapp
             ],
         ];
 
-        return Http::withToken($this->accessToken)->post($this->baseUrl . '/' . $this->phoneId . '/messages', $payload)->throw()->json();
+        return Http::withToken($tokenApp)->post($this->baseUrl . '/' . $phone_id . '/messages', $payload)->throw()->json();
     }
 
-    public function downloadMedia($mediaId)
+    public function downloadMedia($mediaId, $token_api)
     {
-        $media = Http::withToken($this->accessToken)->get($this->baseUrl . '/' . $mediaId)->throw()->json();
+        $media = Http::withToken($token_api)->get($this->baseUrl . '/' . $mediaId)->throw()->json();
         if (!empty($media['url'])) {
-            $req = Http::withToken($this->accessToken)->get($media['url'])->throw();
+            $req = Http::withToken($token_api)->get($media['url'])->throw();
             $content = $req->body();
             $ext = $this->_mime2ext($media['mime_type']);
             $fileName = rand(1, 99999999) . '-' . time();
@@ -53,9 +53,9 @@ class Whatsapp
         return null;
     }
 
-    public function loadTemplateByName($name, $language)
+    public function loadTemplateByName($name, $language, $tokenApp, $waba_id_app)
     {
-        $templates = $this->loadTemplates();
+        $templates = $this->loadTemplates($tokenApp, $waba_id_app);
         foreach ($templates['data'] as $template) {
             if ($template['name'] == $name && $template['language'] == $language) {
                 return $template;
@@ -65,15 +65,15 @@ class Whatsapp
         return null;
     }
 
-    public function loadTemplates()
+    public function loadTemplates($tokenApp, $waba_id_app)
     {
-        return Http::withToken($this->accessToken)->get($this->baseUrl . '/' . $this->wabaId . '/message_templates?limit=250')->throw()->json();
+        return Http::withToken($tokenApp)->get($this->baseUrl . '/' . $waba_id_app . '/message_templates?limit=250')->throw()->json();
     }
 
-    public function genericPayload($payload)
+    public function genericPayload($payload, $tokenApp, $phone_id)
     {
         // try {
-        return Http::withToken($this->accessToken)->post($this->baseUrl . '/' . $this->phoneId . '/messages', $payload)->throw()->json();
+        return Http::withToken($tokenApp)->post($this->baseUrl . '/' . $phone_id . '/messages', $payload)->throw()->json();
         // } catch (Exception $e) {
         //     Log::error('Error al obtener mensajes8: ' . $e->getMessage());
         //     return response()->json([
