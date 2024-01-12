@@ -34,6 +34,7 @@ class MessageController extends Controller
                 ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
                 ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 WHERE m2.phone_id = ? GROUP BY wa_id)', [$phone_id])
                 ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
+                ->where('m.outgoing', '=', 0) // Agregar condición para outgoing igual a 0
                 ->orderByDesc('m.id')
                 ->get();
             // $messages = DB::table('messages', 'm')
@@ -279,6 +280,7 @@ class MessageController extends Controller
             ], 200);
         } catch (Exception $e) {
             Log::error('Error al obtener mensajes6: ' . $e->getMessage());
+            Log::error('Exception trace: ' . $e->getTraceAsString());
             return response()->json([
                 'success'  => false,
                 'error' => $e->getMessage(),
