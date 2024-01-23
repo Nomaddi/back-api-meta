@@ -399,7 +399,7 @@ class MessageController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => count($recipients) . ' messages were enqueued.',
+                'data' => count($recipients) . ' Mensajes encolado correctamente.',
             ], 200);
         } catch (Exception $e) {
             Log::error('Error al obtener mensajes8: ' . $e->getMessage());
