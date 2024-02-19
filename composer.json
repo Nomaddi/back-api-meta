@@ -17,7 +17,8 @@
         "maatwebsite/excel": "^3.1",
         "pusher/pusher-php-server": "^7.2",
         "yajra/laravel-datatables-oracle": "^9.21",
-        "tijsverkoyen/css-to-inline-styles": "^2.2.7"
+        "tijsverkoyen/css-to-inline-styles": "^2.2.7",
+        "symfony/css-selector": "^5.0"
     },
     "require-dev": {
         "facade/ignition": "^2.5",
