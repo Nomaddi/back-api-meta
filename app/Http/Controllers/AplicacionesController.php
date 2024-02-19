@@ -8,131 +8,55 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Log;
-
+use DataTables;
 
 class AplicacionesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+
+    public function index(Request $request)
     {
-        $apps = Aplicaciones::get();
-        return $apps;
+        $aplicaciones = Aplicaciones::all();
+        return view('aplicaciones/index', [
+            'aplicaciones' => $aplicaciones,
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        try {
-            $apps = new Aplicaciones();
-            $apps->nombre = $request->nombre;
-            $apps->id_app = $request->id_app;
-            $apps->id_c_business = $request->id_c_business;
-            $apps->token_api = $request->token_api;
-            $apps->save();
+        $request->validate([
+            'nombre' => 'required',
+            'id_app' => 'required',
+            'id_c_business' => 'required',
+            'token_api' => 'required',
+        ]);
 
-            return response()->json([
-                'success' => true,
-                'data' => $apps,
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+
+        Aplicaciones::create($request->all());
+
+        return response()->json(['success' => 'Aplicación creada con éxito.']);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Aplicaciones  $aplicaciones
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Aplicaciones $aplicaciones)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'nombre' => 'required',
+            'id_app' => 'required',
+            'id_c_business' => 'required',
+            'token_api' => 'required',
+        ]);
+        $aplicacion = Aplicaciones::findOrFail($id);
+        $aplicacion->update($request->all());
+
+        return response()->json(['success' => 'Aplicación actualizada con éxito.']);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Aplicaciones  $aplicaciones
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Aplicaciones $aplicaciones)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Aplicaciones  $aplicaciones
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request)
-    {
-        try {
-            $aplicacion = Aplicaciones::findOrFail($request->id);
-            $aplicacion->nombre = $request->nombre;
-            $aplicacion->id_app = $request->id_app;
-            $aplicacion->id_c_business = $request->id_c_business;
-            $aplicacion->token_api = $request->token_api;
-            $aplicacion->save();
-
-            return response()->json([
-                'success' => true,
-                'data' => $aplicacion,
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Aplicaciones  $aplicaciones
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Request $request, $id)
-    {
-        try {
-            $aplicacion = Aplicaciones::findOrFail($id);
+        $aplicacion = Aplicaciones::find($id);
+        if ($aplicacion) {
             $aplicacion->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Aplicación eliminada correctamente.',
-            ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Aplicación no encontrada.',
-            ], 404);
+            return response()->json(['success' => 'Registro eliminado con éxito.']);
+        } else {
+            return response()->json(['error' => 'El registro no se encontró.'], 404);
         }
     }
 
@@ -150,7 +74,7 @@ class AplicacionesController extends Controller
         } catch (Exception $e) {
             Log::error('Error al obtener mensajes Aplicaciones 4: ' . $e->getMessage());
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'error' => $e->getMessage(),
             ], 500);
         }

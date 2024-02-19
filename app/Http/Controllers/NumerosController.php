@@ -2,137 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Numeros;
-use Illuminate\Http\Request;
 use Exception;
+use App\Models\Numeros;
+use App\Models\Aplicaciones;
+use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 
 class NumerosController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(Request $request)
     {
-        $numeros = Numeros::get();
-        return $numeros;
+        $numeros = Numeros::all();
+        $aplicaciones = Aplicaciones::all();
+        return view('numeros/index', [
+            'numeros' => $numeros,
+            'aplicaciones' => $aplicaciones,
+        ]);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        try {
-            $numeros = new Numeros();
-            $numeros->nombre = $request->nombre;
-            $numeros->numero = $request->numero;
-            $numeros->id_telefono = $request->id_telefono;
-            $numeros->aplicacion = $request->aplicacion;
-            $numeros->calidad = $request->calidad;
-            $numeros->save();
+        $request->validate([
+            'nombre'        => 'required',
+            'numero'        => 'required',
+            'id_telefono'   => 'required',
+            'aplicacion_id'    => 'required',
+            'calidad'       => 'required'
+        ]);
 
-            return response()->json([
-                'success' => true,
-                'data' => $numeros,
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        $aplicacion = Aplicaciones::findOrFail($request->aplicacion_id);
+
+        $numero = $aplicacion->numeros()->create([
+            'nombre'      => $request->nombre,
+            'numero'      => $request->numero,
+            'id_telefono' => $request->id_telefono,
+            'calidad'     => $request->calidad,
+        ]);
+
+        return response()->json(['success' => 'Número creado con éxito.']);
+
+
+        // Numeros::create($request->all());
+
+        // return response()->json(['success' => 'Numero creado con éxito.']);
+
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Numeros  $numeros
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Numeros $numeros)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'nombre'        => 'required',
+            'numero'        => 'required',
+            'id_telefono'   => 'required',
+            'aplicacion'    => 'required',
+            'calidad'       => 'required'
+        ]);
+
+        $numero = Numeros::findOrFail($id);
+        $numero->update($request->all());
+
+        return response()->json(['success' => 'Numero actualizado con éxito.']);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Numeros  $numeros
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Numeros $numeros)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Numeros  $numeros
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request)
-    {
-        try {
-            $numero = Numeros::findOrFail($request->id);
-            $numero->nombre = $request->nombre;
-            $numero->numero = $request->numero;
-            $numero->id_telefono = $request->id_telefono;
-            $numero->aplicacion = $request->aplicacion;
-            $numero->calidad = $request->calidad;
-            $numero->save();
-
-            return response()->json([
-                'success' => true,
-                'data' => $numero,
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Numeros  $numeros
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Request $request, $id)
-    {
-        try {
-            $numero = Numeros::findOrFail($id);
+        $numero = Numeros::find($id);
+        if ($numero) {
             $numero->delete();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Aplicación eliminada correctamente.',
-            ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Aplicación no encontrada.',
-            ], 404);
+            return response()->json(['success' => 'Registro eliminado con éxito.']);
+        } else {
+            return response()->json(['error' => 'El registro no se encontró.'], 404);
         }
     }
 }

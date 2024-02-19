@@ -18,9 +18,12 @@ class CreateNumerosTable extends Migration
             $table->string('nombre');
             $table->string('numero');
             $table->string('id_telefono');
-            $table->string('aplicacion');
+            $table->unsignedBigInteger('aplicacion_id')->nullable();
             $table->string('calidad');
             $table->timestamps();
+
+            // Establece la columna `aplicacion_id` como clave foránea
+            $table->foreign('aplicacion_id')->references('id')->on('aplicaciones')->onDelete('set null');
         });
     }
 

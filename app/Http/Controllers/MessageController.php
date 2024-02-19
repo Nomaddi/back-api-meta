@@ -2,23 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Carbon\Carbon;
+use App\Models\Tag;
 use App\Events\Webhook;
-use App\Jobs\SendMessage;
-use App\Libraries\Whatsapp;
 use App\Models\Message;
 use App\Models\Numeros;
+use PhpParser\Node\Expr;
+use App\Jobs\SendMessage;
+use App\Libraries\Whatsapp;
 use App\Models\Aplicaciones;
-use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use PhpParser\Node\Expr;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 
 class MessageController extends Controller
 {
+    public function NumbersApps()
+    {
+        $numeros = Numeros::all();
+        $tags = Tag::with('contactos')->get();
+        return view('plantillas/index', [
+            'numeros' => $numeros,
+            'tags' => $tags,
+        ]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -99,7 +109,7 @@ class MessageController extends Controller
         } catch (Exception $e) {
             Log::error('Error al obtener mensajes2: ' . $e->getMessage());
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -136,7 +146,7 @@ class MessageController extends Controller
         } catch (Exception $e) {
             Log::error('Error al obtener mensajes3: ' . $e->getMessage());
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -185,7 +195,7 @@ class MessageController extends Controller
         } catch (Exception $e) {
             Log::error('Error al obtener mensajes5: ' . $e->getMessage());
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -255,7 +265,7 @@ class MessageController extends Controller
                                 $value['messages'][0]['timestamp'],
                                 $caption
                             );
-                        Webhook::dispatch($message, false);
+                            Webhook::dispatch($message, false);
                         }
                     } else {
                         $type = $value['messages'][0]['type'];
@@ -282,10 +292,46 @@ class MessageController extends Controller
             Log::error('Error al obtener mensajes6: ' . $e->getMessage());
             Log::error('Exception trace: ' . $e->getTraceAsString());
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function sendMessages()
+    {
+        // try {
+        $token = env('WHATSAPP_API_TOKEN');
+        $phoneId = env('WHATSAPPI_API_PHONE_ID');
+        $version = 'v15.0';
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'to' => '3118402164',
+            'type' => 'template',
+            "template" => [
+                "name" => "hello_world",
+                "language" => [
+                    "code" => "en_US"
+                ]
+            ]
+        ];
+
+        $message = Http::withToken($token)->post('https://graph.facebook.com/' . $version . '/' . $phoneId . '/messages', $payload)->throw()->json();
+
+        //     $wp = new Whatsapp();
+        //     $message = $wp->sendText('14842918777', 'Is this working?');
+
+        //     return response()->json([
+        //         'success' => true,
+        //         'data' => $message,
+        //     ], 200);
+        // } catch (Exception $e) {
+        //     Log::error('Error al obtener mensajes4: ' . $e->getMessage());
+        //     return response()->json([
+        //         'success'  => false,
+        //         'error' => $e->getMessage(),
+        //     ], 500);
+        // }
     }
 
     public function loadMessageTemplates(Request $request)
@@ -303,7 +349,7 @@ class MessageController extends Controller
         } catch (Exception $e) {
             Log::error('Error al obtener mensajes7: ' . $e->getMessage());
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -313,13 +359,12 @@ class MessageController extends Controller
     {
         try {
             $input = $request->all();
-
             $wp = new Whatsapp();
             $templateName = $input['template_name'];
             $templateLang = $input['template_language'];
-            $tokenApp     = $input['token_api'];
-            $phone_id     = $input['phone_id'];
-            $waba_id_app  = $input['id_c_business'];
+            $tokenApp = $input['token_api'];
+            $phone_id = $input['phone_id'];
+            $waba_id_app = $input['id_c_business'];
             $template = $wp->loadTemplateByName($templateName, $templateLang, $tokenApp, $waba_id_app);
 
             if (!$template) {
@@ -350,23 +395,27 @@ class MessageController extends Controller
                 if ($type == 'document') {
                     $payload['template']['components'][] = [
                         'type' => 'header',
-                        'parameters' => [[
-                            'type' => $type,
-                            $type => [
-                                "filename" => "Contrato.pdf",
-                                'link' => $input['header_url'],
+                        'parameters' => [
+                            [
+                                'type' => $type,
+                                $type => [
+                                    "filename" => "Contrato.pdf",
+                                    'link' => $input['header_url'],
+                                ]
                             ]
-                        ]],
+                        ],
                     ];
                 } else {
                     $payload['template']['components'][] = [
                         'type' => 'header',
-                        'parameters' => [[
-                            'type' => $type,
-                            $type => [
-                                'link' => $input['header_url'],
+                        'parameters' => [
+                            [
+                                'type' => $type,
+                                $type => [
+                                    'link' => $input['header_url'],
+                                ]
                             ]
-                        ]],
+                        ],
                     ];
                 }
                 $messageData = [
@@ -374,6 +423,7 @@ class MessageController extends Controller
                     'header_url' => $input['header_url'],
                 ];
             }
+
 
             $body = $templateBody;
             if (!empty($input['body_placeholders'])) {
@@ -385,6 +435,21 @@ class MessageController extends Controller
                 $payload['template']['components'][] = [
                     'type' => 'body',
                     'parameters' => $bodyParams,
+                ];
+            }
+
+            if (!empty($input['buttons_url'])) {
+                $payload['template']['components'][] = [
+                    'type' => 'button',
+                    'index' => '0',
+                    'sub_type' => 'url',
+                    'parameters' => [
+                        [
+                            'type' => 'text',
+                            'text' => $input['buttons_url'],
+
+                        ]
+                    ],
                 ];
             }
 
@@ -404,7 +469,7 @@ class MessageController extends Controller
         } catch (Exception $e) {
             Log::error('Error al obtener mensajes8: ' . $e->getMessage());
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -459,4 +524,6 @@ class MessageController extends Controller
             return response()->json(['error' => 'Error al obtener datos.'], 500);
         }
     }
+
+
 }
