@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EstadisticasController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\MessageController;
@@ -45,6 +46,10 @@ Route::get('plantillas', [MessageController::class, 'NumbersApps']);
 Route::get('send-message', [MessageController::class, 'sendMessages']);
 Route::get('message-templates', [MessageController::class, 'loadMessageTemplates']);
 Route::post('send-message-templates', [MessageController::class, 'sendMessageTemplate']);
+
+//estadisticas
+Route::get('estadisticas', [EstadisticasController::class, 'index']); //mostrar todos los registros
+
 
 Route::resource(
     'messages',

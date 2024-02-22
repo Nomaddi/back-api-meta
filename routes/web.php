@@ -31,7 +31,7 @@ Route::get('/whatsapp-webhook', [MessageController::class, 'verifyWebhook']);
 Route::post('/whatsapp-webhook', [MessageController::class, 'processWebhook']);
 // Agrupando rutas y aplicando el middleware 'auth'
 Route::middleware(['auth'])->group(function () {
-    
+
 
     //estadisticas
 
