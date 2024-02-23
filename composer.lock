@@ -161,16 +161,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.300.0",
+            "version": "3.300.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "67a0c22a70bdcc99ca41028b78be3d5496481c14"
+                "reference": "a1202d1a82593fc2cdad54d627e54c518a984738"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/67a0c22a70bdcc99ca41028b78be3d5496481c14",
-                "reference": "67a0c22a70bdcc99ca41028b78be3d5496481c14",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/a1202d1a82593fc2cdad54d627e54c518a984738",
+                "reference": "a1202d1a82593fc2cdad54d627e54c518a984738",
                 "shasum": ""
             },
             "require": {
@@ -250,9 +250,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.300.0"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.300.3"
             },
-            "time": "2024-02-19T19:08:33+00:00"
+            "time": "2024-02-22T19:20:21+00:00"
         },
         {
             "name": "brick/math",
@@ -2183,16 +2183,16 @@
         },
         {
             "name": "maatwebsite/excel",
-            "version": "3.1.54",
+            "version": "3.1.55",
             "source": {
                 "type": "git",
                 "url": "https://github.com/SpartnerNL/Laravel-Excel.git",
-                "reference": "c35a38e7f478d48edac8c16a99d1e5b7073010ac"
+                "reference": "6d9d791dcdb01a9b6fd6f48d46f0d5fff86e6260"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/SpartnerNL/Laravel-Excel/zipball/c35a38e7f478d48edac8c16a99d1e5b7073010ac",
-                "reference": "c35a38e7f478d48edac8c16a99d1e5b7073010ac",
+                "url": "https://api.github.com/repos/SpartnerNL/Laravel-Excel/zipball/6d9d791dcdb01a9b6fd6f48d46f0d5fff86e6260",
+                "reference": "6d9d791dcdb01a9b6fd6f48d46f0d5fff86e6260",
                 "shasum": ""
             },
             "require": {
@@ -2248,7 +2248,7 @@
             ],
             "support": {
                 "issues": "https://github.com/SpartnerNL/Laravel-Excel/issues",
-                "source": "https://github.com/SpartnerNL/Laravel-Excel/tree/3.1.54"
+                "source": "https://github.com/SpartnerNL/Laravel-Excel/tree/3.1.55"
             },
             "funding": [
                 {
@@ -2260,7 +2260,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-02-19T11:00:33+00:00"
+            "time": "2024-02-20T08:27:10+00:00"
         },
         {
             "name": "maennchen/zipstream-php",
@@ -2875,16 +2875,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v5.0.0",
+            "version": "v5.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "4a21235f7e56e713259a6f76bf4b5ea08502b9dc"
+                "reference": "2218c2252c874a4624ab2f613d86ac32d227bc69"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/4a21235f7e56e713259a6f76bf4b5ea08502b9dc",
-                "reference": "4a21235f7e56e713259a6f76bf4b5ea08502b9dc",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/2218c2252c874a4624ab2f613d86ac32d227bc69",
+                "reference": "2218c2252c874a4624ab2f613d86ac32d227bc69",
                 "shasum": ""
             },
             "require": {
@@ -2927,9 +2927,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v5.0.0"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v5.0.1"
             },
-            "time": "2024-01-07T17:17:35+00:00"
+            "time": "2024-02-21T19:24:10+00:00"
         },
         {
             "name": "opis/closure",

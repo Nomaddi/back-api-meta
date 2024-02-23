@@ -219,6 +219,23 @@ class MessageController extends Controller
                     $wam->save();
                     Webhook::dispatch($wam, true);
                 }
+                // Si el estado es 'failed', procesar y registrar los detalles del error
+                if ($status == 'failed') {
+                        $errorMessage = $value['statuses'][0]['errors'][0]['message'] ?? 'Unknown error';
+                        $errorCode = $value['statuses'][0]['errors'][0]['code'] ?? 'Unknown code';
+                        $errorDetails = $value['statuses'][0]['errors'][0]['error_data']['details'] ?? 'No additional details';
+
+                        // Registrar el error en los logs de Laravel
+                        Log::error("Webhook processing error: {$errorMessage}, Code: {$errorCode}, Details: {$errorDetails}");
+
+                        // Aquí podrías agregar lógica adicional si necesitas manejar estos errores de manera específica
+                        // Por ejemplo, notificar al equipo de soporte, realizar reintento condicional, etc.
+                        if (!empty($wam->id)) {
+                            $wam->caption = $errorCode;
+                            $wam->save();
+                            Webhook::dispatch($wam, true);
+                        }
+                }
             } else if (!empty($value['messages'])) { // Message
                 $exists = Message::where('wam_id', $value['messages'][0]['id'])->first();
 
