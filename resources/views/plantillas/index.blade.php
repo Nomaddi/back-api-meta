@@ -1,5 +1,7 @@
 @extends('adminlte::page')
 
+@section('plugins.Sweetalert2', true)
+
 @section('title', 'Plantillas')
 
 @section('content')
@@ -132,7 +134,7 @@
                                 templatesData = response.data;
 
                                 // Vacía el select antes de cargar nuevos datos para evitar duplicados
-                                $('#templatesSelect').empty();
+                                // $('#templatesSelect').empty();
 
                                 // Itera sobre la respuesta y añade cada opción al select
                                 response.data.forEach(function(item) {
@@ -297,6 +299,14 @@
                     template_name: template_name,
                     token_api: token_api
                 };
+                // Mostrar el mensaje de carga con SweetAlert
+                Swal.fire({
+                    title: 'Cargando...',
+                    allowOutsideClick: false,
+                    onBeforeOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
                 $.ajax({
                     type: "POST",
                     url: "send-message-templates",
@@ -305,13 +315,24 @@
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    async: true, // Agrega esta opción para asegurarte de que sea asíncrono
+                    async: true,
                     success: function(response) {
-                        alert("Envío correcto");
+                        // Ocultar el mensaje de carga
+                        Swal.close();
+
+                        //limpiar formularo
+                        $('#createSend').trigger("reset");
+
+                        // Mostrar SweetAlert con la respuesta
+                        Swal.fire('Envío correcto', response.message, 'success');
                     },
                     error: function(error) {
-                        console.log(error);
-                        alert("Error al enviar");
+                        // Ocultar el mensaje de carga
+                        Swal.close();
+
+                        // Mostrar SweetAlert con el mensaje de error
+                        Swal.fire('Error al enviar', 'Ha ocurrido un error durante el envío.',
+                            'error');
                     }
                 });
             });

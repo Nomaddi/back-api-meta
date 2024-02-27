@@ -1,12 +1,13 @@
 <?php
 
-use App\Http\Controllers\EstadisticasController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\EnvioController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NumerosController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\AplicacionesController;
+use App\Http\Controllers\EstadisticasController;
 
 
 
@@ -28,8 +29,9 @@ Route::resource(
 Route::get('contactos', [ContactoController::class, 'index'])->name('contactos.index');; //mostrar todos los registros
 Route::get('contactos/getData', [ContactoController::class, 'getData'])->name('contactos.getData');
 Route::post('contactos', [ContactoController::class, 'store'])->name('contactos.store'); //crear un registro
-Route::put('contactos/{id}', [ContactoController::class, 'update']); //actualizare un registro
-Route::delete('contactos/{id}', [ContactoController::class, 'destroy']); //actualizare un registro
+Route::get('contactos/edit/{id}', [ContactoController::class, 'edit']); //obtener datos para editar un registro
+Route::post('contactos/update', [ContactoController::class, 'update'])->name('contactos.update'); //actualizare un registro
+Route::get('contactos/delete/{id}', [ContactoController::class, 'destroy'])->name('contactos.delete'); //actualizare un registro
 
 // Tags
 Route::get('tags', [TagController::class, 'index']); //mostrar todos los registros
@@ -49,7 +51,7 @@ Route::post('send-message-templates', [MessageController::class, 'sendMessageTem
 
 //estadisticas
 Route::get('estadisticas', [EstadisticasController::class, 'index']); //mostrar todos los registros
-
+Route::get('envios-plantillas', [EnvioController::class, 'index']); //mostrar todos los registros
 
 Route::resource(
     'messages',

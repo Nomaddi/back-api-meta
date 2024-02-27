@@ -26,11 +26,11 @@
                     </div>
                     <div class="form-group">
                         <label for="telefono">Telefono</label>
-                        <input type="text" class="form-control" id="telefono" name="telefono" pattern="\+57\d{10}" title="El teléfono debe comenzar con +57 y tener 10 cifras" required>
-                        <small id="telefonoHelp" class="form-text text-muted">Ejemplo: +571234567890</small>
+                        <input type="tel" class="form-control" id="telefono" name="telefono" pattern="[0-9]{12}" title="Digita el prefijo del país seguido del numero celular" required>
+                        <small id="telefonoHelp" class="form-text text-muted">Ejemplo: 571234567890</small>
                     </div>
                     <div>
-                        <select id="etiqueta" name="etiqueta[]" class="form-select form-control mb-3" multiple>
+                        <select id="etiqueta" name="etiqueta[]" class="form-select form-control mb-3" multiple required>
                             <option value="">Selecciona una Etiqueta</option>
                             @foreach ($tags as $tag)
                                 <option value="{{ $tag->id }}">{{ $tag->nombre }}</option>

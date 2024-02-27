@@ -22,8 +22,8 @@
             <p>{{ $message }}</p>
         </div>
     @endif
-    <table id="contactosTable" class="table table-striped table-bordered shadow-lg mt-4 display compact" style="width:100%">
-        <thead class="bg-primary text-white">
+    <table id="contactosTable" class="table table-striped tabladatatable dt-responsive" style="width:100%">
+        <thead>
             <tr>
                 <th>No</th>
                 <th>Nombre</th>
@@ -35,27 +35,24 @@
         <tbody style="text-align: center"></tbody>
     </table>
 
-    {{-- @include('contactos.modals.show-modal')
-    @include('contactos.modals.import-modal')
-    @include('contactos.modals.edit-modal')
-    @include('contactos.modals.delete-modal') --}}
+    @include('contactos.modals.crud-modal')
     @include('contactos.modals.create-modal')
+    @include('contactos.modals.delete-modal')
+    @include('contactos.modals.import-modal')
 @endsection
 @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.bootstrap4.css">
 @stop
 
 @section('js')
-    <script src="https://code.jquery.com/jquery-3.7.0.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script>
+<script src="//cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap4.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#contactosTable').DataTable({
                 processing: true,
                 serverSide: true, // Aquí se habilita la paginación y búsqueda del lado del servidor
-                ajax: '{{ route('contactos.getData') }}',
+                ajax: '{{ route('contactos.index') }}',
                 columns: [{
                         data: 'id'
                     },
@@ -66,86 +63,135 @@
                         data: 'telefono'
                     },
                     {
-                        data: 'tags'
+                        data: 'tags',
+                        orderable: false,
+                        searchable: false
                     },
                     {
-                        data: 'actions'
+                        data: 'action',
+                        orderable: false,
+                        searchable: false
                     },
                 ]
             });
+        });
+
+        $(document).on('click', '.edit', function(event) {
+            event.preventDefault();
+            var id = $(this).attr('id');
+            $('#form_result').html('');
+
+
+
+            $.ajax({
+                url: "contactos/edit/" + id,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                dataType: "json",
+                success: function(data) {
+                    $('#nombre').val(data.result.nombre);
+                    $('#apellido').val(data.result.apellido);
+                    $('#correo').val(data.result.correo);
+                    $('#telefono').val(data.result.telefono);
+                    $('#notas').val(data.result.notas);
+                    $('#hidden_id').val(id);
+                    $('.modal-title').text('Editar contacto');
+                    $('.editpass').hide();
+
+                    // Seleccionar las etiquetas que ya tiene el contacto
+                    var selectedTags = $.map(data.result.tags, function(tag) {
+                        return tag.id
+                            .toString(); // Convertir a cadena para asegurarse de la comparación de tipos
+                    });
+
+                    $('#etiqueta').val(selectedTags);
+
+                    $('#formModal').modal('show');
+                },
+                error: function(data) {
+                    var errors = data.responseJSON;
+                    console.log(errors);
+                }
+            })
+        });
+
+        $('#sample_form').on('submit', function(event) {
+            event.preventDefault();
+            var action_url = '';
+
+            if ($('#action').val() == 'Edit') {
+                action_url = "{{ route('contactos.update') }}";
+            }
+
+            $.ajax({
+                type: 'post',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                url: action_url,
+                data: $(this).serialize(),
+                dataType: 'json',
+                success: function(data) {
+
+                    var html = '';
+                    if (data.errors) {
+                        html = '<div class="alert alert-danger">';
+                        for (var count = 0; count < data.errors.length; count++) {
+                            html += '<p>' + data.errors[count] + '</p>';
+                        }
+                        html += '</div>';
+                    }
+                    if (data.success) {
+                        html = '<div class="alert alert-success">' + data.success + '</div>';
+                        $('#sample_form')[0].reset();
+                        $('#contactosTable').DataTable().ajax.reload();
+                        $('#formModal').modal('hide');
+                        Swal.fire('Contacto editado correctamente', data.success, 'success');
+                    }
+                    $('#form_result').html(html);
+                },
+                error: function(data) {
+                    var errors = data.responseJSON;
+                    console.log(errors);
+                }
+            });
+        });
+
+        var user_id;
+
+        $(document).on('click', '.delete', function() {
+            user_id = $(this).attr('id');
+            $('#confirmModal').modal('show');
+        });
+
+        $('#ok_button').click(function() {
+            $.ajax({
+                url: "contactos/delete/" + user_id,
+                beforeSend: function() {
+                    $('#ok_button').text('Deleting...');
+                },
+                success: function(data) {
+                    setTimeout(function() {
+                        $('#confirmModal').modal('hide');
+                        $('#contactosTable').DataTable().ajax.reload();
+                        Swal.fire('Contacto eliminado correctamente', data.message, 'success');
+                    }, 2000);
+                }
+            })
         });
     </script>
     <script>
         // Script para agregar validación personalizada usando JavaScript
         document.getElementById('telefono').addEventListener('input', function() {
             var telefonoInput = this;
-            var validacion = /^\+57\d{10}$/;
+            var validacion = /^[0-9]{12}$/;
 
             if (!validacion.test(telefonoInput.value)) {
-                telefonoInput.setCustomValidity('El teléfono debe comenzar con +57 y tener 10 cifras');
+                telefonoInput.setCustomValidity('Digita el prefijo del país seguido del numero celular');
             } else {
                 telefonoInput.setCustomValidity('');
             }
-        });
-    </script>
-    <script>
-        $(document).ready(function() {
-            $('form[id^="editForm-"]').on('submit', function(e) {
-                e.preventDefault(); // Evitar la recarga de la página
-                var appId = this.id.split('-')[1]; // Obtener el ID de la aplicación
-                var formData = $(this).serialize(); // Serializar los datos del formulario
-
-                $.ajax({
-                    type: "POST",
-                    url: "contactos/" + appId, // Ajusta esta URL según tu enrutamiento
-                    data: formData,
-                    success: function(response) {
-                        // $('#modal-show-' + appId).modal('hide'); // Ocultar el modal
-                        alert("Contacto actualizado con éxito"); // Mostrar mensaje de éxito
-                        location
-                            .reload(); // Opcional: recargar la página o actualizar la vista de alguna otra manera
-                    },
-                    error: function(error) {
-                        console.log(error);
-                        alert("Error al actualizar la contacto");
-                    }
-                });
-            });
-        });
-    </script>
-    <script>
-        $(document).ready(function() {
-            // Cuando se clickea el botón de eliminar, asignar el ID al botón del modal
-            $('.deleteApp').click(function() {
-                var appId = $(this).attr('data-appid');
-                $('#delete-btn').data('appid',
-                    appId); // Asignar el ID como un atributo data del botón de eliminar
-            });
-
-            // Manejar el evento click del botón de eliminar en el modal
-            $('#delete-btn').click(function() {
-                var appId = $(this).data('appid');
-
-                $.ajax({
-                    url: 'contactos/' +
-                        appId, // Asegúrate de ajustar la URL a tu ruta de eliminación
-                    type: 'POST',
-                    data: {
-                        _method: 'DELETE',
-                        _token: $('meta[name="csrf-token"]').attr(
-                            'content') // Asegúrate de tener un meta tag con el CSRF token
-                    },
-                    success: function(result) {
-                        // Aquí puedes recargar la tabla o eliminar la fila del DOM para reflejar el cambio
-                        alert("Registro eliminado con éxito");
-                        location
-                            .reload(); // Opcional: actualiza la página o haz los ajustes necesarios en el DOM
-                    },
-                    error: function(request, status, error) {
-                        alert("No se pudo eliminar el registro");
-                    }
-                });
-            });
         });
     </script>
     <script>
@@ -159,12 +205,16 @@
                     url: "{{ route('contactos.store') }}",
                     data: formData,
                     success: function(response) {
-                        alert("Contacto creado con éxito");
-                        location.reload();
+                        $('#contactosTable').DataTable().ajax.reload();
+                        $('#createContactoModal').modal('hide');
+                        // Resetea el formulario
+                        $('#createFormContactos').trigger("reset");
+                        Swal.fire('Contacto creado correctamente', response.message, 'success');
                     },
                     error: function(error) {
-                        console.log(error);
-                        alert("Error al crear el contacto");
+                        Swal.fire('Error al crear el contacto',
+                            'Ha ocurrido un error durante la creacion.',
+                            'error');
                     }
                 });
             });

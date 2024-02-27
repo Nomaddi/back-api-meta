@@ -12,35 +12,20 @@
                 <br>
                 <div class="card" style="width: 100%;">
                     <div class="card-header bg-primary text-white" align="center">
-                        Información de contacto
+                        Información del envio
                     </div>
-                    <ul class="list-group list-group-flush" align="center">
+                    <ul class="list-group list-group-flush">
                         <li class="list-group-item">Id
                             <b>{{ $app->id }}</b>
                         </li>
-                        <li class="list-group-item">Nombre de contacto
-                            <b>{{ $app->nombre }}</b>
+                        <li class="list-group-item">Nombre de Numero
+                            <b>{{ $app->nombrePlantilla }}</b>
                         </li>
-                        <li class="list-group-item">Apellido
-                            <b>{{ $app->apellido }}</b>
+                        <li class="list-group-item">Numero
+                            <b>{{ $app->numeroDestinatarios }}</b>
                         </li>
-                        <li class="list-group-item">Correo
-                            <b>{{ $app->correo }}</b>
-                        </li>
-                        <li class="list-group-item">Telefono
-                            <b>{{ $app->telefono }}</b>
-                        </li>
-                        <li class="list-group-item">Etiquetas
-                            <b>
-                                @foreach ($app->tags as $tag)
-                                    <span
-                                        style="background-color: {{ $tag->color }};
-                                padding: 5px; border-radius: 4px;">{{ $tag->nombre }}</span>
-                                @endforeach
-                            </b>
-                        </li>
-                        <li class="list-group-item">Notas
-                            <b>{{ $app->notas }}</b>
+                        <li class="list-group-item">ID Numero
+                            <b>{{ $app->body }}</b>
                         </li>
                     </ul>
                 </div>

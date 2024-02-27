@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Tag;
+use App\Models\Envio;
 use App\Events\Webhook;
 use App\Models\Message;
 use App\Models\Numeros;
@@ -478,6 +479,12 @@ class MessageController extends Controller
 
                 SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData);
             }
+
+            $contacto = new Envio();
+            $contacto->nombrePlantilla = $templateName;
+            $contacto->numeroDestinatarios = count($recipients);
+            $contacto->body = $body;
+            $contacto->save();
 
             return response()->json([
                 'success' => true,

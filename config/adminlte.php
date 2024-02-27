@@ -331,9 +331,15 @@ return [
             'url'  => 'admin/tags',
             'icon' => 'fas fa-fw fa-tags',
         ],
+        ['header' => 'INFORMES'],
         [
             'text' => 'Estadisticas',
             'url'  => 'admin/estadisticas',
+            'icon' => 'fas fa-fw fa-chart-line',
+        ],
+        [
+            'text' => 'Envios plantilla',
+            'url'  => 'admin/envios-plantillas',
             'icon' => 'fas fa-fw fa-chart-line',
         ],
         ['header' => 'CONFIGURACION'],
@@ -385,7 +391,7 @@ return [
 
     'plugins' => [
         'Datatables' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
@@ -430,7 +436,7 @@ return [
             ],
         ],
         'Sweetalert2' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',

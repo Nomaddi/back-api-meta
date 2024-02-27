@@ -12,35 +12,31 @@ use DataTables;
 
 class ContactoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->ajax()) {
+            $data = Contacto::with('tags');
+            return DataTables::of($data)->addIndexColumn()
+                ->addColumn('tags', function ($contacto) {
+                    return $contacto->tags->map(function ($tag) {
+                        return '<span style="background-color: ' . $tag->color . '; padding: 5px; border-radius: 4px;">' . $tag->nombre . '</span>';
+                    })->implode(' ');
+                })
+
+                ->addColumn('action', function ($data) {
+                    $button = '<button type="button" name="edit" id="' . $data->id . '" class="edit btn btn-primary btn-sm" style="margin-right: 8px;"> <i class="fa fa-edit"></i></button>';
+                    $button .= '<button type="button" name="edit" id="' . $data->id . '" class="delete btn btn-danger btn-sm"> <i class="fa fa-trash"></i></button>';
+                    return $button;
+                })
+
+                ->rawColumns(['tags', 'action'])
+                ->make(true);
+        }
+
         $tags = Tag::all(); // O cualquier lógica que uses para obtener las etiquetas
         return view('contactos.index', compact('tags'));
     }
 
-    public function getData()
-    {
-        $query = Contacto::with('tags');
-        return DataTables::of($query)
-            ->addColumn('tags', function ($contacto) {
-                return $contacto->tags->map(function ($tag) {
-                    return '<span style="background-color: ' . $tag->color . '; padding: 5px; border-radius: 4px;">' . $tag->nombre . '</span>';
-                })->implode(' ');
-            })
-            ->addColumn('actions', 'contactos.datatables.actions')
-            ->rawColumns(['tags', 'actions'])
-            ->toJson();
-    }
-
-    // public function index()
-    // {
-    //     $contactos = Contacto::with('tags')->paginate(20);
-    //     $tags = Tag::all();
-    //     return view('contactos/index', [
-    //         'contactos' => $contactos,
-    //         'tags' => $tags
-    //     ]);
-    // }
     public function store(Request $request)
     {
         $request->validate([
@@ -51,16 +47,6 @@ class ContactoController extends Controller
             'notas' => 'required',
             'etiqueta' => 'required|array',
         ]);
-        // $contacto = (new Contacto)->createWithTags([
-        //     'nombre' => $request->nombre,
-        //     'apellido' => $request->apellido,
-        //     'correo' => $request->correo,
-        //     'telefono' => $request->telefono,
-        //     "notas"     => $request->notas,
-
-        //     // Otros campos...
-        //     'tags' => $request->etiqueta, // Ajusta esto según la estructura de tu CSV
-        // ]);
 
         $contacto = new Contacto();
         $contacto->nombre = $request->nombre;
@@ -76,9 +62,18 @@ class ContactoController extends Controller
             $contacto->tags()->attach($tag);
         }
 
-        return response()->json(['success' => 'Numero creado con éxito.']);
+        return response()->json(['success' => 'Contacto creado con éxito.']);
 
 
+    }
+
+    public function edit($id)
+    {
+        if (request()->ajax()) {
+            $data = Contacto::with('tags')
+                ->findOrFail($id);
+            return response()->json(['result' => $data]);
+        }
     }
 
     public function update(Request $request)
@@ -91,51 +86,30 @@ class ContactoController extends Controller
             'notas' => 'required',
             'etiqueta' => 'required|array', // Asegúrate de que 'etiqueta' sea un array
         ]);
-        try {
-            $contacto = Contacto::findOrFail($request->id);
-            $contacto->nombre = $request->nombre;
-            $contacto->apellido = $request->apellido;
-            $contacto->correo = $request->correo;
-            $contacto->telefono = $request->telefono;
-            $contacto->notas = $request->notas;
-            $contacto->save();
+        $contacto = Contacto::findOrFail($request->hidden_id);
+        $contacto->nombre = $request->nombre;
+        $contacto->apellido = $request->apellido;
+        $contacto->correo = $request->correo;
+        $contacto->telefono = $request->telefono;
+        $contacto->notas = $request->notas;
+        $contacto->save();
 
-            $tagIds = $request->etiqueta; // Obtén un array de IDs de etiquetas a asignar al contacto
+        $tagIds = $request->etiqueta ?? []; // Obtén un array de IDs de etiquetas a asignar al contacto
 
-            $contacto->tags()->sync($tagIds);
+        $contacto->tags()->sync($tagIds);
 
-            return response()->json([
-                'success' => true,
-                'data' => $contacto,
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+        return response()->json(['success' => 'Contacto actualizado con exito']);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Request $request)
+    public function destroy($id)
     {
-        $contacto = Contacto::findOrFail($request->id);
+        $contacto = Contacto::findOrFail($id);
 
         // Elimina las relaciones de muchos a muchos con las etiquetas
         $contacto->tags()->detach();
 
         // Luego elimina el contacto
         $contacto->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Contacto eliminado correctamente.',
-        ], 200);
     }
 
     public function uploadUsers(Request $request)
@@ -146,7 +120,7 @@ class ContactoController extends Controller
                 'success' => true,
                 'message' => 'Importación correcta.',
             ], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Error en la importación: ' . $e->getMessage(),
