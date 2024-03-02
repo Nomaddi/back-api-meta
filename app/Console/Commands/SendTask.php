@@ -47,7 +47,6 @@ class SendTask extends Command
             // Obtener tareas programadas pendientes para enviar
             $tareasPendientes = TareaProgramada::where('fecha_programada', '<=', now())
                 ->where('status', 'pendiente')
-                ->where('cancelada', false) // Excluye las tareas canceladas
                 ->get();
             // \Log::info($tareasPendientes);
 
