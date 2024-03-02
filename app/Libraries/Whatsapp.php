@@ -75,7 +75,7 @@ class Whatsapp
         // try {
         return Http::withToken($tokenApp)->post($this->baseUrl . '/' . $phone_id . '/messages', $payload)->throw()->json();
         // } catch (Exception $e) {
-        //     Log::error('Error al obtener mensajes8: ' . $e->getMessage());
+        //     Log::error('Error al enviar mensaje: ' . $e->getMessage());
         //     return response()->json([
         //         'success'  => false,
         //         'error' => $e->getMessage(),

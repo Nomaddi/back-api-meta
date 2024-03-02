@@ -14,9 +14,12 @@ use App\Jobs\SendMessage;
 use App\Libraries\Whatsapp;
 use App\Models\Aplicaciones;
 use Illuminate\Http\Request;
+use App\Models\TareaProgramada;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
 
 
 class MessageController extends Controller
@@ -222,20 +225,20 @@ class MessageController extends Controller
                 }
                 // Si el estado es 'failed', procesar y registrar los detalles del error
                 if ($status == 'failed') {
-                        $errorMessage = $value['statuses'][0]['errors'][0]['message'] ?? 'Unknown error';
-                        $errorCode = $value['statuses'][0]['errors'][0]['code'] ?? 'Unknown code';
-                        $errorDetails = $value['statuses'][0]['errors'][0]['error_data']['details'] ?? 'No additional details';
+                    $errorMessage = $value['statuses'][0]['errors'][0]['message'] ?? 'Unknown error';
+                    $errorCode = $value['statuses'][0]['errors'][0]['code'] ?? 'Unknown code';
+                    $errorDetails = $value['statuses'][0]['errors'][0]['error_data']['details'] ?? 'No additional details';
 
-                        // Registrar el error en los logs de Laravel
-                        Log::error("Webhook processing error: {$errorMessage}, Code: {$errorCode}, Details: {$errorDetails}");
+                    // Registrar el error en los logs de Laravel
+                    Log::error("Webhook processing error: {$errorMessage}, Code: {$errorCode}, Details: {$errorDetails}");
 
-                        // Aquí podrías agregar lógica adicional si necesitas manejar estos errores de manera específica
-                        // Por ejemplo, notificar al equipo de soporte, realizar reintento condicional, etc.
-                        if (!empty($wam->id)) {
-                            $wam->caption = $errorCode;
-                            $wam->save();
-                            Webhook::dispatch($wam, true);
-                        }
+                    // Aquí podrías agregar lógica adicional si necesitas manejar estos errores de manera específica
+                    // Por ejemplo, notificar al equipo de soporte, realizar reintento condicional, etc.
+                    if (!empty($wam->id)) {
+                        $wam->caption = $errorCode;
+                        $wam->save();
+                        Webhook::dispatch($wam, true);
+                    }
                 }
             } else if (!empty($value['messages'])) { // Message
                 $exists = Message::where('wam_id', $value['messages'][0]['id'])->first();
@@ -383,6 +386,7 @@ class MessageController extends Controller
             $tokenApp = $input['token_api'];
             $phone_id = $input['phone_id'];
             $waba_id_app = $input['id_c_business'];
+            $fechaProgramada = $input['programar'];
             $template = $wp->loadTemplateByName($templateName, $templateLang, $tokenApp, $waba_id_app);
 
             if (!$template) {
@@ -473,11 +477,38 @@ class MessageController extends Controller
 
             $recipients = explode("\n", $input['recipients']);
 
-            foreach ($recipients as $recipient) {
-                $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
-                $payload['to'] = $phone;
+            if ($fechaProgramada !== null) {
+                $fechaFormateada = Carbon::parse($fechaProgramada)->toDateTimeString();
+                $numeros = $input['recipients'];
+                $fechaHoraActual = Carbon::now()->format('Ymd_His');
+                $rutaArchivo = "tareas/tarea_{$fechaHoraActual}.txt";
+                Storage::put($rutaArchivo, $numeros);
 
-                SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData);
+                $tarea = new TareaProgramada();
+                $tarea->token_app = $tokenApp;
+                $tarea->phone_id = $phone_id;
+                $tarea->numeros = $rutaArchivo;
+                $tarea->payload = json_encode($payload);
+                $tarea->body = $body;
+                $tarea->messageData = json_encode($messageData);;
+                $tarea->status = 'pendiente';
+                $tarea->fecha_programada = $fechaFormateada;
+                $tarea->save();
+
+                // Ejecutar el comando SendTask con la opción --scheduled
+                Artisan::call('send:task', ['--scheduled' => true]);
+
+                return response()->json([
+                    'success' => true,
+                    'data' => ' Mensajes agregado al cron correctamente.',
+                ], 200);
+
+            } else {
+                foreach ($recipients as $recipient) {
+                    $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
+                    $payload['to'] = $phone;
+                    SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData);
+                }
             }
 
             $contacto = new Envio();
@@ -488,7 +519,7 @@ class MessageController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => count($recipients) . ' Mensajes encolado correctamente.',
+                'data' => ' Mensajes encolado correctamente.',
             ], 200);
         } catch (Exception $e) {
             Log::error('Error al obtener mensajes8: ' . $e->getMessage());

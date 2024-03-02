@@ -60,6 +60,12 @@
                 <div id="templateDetails">
                     <!-- Los detalles de la plantilla se inyectarán aquí -->
                 </div>
+
+                <div class="col-lg-12">
+                    <label for="fechaInicio" class="form-label">Desea programar el envío?</label>
+                    <input type="datetime-local" class="form-control" id="programar" name="programar">
+                </div>
+                <br>
                 <button type="submit" class="btn btn-primary">Enviar mensajes</button>
 
             </div>
@@ -268,6 +274,7 @@
                 var template_language = null;
                 var template_name = null;
                 var token_api = null;
+                var programar = null;
 
                 // Luego, asignar valores a las variables
                 header_type = templateType; // Ahora asignas el valor deseado
@@ -285,6 +292,8 @@
                 template_language = templateLanguage; // Ahora asignas el valor deseado
                 template_name = templateName; // Ahora asignas el valor deseado
                 token_api = $('#selectPlantilla option:selected').data('token_api');
+                programar = $('#programar').val() ? $('#programar').val() :
+                    null;
 
                 // Organizar la información en un objeto
                 var dataToSend = {
@@ -297,7 +306,8 @@
                     recipients: recipients,
                     template_language: template_language,
                     template_name: template_name,
-                    token_api: token_api
+                    token_api: token_api,
+                    programar: programar
                 };
                 // Mostrar el mensaje de carga con SweetAlert
                 Swal.fire({
