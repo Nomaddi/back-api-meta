@@ -490,7 +490,8 @@ class MessageController extends Controller
                 $tarea->numeros = $rutaArchivo;
                 $tarea->payload = json_encode($payload);
                 $tarea->body = $body;
-                $tarea->messageData = json_encode($messageData);;
+                $tarea->messageData = json_encode($messageData);
+                ;
                 $tarea->status = 'pendiente';
                 $tarea->fecha_programada = $fechaFormateada;
                 $tarea->save();
@@ -509,13 +510,14 @@ class MessageController extends Controller
                     $payload['to'] = $phone;
                     SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData);
                 }
+
+                $contacto = new Envio();
+                $contacto->nombrePlantilla = $templateName;
+                $contacto->numeroDestinatarios = count($recipients);
+                $contacto->body = $body;
+                $contacto->save();
             }
 
-            $contacto = new Envio();
-            $contacto->nombrePlantilla = $templateName;
-            $contacto->numeroDestinatarios = count($recipients);
-            $contacto->body = $body;
-            $contacto->save();
 
             return response()->json([
                 'success' => true,

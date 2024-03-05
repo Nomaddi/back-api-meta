@@ -320,6 +320,11 @@ return [
             'url'  => 'admin/plantillas',
             'icon' => 'fas fa-fw fa-file-invoice',
         ],
+        [
+            'text' => 'Programados',
+            'url'  => 'admin/programados',
+            'icon' => 'fas fa-fw fa-clock',
+        ],
         ['header' => 'BASE DE DATOS'],
         [
             'text' => 'Contactos',

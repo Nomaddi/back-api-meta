@@ -55,7 +55,9 @@
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     <script>
-        new DataTable('#enviosTable');
+        new DataTable('#enviosTable', {
+            "order": [[ 0, "desc" ]] // Ordenar por la primera columna (created_at) de manera descendente
+        });
     </script>
 
 

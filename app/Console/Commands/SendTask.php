@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Envio;
 use App\Jobs\SendMessage;
 use App\Models\TareaProgramada;
 use Illuminate\Console\Command;
@@ -54,6 +55,8 @@ class SendTask extends Command
             foreach ($tareasPendientes as $tarea) {
                 $nombreArchivo = basename($tarea->numeros);  // Extrae el nombre del archivo de la ruta completa
                 $rutaArchivo = storage_path("app/tareas/$nombreArchivo");  // Construye la ruta completa
+                $payload = json_decode($tarea->payload, true);
+
 
                 try {
                     // Normaliza la ruta para manejar diferencias entre sistemas operativos
@@ -65,13 +68,18 @@ class SendTask extends Command
                         foreach ($lineas as $linea) {
                             // $linea contiene el contenido de cada línea
                             // Puedes realizar las operaciones necesarias con cada línea aquí
-                            $payload = json_decode($tarea->payload, true);
                             $payload['to'] = $linea;
                             SendMessage::dispatch($tarea->token_app, $tarea->phone_id, $payload, $tarea->body, $tarea->messageData);
 
                         }
 
+
                         // Resto de tu lógica aquí...
+                        $contacto = new Envio();
+                        $contacto->nombrePlantilla = $payload['template']['name'];
+                        $contacto->numeroDestinatarios = count($lineas);
+                        $contacto->body = $tarea->body;
+                        $contacto->save();
                     } else {
                         \Log::error("El archivo no existe en la ruta: $rutaArchivo");
                     }
