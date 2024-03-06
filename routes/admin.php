@@ -52,13 +52,13 @@ Route::post('send-message-templates', [MessageController::class, 'sendMessageTem
 
 //estadisticas
 Route::get('estadisticas', [EstadisticasController::class, 'index']); //mostrar todos los registros
+Route::post('/estadisticas/get-statistics', [EstadisticasController::class, 'getStatistics'])->name('get-statistics');
 Route::get('envios-plantillas', [EnvioController::class, 'index']); //mostrar todos los registros
 
 //programados
 Route::get('programados', [ProgramadosControllers::class, 'index']); //mostrar todos los registros
 Route::get('/descargar-archivo/{id}', [ProgramadosControllers::class, 'descargar'])->name('descargar-archivo');
 Route::put('/actualizar-estado/{id}', [ProgramadosControllers::class, 'actualizarEstado'])->name('actualizar-estado');
-
 
 Route::resource(
     'messages',

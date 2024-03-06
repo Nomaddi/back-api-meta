@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Envios por plantillas')
+@section('title', 'Envios programados')
 
 @section('content_header')
-    <h1>Envios por plantillas</h1>
+    <h1>Envios programados</h1>
 @stop
 
 @section('content')

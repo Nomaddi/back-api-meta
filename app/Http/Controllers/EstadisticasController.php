@@ -8,35 +8,86 @@ use Illuminate\Support\Facades\Log;
 
 class EstadisticasController extends Controller
 {
-    public function index(){
+    public function index()
+    {
+
         return view('estadisticas.index');
     }
 
     public function getStatistics(Request $request)
     {
-        $this->validate($request, [
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
+        // Validar los datos del formulario
+        $validatedData = $request->validate([
+            'fechaInicio' => 'required|date',
+            'fechaFin' => 'required|date|after_or_equal:fechaInicio',
         ]);
 
         try {
-            $startDate = $request->input('start_date');
-            $endDate = $request->input('end_date');
+            $startDate = $validatedData['fechaInicio'];
+            $endDate = $validatedData['fechaFin'];
 
-            // Obtener todos los datos en el rango de fechas sin aplicar el filtro
+            // Obtener estadísticas según el rango de fechas
             $statistics = Message::whereBetween('created_at', [$startDate, $endDate])
-                ->where('outgoing', 1)
-                ->select('wa_id', 'type', 'status', 'created_at')
+                ->where('outgoing', 1) // Agrega cualquier filtro adicional necesario
+                ->select('status') // Selecciona solo el campo 'status'
                 ->get();
 
-            if ($statistics->isEmpty()) {
-                return response()->json(['message' => 'No hay datos disponibles para el rango de fechas proporcionado.']);
+            $totalMessages = $statistics->count();
+
+            // Calcular el número de mensajes para cada estado
+            $sentCount = $statistics->where('status', 'sent')->count();
+            $deliveredCount = $statistics->where('status', 'delivered')->count();
+            $readCount = $statistics->where('status', 'read')->count();
+            $failedCount = $statistics->where('status', 'failed')->count();
+
+            //Verificar si $sentCount es cero antes de calcular el porcentaje
+            if ($sentCount != 0 && $totalMessages != 0) {
+                $sentPercentage = number_format(($sentCount / $totalMessages) * 100, 2);
+            } else {
+                $sentPercentage = 0;
             }
 
-            return response()->json(['statistics' => $statistics]);
+            // Repite lo mismo para $deliveredCount, $readCount y $failedCount
+            // Verificar si $deliveredCount es cero antes de calcular el porcentaje
+            if ($deliveredCount != 0 && $totalMessages != 0) {
+                $deliveredPercentage = number_format(($deliveredCount / $totalMessages) * 100, 2);
+            } else {
+                $deliveredPercentage = 0;
+            }
+
+            // Verificar si $readCount es cero antes de calcular el porcentaje
+            if ($readCount != 0 && $totalMessages != 0) {
+                $readPercentage = number_format(($readCount / $totalMessages) * 100, 2);
+            } else {
+                $readPercentage = 0;
+            }
+
+            // Verificar si $failedCount es cero antes de calcular el porcentaje
+            if ($failedCount != 0 && $totalMessages != 0) {
+                $failedPercentage = number_format(($failedCount / $totalMessages) * 100, 2);
+            } else {
+                $failedPercentage = 0;
+            }
+
+
+            // Devolver la respuesta JSON con los resultados
+            return response()->json([
+                'totalMessages' => $totalMessages,
+                'sentPercentage' => $sentPercentage,
+                'deliveredPercentage' => $deliveredPercentage,
+                'readPercentage' => $readPercentage,
+                'failedPercentage' => $failedPercentage,
+                'sentCount' => $sentCount,
+                'deliveredCount' => $deliveredCount,
+                'readCount' => $readCount,
+                'failedCount' => $failedCount,
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+            ]);
         } catch (\Exception $e) {
-            Log::error('Error al obtener mensajes9: ' . $e->getMessage());
-            return response()->json(['error' => 'Error al obtener datos.'], 500);
+            // Manejar errores
+            return response()->json(['error' => 'Error al obtener estadísticas.'], 500);
         }
     }
+
 }
