@@ -25,6 +25,8 @@ class CreateMessagesTable extends Migration
             $table->longText('caption')->nullable();
             $table->binary('data');
             $table->timestamps();
+
+            $table->foreign('wa_id')->references('telefono')->on('contactos');
         });
     }
 
