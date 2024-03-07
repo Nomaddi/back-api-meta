@@ -516,6 +516,8 @@ class MessageController extends Controller
                 $contacto->numeroDestinatarios = count($recipients);
                 $contacto->body = $body;
                 $contacto->save();
+
+                Log::error('envio encolado' . count($recipients));
             }
 
 
