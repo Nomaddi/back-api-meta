@@ -38,3 +38,4 @@ class Webhook implements ShouldBroadcast
         return new Channel('webhooks');
     }
 }
+
