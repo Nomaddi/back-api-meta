@@ -517,7 +517,7 @@ class MessageController extends Controller
                 $contacto->body = $body;
                 $contacto->save();
 
-                Log::error('envio encolado' . count($recipients));
+                Log::info('envio encolado' . count($recipients));
             }
 
 
@@ -526,7 +526,7 @@ class MessageController extends Controller
                 'data' => ' Mensajes encolado correctamente.',
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes8: ' . $e->getMessage());
+            Log::info('Error al obtener mensajes8: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),

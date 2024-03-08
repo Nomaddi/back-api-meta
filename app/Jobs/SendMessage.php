@@ -48,6 +48,7 @@ class SendMessage implements ShouldQueue
 
             $wp = new Whatsapp();
             $request = $wp->genericPayload($this->payload, $this->tokenApp, $this->phone_id);
+            Log::info($request);
 
             $wam = new Message();
             $wam->body = $this->body;
@@ -64,10 +65,6 @@ class SendMessage implements ShouldQueue
             // Captura la excepción y registra un mensaje de error detallado
             $errorMessage = 'Error handling SendMessage job: ' . $e->getMessage();
 
-            // Agrega información adicional al mensaje de error
-            $errorMessage .= "\nPayload: " . json_encode($this->payload);
-            $errorMessage .= "\nBody: " . $this->body;
-            $errorMessage .= "\nMessage Data: " . json_encode($this->messageData);
 
             Log::error($errorMessage);
 

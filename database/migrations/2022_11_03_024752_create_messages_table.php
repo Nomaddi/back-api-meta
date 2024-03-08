@@ -26,7 +26,7 @@ class CreateMessagesTable extends Migration
             $table->binary('data');
             $table->timestamps();
 
-            $table->foreign('wa_id')->references('telefono')->on('contactos');
+            $table->foreign('wa_id')->references('telefono')->on('contactos')->onDelete('cascade');
         });
     }
 
