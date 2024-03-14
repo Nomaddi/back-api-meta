@@ -1,7 +1,8 @@
 <div class="modal fade" id="importAppModal" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <form id="createForm">
+            <form action="{{ route('importar-contactos') }}" method="POST" enctype="multipart/form-data">
+            {{-- <form id="createForm"> --}}
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title">Importar contactos</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -22,17 +23,15 @@
                             <label for="file">
                                 <span style="color: red;">*</span>Entrada de archivo (Datasheet)
                             </label>
-                            <input type="file" class="form-control-file" id="fileUpload" name="file" accept=".csv">
-                            {{-- Asumiendo que estás usando una variable de sesión de Laravel para mostrar errores --}}
-                            @if (session('error'))
-                                <div class="alert alert-danger">{{ session('error') }}</div>
-                            @endif
+                            <input type="file" class="form-control-file" id="fileUpload" name="file"
+                                accept=".csv" required>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                    <button type="submit" id="uploadBtn" class="btn btn-primary">Guardar</button>
+                    {{-- <button type="submit" id="uploadBtn" class="btn btn-primary">Cargar</button> --}}
+                    <button type="submit" class="btn btn-primary">Cargar</button>
                 </div>
             </form>
         </div>

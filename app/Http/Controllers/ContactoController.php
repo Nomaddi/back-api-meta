@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Exception;
+use Throwable;
 use App\Models\Contacto;
 use App\Models\Tag;
 use App\Imports\ContactosImport;
@@ -114,18 +115,7 @@ class ContactoController extends Controller
 
     public function uploadUsers(Request $request)
     {
-        try {
-            Excel::import(new ContactosImport, $request->file);
-            return response()->json([
-                'success' => true,
-                'message' => 'Importación correcta.',
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Error en la importación: ' . $e->getMessage(),
-                'trace' => $e->getTraceAsString(), // Añade el trace para obtener más detalles
-            ], 500);
-        }
+        Excel::import(new ContactosImport, $request->file);
+        return redirect()->route('contactos.index')->with('success', 'Contactos importados con exito');
     }
 }

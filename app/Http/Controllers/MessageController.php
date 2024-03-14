@@ -179,6 +179,39 @@ class MessageController extends Controller
         //
     }
 
+    public function sendMessages()
+    {
+        try {
+            $token = env('WHATSAPP_API_TOKEN');
+            $phoneId = env('WHATSAPPI_API_PHONE_ID');
+            $version = 'v15.0';
+            $payload = [
+                'messaging_product' => 'whatsapp',
+                'to' => '5731184021643',
+                'type' => 'template',
+                "template" => [
+                    "name" => "hello_world",
+                    "language" => [
+                        "code" => "en_US"
+                    ]
+                ]
+            ];
+            $message = Http::withToken($token)->post('https://graph.facebook.com/' . $version . '/' . $phoneId . '/messages', $payload)->throw()->json();
+            // $wp = new Whatsapp();
+            // $message = $wp->sendText('14842918777', 'Is this working?');
+            return response()->json([
+                'success' => true,
+                'data' => $message,
+            ], 200);
+        } catch (Exception $e) {
+            Log::error('Error al obtener mensajes4: ' . $e->getMessage());
+            return response()->json([
+                'success'  => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function verifyWebhook(Request $request)
     {
         try {

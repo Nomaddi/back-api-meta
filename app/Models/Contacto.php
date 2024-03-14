@@ -22,10 +22,10 @@ class Contacto extends Model
         return $this->belongsToMany(Tag::class, 'contacto_tag', 'contacto_id', 'tag_id');
     }
 
-    public function mensajes()
-    {
-        return $this->hasMany(Message::class, 'wa_id', 'telefono');
-    }
+    // public function mensajes()
+    // {
+    //     return $this->hasMany(Message::class, 'wa_id', 'telefono');
+    // }
 
     public function createWithTags(array $data)
     {

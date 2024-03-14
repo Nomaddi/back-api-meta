@@ -16,10 +16,13 @@
             </div>
         </div>
     </div>
-
-    @if ($message = Session::get('success'))
-        <div class="alert alert-success">
-            <p>{{ $message }}</p>
+    @if (isset($errors) && $errors->any())
+        <div class="alert alert-danger" role="alert">
+            @foreach ($errors->all() as $error)
+                <ul>
+                    <li>{{ $error }}</li>
+                </ul>
+            @endforeach
         </div>
     @endif
     <table id="contactosTable" class="table table-striped tabladatatable dt-responsive" style="width:100%">
@@ -41,12 +44,12 @@
     @include('contactos.modals.import-modal')
 @endsection
 @section('css')
-<link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.bootstrap4.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.bootstrap4.css">
 @stop
 
 @section('js')
-<script src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script>
-<script src="//cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap4.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap4.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#contactosTable').DataTable({
@@ -166,16 +169,22 @@
         });
 
         $('#ok_button').click(function() {
+            Swal.fire({
+                title: 'Eliminando...',
+                text: 'Por favor espera.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
             $.ajax({
                 url: "contactos/delete/" + user_id,
-                beforeSend: function() {
-                    $('#ok_button').text('Deleting...');
-                },
                 success: function(data) {
                     setTimeout(function() {
                         $('#confirmModal').modal('hide');
                         $('#contactosTable').DataTable().ajax.reload();
-                        Swal.fire('Contacto eliminado correctamente', data.message, 'success');
+                        Swal.fire('Eliminado', 'Contacto eliminado correctamente', 'success');
                     }, 2000);
                 }
             })
@@ -221,15 +230,57 @@
         });
     </script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Muestra alerta de éxito
+            @if (session('success'))
+                Swal.fire({
+                    title: 'Éxito!',
+                    text: '{{ session('success') }}',
+                    icon: 'success',
+                    confirmButtonText: 'Aceptar'
+                });
+            @endif
+
+            // Muestra errores uno por uno
+            @if ($errors->any())
+                @foreach ($errors->all() as $error)
+                    Swal.fire({
+                        title: 'Error!',
+                        text: '{{ $error }}',
+                        icon: 'error',
+                        confirmButtonText: 'Cerrar'
+                    });
+                @endforeach
+            @endif
+        });
+    </script>
+
+    {{-- <script>
         $(document).ready(function() {
             $('#uploadBtn').click(function(e) {
                 e.preventDefault(); // Evitar la recarga de la página
 
                 var fileInput = $('#fileUpload')[0];
                 if (fileInput.files.length === 0) {
-                    $('#uploadError').text('Por favor, selecciona un archivo.').show();
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Archivo no seleccionado',
+                        text: 'Por favor, selecciona un archivo.',
+                        timer: 2000,
+                        timerProgressBar: true,
+                    });
                     return;
                 }
+
+                // Muestra una alerta de carga con animación y sin botón de aceptar
+                Swal.fire({
+                    title: 'Cargando...',
+                    text: 'El archivo se está subiendo, por favor espera.',
+                    allowOutsideClick: false,
+                    onBeforeOpen: () => {
+                        Swal.showLoading(); // Muestra solo la animación de carga
+                    }
+                });
 
                 var formData = new FormData();
                 formData.append('file', fileInput.files[0]);
@@ -244,24 +295,33 @@
                     processData: false, // Evitar que jQuery procese los datos
                     contentType: false, // Evitar que jQuery establezca el tipo de contenido
                     success: function(response) {
-                        console.log(response);
-                        location
-                            .reload();
-                        // Aquí puedes manejar el cierre de tu modal o diálogo y actualizar la vista según sea necesario
-                        // Por ejemplo, si estás usando Bootstrap Modal puedes cerrarlo así:
-                        // $('#createAppModal').modal('hide');
-                        // Y si quieres llamar a otra función para mostrar los datos actualizados puedes hacerlo aquí
+                        Swal.close(); // Cierra la alerta de carga
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Subido',
+                            text: 'El archivo se ha subido correctamente.',
+                            showConfirmButton: false,
+                            timer: 1500,
+                            timerProgressBar: true,
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                location.reload();
+                            }
+                        });
                     },
                     error: function(xhr, status, error) {
+                        Swal.close(); // Cierra la alerta de carga
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo subir el archivo.',
+                        });
                         console.error('Error al subir archivo:', error);
-                        $('#uploadError').text('Error al subir el archivo.').show();
-                        // location
-                        //     .reload();
                     }
                 });
             });
         });
-    </script>
+    </script> --}}
 
 
 @stop

@@ -60,16 +60,38 @@ class SendMessage implements ShouldQueue
             $wam->data = serialize($this->messageData);
             $wam->save();
         } catch (Exception $e) {
-            // Captura la excepción y registra un mensaje de error detallado
-        $errorMessage = 'Error handling SendMessage job: ' . $e->getMessage();
+            $errorMessage = $e->getMessage();
+            // Encuentra el JSON en el mensaje de error
+            $jsonStartPos = strpos($errorMessage, '{');
+            $errorJson = substr($errorMessage, $jsonStartPos);
 
-        // Agrega información adicional al mensaje de error
-        $errorMessage .= "\nPayload: " . json_encode($this->payload);
-        $errorMessage .= "\nBody: " . $this->body;
-        $errorMessage .= "\nMessage Data: " . json_encode($this->messageData);
+            if ($jsonStartPos !== false) {
+                $errorArray = json_decode($errorJson, true); // Convertir a array
 
-        Log::error($errorMessage);
-
+                if (json_last_error() === JSON_ERROR_NONE && isset($errorArray['error']['code'])) {
+                    $errorCode = $errorArray['error']['code'];
+                    $fbtrace_id = $errorArray['error']['fbtrace_id'];
+                    // Ahora puedes manejar $errorCode según sea necesario
+                    $wam = new Message();
+                    $wam->body = $this->body;
+                    $wam->outgoing = true;
+                    $wam->type = 'template';
+                    $wam->wa_id = $this->payload["to"];
+                    $wam->wam_id = $fbtrace_id;
+                    $wam->phone_id = $this->phone_id;
+                    $wam->status = 'failed';
+                    $wam->caption = $errorCode;
+                    $wam->data = serialize($this->messageData);
+                    $wam->save();
+                } else {
+                    // Maneja el caso de un error de decodificación JSON o ausencia del campo 'code'
+                    Log::error('Error al procesar la respuesta de error: ' . $e->getMessage());
+                }
+            } else {
+                // El mensaje de error no contiene JSON
+                Log::error('Error al enviar mensaje: ' . $e->getMessage());
+            }
         }
+
     }
 }

@@ -41,7 +41,7 @@ Route::put('tags/{id}', [TagController::class, 'update']); //actualizare un regi
 Route::delete('tags/{id}', [TagController::class, 'destroy']); //actualizare un registro
 
 // importar contactos
-Route::post('upload-contactos', [ContactoController::class, 'uploadUsers']);
+Route::post('upload-contactos', [ContactoController::class, 'uploadUsers'])->name('importar-contactos');
 
 // enviar mensaje plantilla
 Route::get('plantillas', [MessageController::class, 'NumbersApps']);

@@ -126,6 +126,14 @@
                 var tokenApi = selectedOption.data('token_api');
 
                 if (idCBusiness && tokenApi) {
+                    Swal.fire({
+                        title: 'Cargando plantillas...',
+                        text: 'Por favor espera',
+                        allowOutsideClick: false,
+                        onBeforeOpen: () => {
+                            Swal.showLoading();
+                        },
+                    });
                     $.ajax({
                         url: 'message-templates', // Cambia esto por la ruta real a tu controlador
                         type: 'GET',
@@ -134,13 +142,17 @@
                             token_api: tokenApi
                         },
                         success: function(response) {
+                            Swal.close(); // Cierra el SweetAlert de carga
                             if (response.success) {
                                 console.log(response.data);
                                 // Actualiza la variable global con la respuesta
                                 templatesData = response.data;
 
                                 // Vacía el select antes de cargar nuevos datos para evitar duplicados
-                                // $('#templatesSelect').empty();
+                                //$('#templatesSelect').empty();
+
+                                // Elimina todas las opciones excepto la primera
+                                $('#templatesSelect option:not(:first)').remove();
 
                                 // Itera sobre la respuesta y añade cada opción al select
                                 response.data.forEach(function(item) {
@@ -148,14 +160,19 @@
                                         item.name
                                     )); // El texto y el valor de la opción son el nombre
                                 });
-
+                                Swal.fire('¡Cargado!',
+                                    'Las plantillas se han cargado correctamente.',
+                                    'success');
                                 // No olvides añadir aquí el código para manejar la selección inicial si es necesario
                             } else {
-                                alert('No se pudieron cargar las plantillas.');
+                                Swal.fire('Error', 'No se pudieron cargar las plantillas.',
+                                    'error');
                             }
                         },
                         error: function(xhr, status, error) {
-                            alert('Ocurrió un error al cargar las plantillas.');
+                            Swal.close();
+                            Swal.fire('Error', 'Ocurrió un error al cargar las plantillas: ' +
+                                error, 'error');
                         }
                     });
                 }
@@ -171,12 +188,27 @@
                 if (selectedTemplate) {
                     templateLanguage = selectedTemplate.language; // Asigna el idioma a la variable
                     templateName = selectedTemplate.name; // Asigna el nombre a la variable
+                    Swal.fire({
+                        title: 'Cargando plantilla...',
+                        text: 'Por favor espera.',
+                        allowOutsideClick: false,
+                        onBeforeOpen: () => {
+                            Swal.showLoading();
+                        },
+                    });
                 } else {
                     templateLanguage = null; // Reinicia a null si no se encuentra la plantilla
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Plantilla no encontrada',
+                        text: 'La plantilla seleccionada no pudo ser cargada. Por favor, intenta con otra.',
+                    });
                 }
                 // Construye el HTML para los detalles de la plantilla
                 // Inicializa el HTML para los detalles de la plantilla
+
                 var detailsHtml = '';
+                Swal.close();
 
                 // Itera sobre los componentes de la plantilla
                 selectedTemplate.components.forEach(component => {
@@ -258,6 +290,15 @@
 
                 // Preparar los datos de los placeholders como un array
                 var body_placeholders = [];
+
+                Swal.fire({
+                    title: 'Enviando...',
+                    allowOutsideClick: false,
+                    onBeforeOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
                 $('#templateDetails .format').each(function() {
                     body_placeholders.push($(this).val());
                 });
@@ -309,14 +350,6 @@
                     token_api: token_api,
                     programar: programar
                 };
-                // Mostrar el mensaje de carga con SweetAlert
-                Swal.fire({
-                    title: 'Cargando...',
-                    allowOutsideClick: false,
-                    onBeforeOpen: () => {
-                        Swal.showLoading();
-                    },
-                });
                 $.ajax({
                     type: "POST",
                     url: "send-message-templates",
@@ -334,15 +367,16 @@
                         $('#createSend').trigger("reset");
 
                         // Mostrar SweetAlert con la respuesta
-                        Swal.fire('Envío correcto', response.message, 'success');
+                        Swal.fire('¡Enviado!', 'Tu mensaje ha sido enviado correctamente.',
+                            'success');
                     },
                     error: function(error) {
                         // Ocultar el mensaje de carga
                         Swal.close();
 
                         // Mostrar SweetAlert con el mensaje de error
-                        Swal.fire('Error al enviar', 'Ha ocurrido un error durante el envío.',
-                            'error');
+                        Swal.fire('Error en el envío',
+                            'No se pudo enviar el mensaje. Inténtalo de nuevo.', 'error');
                     }
                 });
             });

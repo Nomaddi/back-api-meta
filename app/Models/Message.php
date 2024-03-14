@@ -9,8 +9,8 @@ class Message extends Model
 {
     use HasFactory;
 
-    public function contacto()
-    {
-        return $this->belongsTo(Contacto::class, 'wa_id', 'telefono');
-    }
+    // public function contacto()
+    // {
+    //     return $this->belongsTo(Contacto::class, 'wa_id', 'telefono');
+    // }
 }
