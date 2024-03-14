@@ -44,4 +44,5 @@ class Handler extends ExceptionHandler
             return redirect('/'); // Redirige a la página de inicio
         });
     }
+
 }

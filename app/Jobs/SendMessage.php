@@ -47,31 +47,31 @@ class SendMessage implements ShouldQueue
         try {
             $wp = new Whatsapp();
             $request = $wp->genericPayload($this->payload, $this->tokenApp, $this->phone_id);
+            if (isset($request["contacts"][0]["wa_id"])) {
+                $wam = new Message();
+                $wam->body = $this->body;
+                $wam->outgoing = true;
+                $wam->type = 'template';
+                $wam->wa_id = $request["contacts"][0]["wa_id"];
+                $wam->wam_id = $request["messages"][0]["id"];
+                $wam->phone_id = $this->phone_id;
+                $wam->status = 'sent';
+                $wam->caption = '';
+                $wam->data = serialize($this->messageData);
+                $wam->save();
+            } else {
+                // Encuentra el JSON en el mensaje de error
+                $jsonStartPos = strpos($request, '{');
+                $errorJsonString = substr($request, $jsonStartPos);
+                // Decodifica la cadena JSON a un array
+                $errorJson = json_decode($errorJsonString, true);
 
-            $wam = new Message();
-            $wam->body = $this->body;
-            $wam->outgoing = true;
-            $wam->type = 'template';
-            $wam->wa_id = $request["contacts"][0]["wa_id"];
-            $wam->wam_id = $request["messages"][0]["id"];
-            $wam->phone_id = $this->phone_id;
-            $wam->status = 'sent';
-            $wam->caption = '';
-            $wam->data = serialize($this->messageData);
-            $wam->save();
-        } catch (Exception $e) {
-            $errorMessage = $e->getMessage();
-            // Encuentra el JSON en el mensaje de error
-            $jsonStartPos = strpos($errorMessage, '{');
-            $errorJson = substr($errorMessage, $jsonStartPos);
+                // Asegúrate de verificar que la decodificación fue exitosa y que los datos necesarios están presentes
+                if ($errorJson && isset($errorJson['error']['code'], $errorJson['error']['fbtrace_id'])) {
+                    $errorCode = $errorJson['error']['code'];
+                    $fbtrace_id = $errorJson['error']['fbtrace_id'];
 
-            if ($jsonStartPos !== false) {
-                $errorArray = json_decode($errorJson, true); // Convertir a array
-
-                if (json_last_error() === JSON_ERROR_NONE && isset($errorArray['error']['code'])) {
-                    $errorCode = $errorArray['error']['code'];
-                    $fbtrace_id = $errorArray['error']['fbtrace_id'];
-                    // Ahora puedes manejar $errorCode según sea necesario
+                    // Ahora puedes manejar $errorCode y $fbtrace_id según sea necesario
                     $wam = new Message();
                     $wam->body = $this->body;
                     $wam->outgoing = true;
@@ -84,13 +84,12 @@ class SendMessage implements ShouldQueue
                     $wam->data = serialize($this->messageData);
                     $wam->save();
                 } else {
-                    // Maneja el caso de un error de decodificación JSON o ausencia del campo 'code'
-                    Log::error('Error al procesar la respuesta de error: ' . $e->getMessage());
+                    // Manejo de error si la respuesta no contiene el formato esperado o la decodificación falló
+                    Log::error("Error al procesar la respuesta de error o la respuesta no contiene el formato esperado: " . $errorJsonString);
                 }
-            } else {
-                // El mensaje de error no contiene JSON
-                Log::error('Error al enviar mensaje: ' . $e->getMessage());
             }
+        } catch (Exception $e) {
+            Log::error('error en catch' . $e->getMessage());
         }
 
     }
