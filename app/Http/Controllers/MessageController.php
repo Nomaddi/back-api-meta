@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\ClocalController;
 
 
 class MessageController extends Controller
@@ -517,6 +518,15 @@ class MessageController extends Controller
                 Log::info('envio encolado' . count($recipients));
             }
 
+            //Cambiar status de pendiente a enviado en contratacion local
+            if(!empty($input['status_send'])) {
+                // Crear una instancia de ClocalController
+                $clocalController = new ClocalController();
+
+                // Llamar al método update de ClocalController
+                $clocalController->update($input['solicitudId'], $input['status_send']);
+
+            }
 
             return response()->json([
                 'success' => true,

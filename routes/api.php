@@ -1,13 +1,14 @@
 <?php
 
-use App\Http\Controllers\MessageController;
-use App\Http\Controllers\ContactoController;
-use App\Http\Controllers\AplicacionesController;
-use App\Http\Controllers\NumerosController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\ClocalController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\NumerosController;
+
+use App\Http\Controllers\ContactoController;
+use App\Http\Controllers\AplicacionesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,9 @@ use Illuminate\Support\Facades\Artisan;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Pusher
+Route::post('/store-data', [ClocalController::class, 'storeData']);
 
 // Route::get('/whatsapp-webhook', [MessageController::class, 'verifyWebhook']);
 // Route::post('/whatsapp-webhook', [MessageController::class, 'processWebhook']);

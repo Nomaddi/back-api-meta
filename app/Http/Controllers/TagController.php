@@ -82,4 +82,15 @@ class TagController extends Controller
             'message' => 'Etiqueta eliminada correctamente.',
         ], 200);
     }
+
+    public function showContacts($tagId)
+    {
+        $tag = Tag::with('contactos')->find($tagId);
+
+        if (!$tag) {
+            return redirect()->route('tags.index')->with('error', 'Tag no encontrado');
+        }
+
+        return view('tags.showContacts', ['tag' => $tag]);
+    }
 }

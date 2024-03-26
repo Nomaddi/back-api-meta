@@ -9,6 +9,7 @@ use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
+use App\Http\Controllers\ClocalController;
 
 
 
@@ -35,10 +36,14 @@ Route::post('contactos/update', [ContactoController::class, 'update'])->name('co
 Route::get('contactos/delete/{id}', [ContactoController::class, 'destroy'])->name('contactos.delete'); //actualizare un registro
 
 // Tags
-Route::get('tags', [TagController::class, 'index']); //mostrar todos los registros
+Route::get('tags', [TagController::class, 'index'])->name('tags.index'); //mostrar todos los registros
 Route::post('tags', [TagController::class, 'store'])->name('tags.store'); //crear un registro
 Route::put('tags/{id}', [TagController::class, 'update']); //actualizare un registro
 Route::delete('tags/{id}', [TagController::class, 'destroy']); //actualizare un registro
+Route::delete('tags/{id}', [TagController::class, 'destroy']); //actualizare un registro
+Route::get('tags/{id}/contactos', [TagController::class, 'showContacts'])->name('tags.showContacts');
+
+
 
 // importar contactos
 Route::post('upload-contactos', [ContactoController::class, 'uploadUsers'])->name('importar-contactos');
@@ -47,8 +52,8 @@ Route::post('upload-contactos', [ContactoController::class, 'uploadUsers'])->nam
 Route::get('plantillas', [MessageController::class, 'NumbersApps']);
 
 Route::get('send-message', [MessageController::class, 'sendMessages']);
-Route::get('message-templates', [MessageController::class, 'loadMessageTemplates']);
-Route::post('send-message-templates', [MessageController::class, 'sendMessageTemplate']);
+Route::get('message-templates', [MessageController::class, 'loadMessageTemplates'])->name('message.templates');
+Route::post('send-message-templates', [MessageController::class, 'sendMessageTemplate'])->name('send.message.templates');
 
 //estadisticas
 Route::get('estadisticas', [EstadisticasController::class, 'index']); //mostrar todos los registros
@@ -59,6 +64,11 @@ Route::get('envios-plantillas', [EnvioController::class, 'index']); //mostrar to
 Route::get('programados', [ProgramadosControllers::class, 'index']); //mostrar todos los registros
 Route::get('/descargar-archivo/{id}', [ProgramadosControllers::class, 'descargar'])->name('descargar-archivo');
 Route::put('/actualizar-estado/{id}', [ProgramadosControllers::class, 'actualizarEstado'])->name('actualizar-estado');
+
+//contratacion local
+Route::get('solicitudes', [ClocalController::class, 'index']); //mostrar todos los registroscl
+Route::get('solicitudes/send/{id}', [ClocalController::class, 'send'])->name('enviar.solicitud'); //mostrar todos los registroscl
+
 
 Route::resource(
     'messages',

@@ -23,7 +23,7 @@
             <tr>
                 <th>No</th>
                 <th>Nombre</th>
-                <th>Descripción</th>
+                <th>Contactos</th>
                 <th>Color</th>
                 <th>Acciones</th>
             </tr>
@@ -33,7 +33,7 @@
                 <tr>
                     <th>{{ $app->id }}</th>
                     <th>{{ $app->nombre }}</th>
-                    <td>{{ $app->descripcion }}</td>
+                    <td>{{ $app->contactos->count() }}</td>
                     <td>
                         <span
                             style="background-color: {{ $app->color }}; padding: 5px; border-radius: 4px;">{{ $app->color }}</span>
@@ -47,6 +47,7 @@
                             class="btn btn-success btn-sm mb-2" title="Editar">
                             <i class="fa fa-edit"></i>
                         </a>
+                        <a href="{{ route('tags.showContacts', $app->id) }}" class="btn btn-primary btn-sm mb-2"><i class="fa fa-user"></i></a>
 
                         <button class="btn btn-danger btn-sm mb-2 deleteApp" data-appid="{{ $app->id }}"
                             data-toggle="modal" data-target="#deleteConfirmationModal"><i class="fa fa-trash"></i></button>
@@ -187,6 +188,5 @@
             });
         });
     </script>
-
 
 @stop

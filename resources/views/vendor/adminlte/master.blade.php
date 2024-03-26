@@ -50,6 +50,23 @@
     {{-- Custom Stylesheets (post AdminLTE) --}}
     @yield('adminlte_css')
 
+    {{-- scroll --}}
+    <style>
+        /* Estilos personalizados para la barra de desplazamiento */
+        ::-webkit-scrollbar {
+            width: 10px; /* Ancho de la barra de desplazamiento */
+        }
+
+        ::-webkit-scrollbar-track {
+            background-color: #f1f1f1; /* Color del fondo de la barra de desplazamiento */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: #888; /* Color de la barra de desplazamiento */
+            border-radius: 5px; /* Borde redondeado */
+        }
+    </style>
+
     {{-- Favicon --}}
     @if(config('adminlte.use_ico_only'))
         <link rel="shortcut icon" href="{{ asset('favicons/favicon.ico') }}" />
@@ -92,7 +109,12 @@
 
       var channel = pusher.subscribe('my-channel');
       channel.bind('my-event', function(data) {
-        alert(JSON.stringify(data));
+        Swal.fire({
+            title: '¡Nuevo Contrato Publicado!',
+            text: `La empresa ${data.data.empresa} acaba de publicar un contrato.`,
+            icon: 'success',
+            confirmButtonText: 'Aceptar'
+        });
       });
     </script>
 

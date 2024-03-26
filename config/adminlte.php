@@ -325,6 +325,13 @@ return [
             'url'  => 'admin/programados',
             'icon' => 'fas fa-fw fa-clock',
         ],
+        ['header' => 'CONTRATACION LOCAL'],
+        [
+            'text' => 'Solicitudes',
+            'url'  => 'admin/solicitudes',
+            'icon' => 'fab fa-fw fa-readme',
+
+        ],
         ['header' => 'BASE DE DATOS'],
         [
             'text' => 'Contactos',

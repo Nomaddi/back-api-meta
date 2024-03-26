@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\ClocalController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\AplicacionesController;
@@ -30,6 +31,8 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 Route::get('/whatsapp-webhook', [MessageController::class, 'verifyWebhook']);
 Route::post('/whatsapp-webhook', [MessageController::class, 'processWebhook']);
 Route::get('/send-message', [MessageController::class, 'sendMessages']);
+
+
 
 // Agrupando rutas y aplicando el middleware 'auth'
 Route::middleware(['auth'])->group(function () {
