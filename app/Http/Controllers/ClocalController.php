@@ -67,7 +67,10 @@ class ClocalController extends Controller
             return response()->json(['success' => 'Data almacenada con éxito.']);
         } catch (\Exception $e) {
             Log::error('Error al almacenar en la base de datos: ' . $e->getMessage());
-            return response()->json(['error' => 'Hubo un problema al almacenar la data.'], 500);
+            return response()->json([
+                'error' => 'Hubo un problema al almacenar la data.',
+                'message' => $e->getMessage() // Aquí se envía el mensaje de error específico
+            ], 500);
         }
     }
 }

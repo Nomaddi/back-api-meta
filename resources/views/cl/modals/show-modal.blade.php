@@ -39,12 +39,16 @@
                         <li class="list-group-item">Fecha inicio
                             <b>{{ $app->fecha_inicio }}</b>
                         </li>
-                        <li class="list-group-item">Fecha recibo
-                            <b>{{ $app->fecha_recibo }}</b>
-                        </li>
-                        <li class="list-group-item">Hora limite
-                            <b>{{ $app->hora_limite }}</b>
-                        </li>
+                        @if (!is_null($solicitud->fecha_recibo))
+                            <li class="list-group-item">Fecha recibo
+                                <b>{{ $app->fecha_recibo }}</b>
+                            </li>
+                        @endif
+                        @if (!is_null($solicitud->hora_limite))
+                            <li class="list-group-item">Hora limite
+                                <b>{{ $app->hora_limite }}</b>
+                            </li>
+                        @endif
                         <li class="list-group-item">Ubicación de los trabajos
                             <b>
                                 @php
@@ -68,7 +72,8 @@
                             </b>
                         </li>
                         <li class="list-group-item">Estado
-                            <span class="badge {{ $app->estado == 'publicado' ? 'badge-primary' : 'badge-danger' }} badge-pill">{{ $app->estado }}</span>
+                            <span
+                                class="badge {{ $app->estado == 'publicado' ? 'badge-primary' : 'badge-danger' }} badge-pill">{{ $app->estado }}</span>
                         </li>
                     </ul>
                 </div>
