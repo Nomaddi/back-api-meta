@@ -39,12 +39,12 @@
                         <li class="list-group-item">Fecha inicio
                             <b>{{ $app->fecha_inicio }}</b>
                         </li>
-                        @if (!is_null($solicitud->fecha_recibo))
+                        @if (!is_null($app->fecha_recibo))
                             <li class="list-group-item">Fecha recibo
                                 <b>{{ $app->fecha_recibo }}</b>
                             </li>
                         @endif
-                        @if (!is_null($solicitud->hora_limite))
+                        @if (!is_null($app->hora_limite))
                             <li class="list-group-item">Hora limite
                                 <b>{{ $app->hora_limite }}</b>
                             </li>
