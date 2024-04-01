@@ -54,6 +54,7 @@ Route::get('plantillas', [MessageController::class, 'NumbersApps']);
 Route::get('send-message', [MessageController::class, 'sendMessages']);
 Route::get('message-templates', [MessageController::class, 'loadMessageTemplates'])->name('message.templates');
 Route::post('send-message-templates', [MessageController::class, 'sendMessageTemplate'])->name('send.message.templates');
+Route::post('upload-pdf', [MessageController::class, 'upload'])->name('upload.pdf');
 
 //estadisticas
 Route::get('estadisticas', [EstadisticasController::class, 'index']); //mostrar todos los registros

@@ -374,6 +374,26 @@ class MessageController extends Controller
         }
     }
 
+    public function upload(Request $request)
+    {
+        $request->validate([
+            'pdf' => 'required|file|mimes:pdf|max:10240', // 10MB
+        ]);
+
+        if ($request->hasFile('pdf')) {
+            $pdf = $request->file('pdf');
+            $filename = 'pdfs/' . uniqid() . '.' . $pdf->getClientOriginalExtension();
+
+            // Guardar en el disco público
+            $path = $pdf->storeAs('', $filename, 'public');
+
+            // Retorna URL del archivo
+            return response()->json(['url' => Storage::disk('public')->url($filename)], 200);
+        }
+
+        return response()->json(['error' => 'No se pudo subir el archivo.'], 500);
+    }
+
     public function sendMessageTemplate(Request $request)
     {
         try {

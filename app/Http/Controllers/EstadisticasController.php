@@ -10,13 +10,11 @@ class EstadisticasController extends Controller
 {
     public function index()
     {
-
         return view('estadisticas.index');
     }
 
     public function getStatistics(Request $request)
     {
-        // Validar los datos del formulario
         $validatedData = $request->validate([
             'fechaInicio' => 'required|date',
             'fechaFin' => 'required|date|after_or_equal:fechaInicio',
@@ -26,68 +24,42 @@ class EstadisticasController extends Controller
             $startDate = $validatedData['fechaInicio'];
             $endDate = $validatedData['fechaFin'];
 
-            // Obtener estadísticas según el rango de fechas
-            $statistics = Message::whereBetween('created_at', [$startDate, $endDate])
-                ->where('outgoing', 1) // Agrega cualquier filtro adicional necesario
-                ->select('status') // Selecciona solo el campo 'status'
-                ->get();
+            // Obtener el conteo de mensajes por estado en un solo query
+            $statusCounts = Message::whereBetween('created_at', [$startDate, $endDate])
+                ->where('outgoing', 1)
+                ->select('status', \DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->get()
+                ->keyBy('status'); // Clavear por el estado para un acceso fácil
 
-            $totalMessages = $statistics->count();
+            $totalMessages = $statusCounts->sum('count'); // Total de mensajes
 
-            // Calcular el número de mensajes para cada estado
-            $sentCount = $statistics->where('status', 'sent')->count();
-            $deliveredCount = $statistics->where('status', 'delivered')->count();
-            $readCount = $statistics->where('status', 'read')->count();
-            $failedCount = $statistics->where('status', 'failed')->count();
+            // Función para obtener el porcentaje
+            $getPercentage = function ($count) use ($totalMessages) {
+                return $totalMessages > 0 ? number_format(($count / $totalMessages) * 100, 2) : 0;
+            };
 
-            //Verificar si $sentCount es cero antes de calcular el porcentaje
-            if ($sentCount != 0 && $totalMessages != 0) {
-                $sentPercentage = number_format(($sentCount / $totalMessages) * 100, 2);
-            } else {
-                $sentPercentage = 0;
-            }
+            // Usar la función para calcular los porcentajes
+            $sentPercentage = $getPercentage($statusCounts->get('sent', collect(['count' => 0]))['count']);
+            $deliveredPercentage = $getPercentage($statusCounts->get('delivered', collect(['count' => 0]))['count']);
+            $readPercentage = $getPercentage($statusCounts->get('read', collect(['count' => 0]))['count']);
+            $failedPercentage = $getPercentage($statusCounts->get('failed', collect(['count' => 0]))['count']);
 
-            // Repite lo mismo para $deliveredCount, $readCount y $failedCount
-            // Verificar si $deliveredCount es cero antes de calcular el porcentaje
-            if ($deliveredCount != 0 && $totalMessages != 0) {
-                $deliveredPercentage = number_format(($deliveredCount / $totalMessages) * 100, 2);
-            } else {
-                $deliveredPercentage = 0;
-            }
-
-            // Verificar si $readCount es cero antes de calcular el porcentaje
-            if ($readCount != 0 && $totalMessages != 0) {
-                $readPercentage = number_format(($readCount / $totalMessages) * 100, 2);
-            } else {
-                $readPercentage = 0;
-            }
-
-            // Verificar si $failedCount es cero antes de calcular el porcentaje
-            if ($failedCount != 0 && $totalMessages != 0) {
-                $failedPercentage = number_format(($failedCount / $totalMessages) * 100, 2);
-            } else {
-                $failedPercentage = 0;
-            }
-
-
-            // Devolver la respuesta JSON con los resultados
             return response()->json([
                 'totalMessages' => $totalMessages,
                 'sentPercentage' => $sentPercentage,
                 'deliveredPercentage' => $deliveredPercentage,
                 'readPercentage' => $readPercentage,
                 'failedPercentage' => $failedPercentage,
-                'sentCount' => $sentCount,
-                'deliveredCount' => $deliveredCount,
-                'readCount' => $readCount,
-                'failedCount' => $failedCount,
+                'sentCount' => $statusCounts->get('sent', collect(['count' => 0]))['count'],
+                'deliveredCount' => $statusCounts->get('delivered', collect(['count' => 0]))['count'],
+                'readCount' => $statusCounts->get('read', collect(['count' => 0]))['count'],
+                'failedCount' => $statusCounts->get('failed', collect(['count' => 0]))['count'],
                 'startDate' => $startDate,
                 'endDate' => $endDate,
             ]);
         } catch (\Exception $e) {
-            // Manejar errores
             return response()->json(['error' => 'Error al obtener estadísticas.'], 500);
         }
     }
-
 }
