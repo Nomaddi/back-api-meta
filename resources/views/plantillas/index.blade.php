@@ -208,7 +208,6 @@
                         success: function(response) {
                             Swal.close(); // Cierra el SweetAlert de carga
                             if (response.success) {
-                                console.log(response.data);
                                 // Actualiza la variable global con la respuesta
                                 templatesData = response.data;
 
@@ -300,7 +299,7 @@
                                     <h2>Arrastre y suelta archivos</h2>
                                     <span>O</span>
                                     <button type="button">Seleccione su archivo</button>
-                                    <input type="file" class="form-control-file" id="input-file" name="input-file" hidden accept=".pdf" required/>
+                                    <input type="file" class="form-control-file" id="input-file" name="input-file" hidden accept=".pdf"/>
                                     <div id="preview"></div>
                                 </div>
                             </div>`;
@@ -449,6 +448,7 @@
         });
         $(document).ready(function() {
             $('#createSend').submit(function(e) {
+                var fileInput = document.getElementById('input-file');
                 e.preventDefault(); // Prevenir la recarga de la página
                 Swal.fire({
                     title: 'Enviando...',
@@ -461,9 +461,8 @@
                 if ($('#header').val()) {
                     header_url = $('#header').val();
                     enviarDatos(header_url); // Envía los datos inmediatamente si solo es un enlace
-                } else {
+                } else if (fileInput !== null) {
                     var formData = new FormData();
-                    var fileInput = document.getElementById('input-file');
                     if (fileInput.files[0]) {
                         formData.append('pdf', fileInput.files[0]);
                     }
@@ -478,8 +477,6 @@
                         processData: false, // Importante: no procesar los datos
                         contentType: false, // Importante: no establecer el tipo de contenido
                         success: function(response) {
-                            // Aquí manejas la respuesta del servidor, por ejemplo, guardando la URL del PDF
-                            console.log(response.url);
                             // Puedes continuar aquí con el envío de los demás datos de tu formulario
                             enviarDatos(response.url);
                         },
@@ -494,6 +491,9 @@
                             );
                         }
                     });
+                } else {
+                    const url = null;
+                    enviarDatos(url);
                 }
             });
         });
@@ -570,11 +570,15 @@
 
                     //limpiar formularo
                     $('#createSend').trigger("reset");
-                    limpiarFormularioDeSubida();
 
                     // Mostrar SweetAlert con la respuesta
-                    Swal.fire('¡Enviado!', 'Tu mensaje ha sido enviado correctamente.',
-                        'success');
+                    Swal.fire({
+                        title: '¡Enviado!',
+                        text: 'Tu mensaje ha sido enviado correctamente.'
+                    }).then(() => {
+                        // Recargar la página después de cerrar el SweetAlert, independientemente de cómo se cerró
+                        window.location.reload();
+                    });
                 },
                 error: function(error) {
                     // Ocultar el mensaje de carga
