@@ -118,4 +118,37 @@ class ContactoController extends Controller
         Excel::import(new ContactosImport, $request->file);
         return redirect()->route('contactos.index')->with('success', 'Contactos importados con exito');
     }
+
+    public function exportar()
+    {
+        $contactos = Contacto::with('tags')->get(); // Cargar anticipadamente las etiquetas
+        $nombreArchivo = 'contactos.csv';
+
+        $headers = array(
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$nombreArchivo",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        );
+
+        $columnas = array('ID', 'Nombre', 'Teléfono', 'Etiquetas'); // Agrega 'Etiquetas'
+
+        $callback = function () use ($contactos, $columnas) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columnas);
+
+            foreach ($contactos as $contacto) {
+                // Concatenar todas las etiquetas en una cadena separada por comas
+                $etiquetas = $contacto->tags->pluck('nombre')->implode(', ');
+
+                fputcsv($file, array ($contacto->id, $contacto->nombre, $contacto->telefono, $etiquetas));
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+
 }

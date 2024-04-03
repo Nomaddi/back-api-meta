@@ -12,7 +12,9 @@
                 <a data-toggle="modal" data-target="#importAppModal" class="btn btn-success btn-sm mb-2" title="Importar">
                     <i class="fa fa-file-import"></i>
                 </a>
-
+                <a data-toggle="modal" data-target="#exportarAppModal" class="btn btn-success btn-sm mb-2" title="Exportar">
+                    <i class="fa fa-file-export"></i>
+                </a>
             </div>
         </div>
     </div>
@@ -42,6 +44,7 @@
     @include('contactos.modals.create-modal')
     @include('contactos.modals.delete-modal')
     @include('contactos.modals.import-modal')
+    @include('contactos.modals.export-modal')
 @endsection
 @section('css')
     <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.bootstrap4.css">
@@ -50,6 +53,7 @@
 @section('js')
     <script src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script>
     <script src="//cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap4.min.js"></script>
+
     <script>
         $(document).ready(function() {
             $('#contactosTable').DataTable({

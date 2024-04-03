@@ -47,6 +47,9 @@ Route::get('tags/{id}/contactos', [TagController::class, 'showContacts'])->name(
 
 // importar contactos
 Route::post('upload-contactos', [ContactoController::class, 'uploadUsers'])->name('importar-contactos');
+// exporta contactos
+Route::get('exportar-contactos', [ContactoController::class,'exportar'])->name('exportar-contactos');
+
 
 // enviar mensaje plantilla
 Route::get('plantillas', [MessageController::class, 'NumbersApps']);
