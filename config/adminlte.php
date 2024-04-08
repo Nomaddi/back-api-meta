@@ -311,7 +311,7 @@ return [
         ['header' => 'WHATSAPP'],
         [
             'text' => 'Chats',
-            'url'  => 'admin/settings',
+            'url'  => 'admin/messages-index',
             'icon' => 'fab fa-fw fa-whatsapp',
 
         ],

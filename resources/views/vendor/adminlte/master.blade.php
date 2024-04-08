@@ -101,7 +101,7 @@
 
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script>
-      Pusher.logToConsole = true;
+    //   Pusher.logToConsole = true;
 
       var pusher = new Pusher('52c212ce563c5534e98c', { // Usa tu clave real aquí
         cluster: 'us2' // Usa tu cluster real aquí

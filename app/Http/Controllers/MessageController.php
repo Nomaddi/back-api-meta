@@ -34,30 +34,36 @@ class MessageController extends Controller
             'tags' => $tags,
         ]);
     }
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function chat()
+    {
+        $numeros = Numeros::all();
+        $aplicaciones = Aplicaciones::all();
+
+        return view('chat/index', [
+            'numeros' => $numeros,
+            'aplicaciones' => $aplicaciones
+        ]);
+    }
     public function index(Request $request)
     {
         $input = $request->all();
         $phone_id = $input['id_phone'];
 
         try {
-            $messages = DB::table('messages', 'm')
-                ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
-                ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 WHERE m2.phone_id = ? GROUP BY wa_id)', [$phone_id])
-                ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
-                ->where('m.outgoing', '=', 0) // Agregar condición para outgoing igual a 0
-                ->orderByDesc('m.id')
-                ->get();
             // $messages = DB::table('messages', 'm')
             //     ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
+            //     ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 WHERE m2.phone_id = ? GROUP BY wa_id)', [$phone_id])
             //     ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
-            //     ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 GROUP BY wa_id)')
+            //     ->where('m.outgoing', '=', 0) // Agregar condición para outgoing igual a 0
             //     ->orderByDesc('m.id')
             //     ->get();
+            $messages = DB::table('messages', 'm')
+                ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
+                // ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
+                ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 GROUP BY wa_id)')
+                ->orderByDesc('m.id')
+                ->limit(10) // Limitar a los 10 primeros registros
+                ->get();
 
             return response()->json([
                 'success' => true,
@@ -128,28 +134,46 @@ class MessageController extends Controller
      */
     public function show($waId, Request $request)
     {
-        $input = $request->all();
-        $phone_id = $input['id_phone'];
-        try {
-            $messages = DB::table('messages', 'm')
-                ->where('wa_id', $waId)
-                ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
-                ->orderBy('created_at')
-                ->get();
+        $phone_id = $request->input('id_phone');
+        $perPage = 10; // Define cuántos mensajes quieres cargar por página
 
-            foreach ($messages as $key => $message) {
+        try {
+            // Obtener los mensajes paginados
+            $messagesQuery = DB::table('messages as m')
+                ->where('wa_id', $waId)
+                ->where('m.phone_id', $phone_id)
+                ->orderByDesc('created_at') // Ordena por created_at descendente para obtener los más recientes primero
+                ->paginate($perPage);
+
+            $messages = $messagesQuery->getCollection();
+
+            // Procesar cada mensaje si es necesario
+            $messages->transform(function ($message) {
                 if ($message->type == 'template') {
                     $message->data = unserialize($message->data);
                 }
-                $messages[$key] = $message;
-            }
+                return $message;
+            });
+
+            // Agrupar los mensajes por la fecha de 'created_at'
+            $grouped = $messages->groupBy(function ($item) {
+                return Carbon::parse($item->created_at)->format('Y-m-d'); // Agrupa por fecha
+            });
+            // Ordena los mensajes dentro de cada grupo por 'created_at' de manera descendente
+            $grouped = $grouped->map(function ($dayMessages) {
+                return $dayMessages->sortBy(function ($message) {
+                    return Carbon::parse($message->created_at)->timestamp;
+                });
+            });
 
             return response()->json([
                 'success' => true,
-                'data' => $messages,
+                'data' => $grouped,
+                'nextPageUrl' => $messagesQuery->nextPageUrl(), // Proporciona la URL para cargar la próxima página de mensajes
+                'prevPageUrl' => $messagesQuery->previousPageUrl(), // Proporciona la URL para la página anterior (si la necesitas)
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes3: ' . $e->getMessage());
+            Log::error('Error al obtener mensajes: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -207,7 +231,7 @@ class MessageController extends Controller
         } catch (Exception $e) {
             Log::error('Error al obtener mensajes4: ' . $e->getMessage());
             return response()->json([
-                'success'  => false,
+                'success' => false,
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -539,7 +563,7 @@ class MessageController extends Controller
             }
 
             //Cambiar status de pendiente a enviado en contratacion local
-            if(!empty($input['status_send'])) {
+            if (!empty($input['status_send'])) {
                 // Crear una instancia de ClocalController
                 $clocalController = new ClocalController();
 

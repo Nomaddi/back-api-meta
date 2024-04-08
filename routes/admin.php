@@ -74,8 +74,11 @@ Route::get('solicitudes', [ClocalController::class, 'index']); //mostrar todos l
 Route::get('solicitudes/send/{id}', [ClocalController::class, 'send'])->name('enviar.solicitud'); //mostrar todos los registroscl
 
 
+
 Route::resource(
     'messages',
     MessageController::class
 );
+
+Route::get('messages-index', [MessageController::class, 'chat']); //mostrar todos los registroscl
 

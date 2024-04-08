@@ -21,9 +21,9 @@ class CreateClocalsTable extends Migration
             $table->string('codigo_contrato')->nullable();
             $table->string('tipo_orden_id')->nullable();
             $table->string('orden_servicio')->nullable();
-            $table->string('desc_general_act')->nullable();
-            $table->string('objeto')->nullable();
-            $table->string('requerimientos')->nullable();
+            $table->text('desc_general_act')->nullable();
+            $table->text('objeto')->nullable();
+            $table->text('requerimientos')->nullable();
             $table->string('tiempo_ejecucion')->nullable();
             $table->string('fecha_inicio')->nullable();
             $table->string('fecha_recibo')->nullable();

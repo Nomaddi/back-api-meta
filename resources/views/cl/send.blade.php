@@ -29,8 +29,10 @@
                                 // Intenta decodificar la cadena JSON. Si falla, usa un array vacío como respaldo.
                                 $publicArray = json_decode($solicitud->publicacion, true) ?? [];
                             @endphp
-                            <span
-                                class="badge badge-primary badge-pill">{{ collect($publicArray)->filter()->implode(', ') }}</span>
+                            <span>{{ collect($publicArray)->filter()->implode(', ') }}
+                                <i class="fas fa-copy" style="margin-left: 10px; cursor: pointer;"
+                                    onclick="copyToClipboard('{{ collect($publicArray)->filter()->implode(', ') }}')">
+                                </i></span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Estado
@@ -39,7 +41,19 @@
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Tipo de contrato
-                            <span class="badge badge-primary badge-pill">{{ $solicitud->contrato }}</span>
+                            <span class="badge badge-primary badge-pill">{{ $solicitud->contrato }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            link PDF
+                            <span>
+                                <a href="{{ $solicitud->contrato == 'MO' ? env('PROJECT2_URL_MANO') : env('PROJECT2_URL_SERVICIO') }}/{{ $solicitud->id_pdf }}"
+                                    target="_blank" rel="noopener noreferrer" style="text-decoration: none">
+                                    {{ $solicitud->contrato == 'MO' ? env('PROJECT2_URL_MANO') : env('PROJECT2_URL_SERVICIO') }}/{{ $solicitud->id_pdf }}
+                                </a>
+                                <i class="fas fa-copy" style="margin-left: 10px; cursor: pointer;"
+                                    onclick="copyToClipboard('{{ $solicitud->contrato == 'MO' ? env('PROJECT2_URL_MANO') : env('PROJECT2_URL_SERVICIO') }}/{{ $solicitud->id_pdf }}')"></i>
+                            </span>
                         </li>
                     </ul>
                 </div>
@@ -52,28 +66,34 @@
                     <ul class="list-group list-group-flush">
                         <input id="solicitudId" name="solicitudId" type="hidden" value="{{ $solicitud->id }}" />
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Empresa
-                            <span class="badge badge-primary badge-pill">{{ $solicitud->empresa }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
                             Contrato
-                            <span class="badge badge-primary badge-pill">{{ $solicitud->codigo_contrato }}</span>
+                            <span>
+                                {{ $solicitud->codigo_contrato }}
+                                <i class="fas fa-copy" style="margin-left: 10px; cursor: pointer;"
+                                    onclick="copyToClipboard('{{ $solicitud->codigo_contrato }}')">
+                                </i>
+                            </span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Orden de servicio
-                            <span class="badge badge-primary badge-pill">{{ $solicitud->tipo_orden_id }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Descripción general
-                            <span class="badge badge-primary badge-pill">{{ $solicitud->desc_general_act }}</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Tiempo ejecucion
-                            <span class="badge badge-primary badge-pill">{{ $solicitud->tiempo_ejecucion }}</span>
+                            Contratista
+                            <span>{{ $solicitud->empresa }}
+                                <i class="fas fa-copy" style="margin-left: 10px; cursor: pointer;"
+                                    onclick="copyToClipboard('{{ $solicitud->empresa }}')">
+                                </i></span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Objeto
-                            <span class="badge badge-primary badge-pill">{{ $solicitud->objeto }}</span>
+                            <span>{{ $solicitud->objeto }}
+                                <i class="fas fa-copy" style="margin-left: 10px; cursor: pointer;"
+                                    onclick="copyToClipboard('{{ $solicitud->objeto }}')">
+                                </i></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Descripción de actividades
+                            <span>{{ $solicitud->desc_general_act }}
+                                <i class="fas fa-copy" style="margin-left: 10px; cursor: pointer;"
+                                    onclick="copyToClipboard('{{ $solicitud->desc_general_act }}')">
+                                </i></span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Requerimientos
@@ -82,31 +102,50 @@
                                 $requerimientoArray = json_decode($solicitud->requerimientos, true) ?? [];
                             @endphp
                             <ul class="list-unstyled mb-0">
-                                @foreach(collect($requerimientoArray)->filter() as $requerimiento)
+                                @foreach (collect($requerimientoArray)->filter() as $requerimiento)
                                     <li>
                                         <h8>
-                                            - {{ $requerimiento }}</li>
-                                        </h8>
+                                            - {{ $requerimiento }}
+                                    </li>
+                                    </h8>
                                 @endforeach
                             </ul>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Fecha inicio
-                            <span class="badge badge-primary badge-pill">{{ $solicitud->fecha_inicio }}</span>
+                            Tiempo de Ejecución
+                            <span>{{ $solicitud->tiempo_ejecucion }}
+                                <i class="fas fa-copy" style="margin-left: 10px; cursor: pointer;"
+                                    onclick="copyToClipboard('{{ $solicitud->tiempo_ejecucion }}')">
+                                </i></span>
                         </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Fecha inicio
+                            <span>{{ $solicitud->fecha_inicio }}
+                                <i class="fas fa-copy" style="margin-left: 10px; cursor: pointer;"
+                                    onclick="copyToClipboard('{{ $solicitud->fecha_inicio }}')">
+                                </i></span>
+                        </li>
+                        {{-- <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Orden de servicio
+                            <span class="badge badge-primary badge-pill">{{ $solicitud->tipo_orden_id }}</span>
+                        </li> --}}
                         @if (!is_null($solicitud->fecha_recibo))
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                Fecha recibo
-                                <span class="badge badge-primary badge-pill">{{ $solicitud->fecha_recibo }}</span>
+                                Fecha límite entrega ofertas
+                                <span>{{ $solicitud->fecha_recibo }}
+                                    {{ $solicitud->hora_limite }}
+                                    <i class="fas fa-copy" style="margin-left: 10px; cursor: pointer;"
+                                        onclick="copyToClipboard('{{ $solicitud->hora_limite }}')">
+                                    </i></span>
                             </li>
                         @endif
 
-                        @if (!is_null($solicitud->hora_limite))
+                        {{-- @if (!is_null($solicitud->hora_limite))
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 Hora límite
                                 <span class="badge badge-primary badge-pill">{{ $solicitud->hora_limite }}</span>
                             </li>
-                        @endif
+                        @endif --}}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             Ubicación de los trabajos
                             @php
@@ -114,8 +153,10 @@
                                 $tagsArray = json_decode($solicitud->tag, true) ?? [];
                             @endphp
 
-                            <span
-                                class="badge badge-primary badge-pill">{{ collect($tagsArray)->filter()->implode(', ') }}</span>
+                            <span>{{ collect($tagsArray)->filter()->implode(', ') }}
+                                <i class="fas fa-copy" style="margin-left: 10px; cursor: pointer;"
+                                    onclick="copyToClipboard('{{ collect($tagsArray)->filter()->implode(', ') }}')">
+                                </i></span>
                         </li>
                     </ul>
                 </div>
@@ -179,9 +220,9 @@
                                 <label for="status_send">Cambiar estado del envio</label>
                                 <select id="status_send" class="form-select form-control mb-3" required>
                                     <option value="">Selecciona estado</option>
-                                        <option value="enviado">
-                                            Enviado
-                                        </option>
+                                    <option value="enviado">
+                                        Enviado
+                                    </option>
                                 </select>
                             </div>
                             <div class="col-lg-6">
@@ -201,6 +242,18 @@
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <style>
+        /* Personalización de SweetAlert */
+        .swal-wide {
+            font-size: 12px !important;
+            /* Tamaño de letra más pequeño */
+            background-color: #f1fff4 !important;
+            /* Color de fondo verde éxito */
+            color: #ffffff !important;
+            /* Color de letra blanco */
+        }
+    </style>
+    <link rel="stylesheet" href="{{ asset('css/drag-and-drop.css') }}">
 @stop
 
 @section('js')
@@ -220,6 +273,15 @@
             }
             return matches;
         };
+    </script>
+    <script>
+        function contienePlantilla(texto) {
+            const regex = /\{\{.*?\}\}/;
+
+
+            // Usa el método test() para buscar la coincidencia en el texto
+            return regex.test(texto);
+        }
     </script>
     <script>
         $(document).ready(function() {
@@ -342,8 +404,44 @@
                             templateType = 'DOCUMENT';
                             detailsHtml +=
                                 `<div class="my-5"><h5 class="text-h5">Header</h5>
+                                    <div class="form-group">
+                                    <label>Seleccione cómo desea proporcionar el documento:</label>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="useLink" name="PDFInputType" class="custom-control-input" value="PDFlink" checked>
+                                        <label class="custom-control-label" for="useLink">Usar un link</label>
+                                    </div>
+                                    <div class="custom-control custom-radio">
+                                        <input type="radio" id="useUpload" name="PDFInputType" class="custom-control-input" value="upload">
+                                        <label class="custom-control-label" for="useUpload">Subir un PDF</label>
+                                    </div>
+                                </div>
+                                <div class="form-group linkInput">
+                                    <label for="header">Link del documento en formato (PDF)</label>
+                                    <input type="text" class="form-control" id="header" name="header" required>
+                                </div>
+                                <div class="form-group uploadInput files drag-area" style="display:none;">
+                                    <h2>Arrastre y suelta archivos</h2>
+                                    <span>O</span>
+                                    <button type="button">Seleccione su archivo</button>
+                                    <input type="file" class="form-control-file" id="input-file" name="input-file" hidden accept=".pdf"/>
+                                    <div id="preview"></div>
+                                </div>
+                            </div>`;
+                        } else if (component.format === 'IMAGE') {
+                            templateType = 'IMAGE';
+                            detailsHtml +=
+                                `<div class="my-5"><h5 class="text-h5">Header</h5>
                                 <div class="form-group">
-                                    <label for="header">Link del documento</label>
+                                    <label for="header">Link de la imagen en formato (PNG o JPG)</label>
+                                    <input type="text" class="form-control" id="header" name="header" required>
+                                </div>
+                            </div>`;
+                        } else if (component.format === 'VIDEO') {
+                            templateType = 'VIDEO';
+                            detailsHtml +=
+                                `<div class="my-5"><h5 class="text-h5">Header</h5>
+                                <div class="form-group">
+                                    <label for="header">Link del video en formato (MP4)</label>
                                     <input type="text" class="form-control" id="header" name="header" required>
                                 </div>
                             </div>`;
@@ -359,7 +457,7 @@
 
                         // Genera HTML para los inputs de cada placeholder encontrado
                         var inputsHtml = placeholders.map(function(placeholder, index) {
-                            return `<div class="form-group"><label for="${index}">${placeholder.text}</label><input type="text" class="form-control format" id="${index}" name="${index}" value="" /></div>`;
+                            return `<div class="form-group"><label for="${index}">${placeholder.text}</label><input type="text" class="form-control format" id="${index}" name="${index}" value="" required/></div>`;
                         }).join('');
 
                         detailsHtml +=
@@ -372,26 +470,89 @@
 
                         // Verificar si hay elementos en el array "buttons"
                         if (component.buttons && component.buttons.length > 0) {
-                            detailsHtml += '<ul>'; // Puedes usar una lista para mostrar los botones
+                            detailsHtml +=
+                                '<ul>'; // Puedes usar una lista para mostrar los botones
+                            // Acceder a la URL de cada botón
 
                             // Iterar sobre cada botón en el array "buttons"
                             component.buttons.forEach(button => {
-                                // Acceder a la URL de cada botón
-                                const buttonUrl = button.url;
+                                if (contienePlantilla(button.url)) {
+                                    if (button.type = 'URL') {
+                                        const buttonUrl = button.url;
+                                        // Acceder a otros detalles del botón si es necesario (text, type, etc.)
+                                        const buttonText = button.text;
+                                        detailsHtml +=
+                                            `<li>
+                                                    <p class="pre-wrap">${buttonText}</p>
+                                                    <p class="pre-wrap">${buttonUrl}</p>
+                                                    <div class="my-5"><h5 class="text-h5">Boton Dinamico</h5>
+                                                    <div class="form-group">
+                                                        <label for="buttons">Completa la url del botton</label>
+                                                        <input type="text" class="form-control" id="buttons" name="buttons" required>
+                                                    </div>
+                                                </li>`;
+                                    } else if (button.type = 'PHONE_NUMBER') {
+                                        const buttonUrl = button.phone_number;
+                                        // Acceder a otros detalles del botón si es necesario (text, type, etc.)
+                                        const buttonText = button.text;
+                                        detailsHtml +=
+                                            `<li>
+                                                    <p class="pre-wrap">${buttonText}</p>
+                                                    <p class="pre-wrap">${buttonUrl}</p>
+                                                    <div class="my-5"><h5 class="text-h5">Boton Dinamico</h5>
+                                                    <div class="form-group">
+                                                        <label for="buttons">Escribe el numero de telefono</label>
+                                                        <input type="text" class="form-control" id="buttons" name="buttons" required>
+                                                    </div>
+                                                </li>`;
+                                    } else {
+                                        detailsHtml +=
+                                            `<li>
+                                                    <p class="pre-wrap">Boton dinamico desconocido</p>
+                                                </li>`;
+                                    }
+                                } else {
+                                    if (button.type = 'URL') {
+                                        const buttonUrl = button.url;
+                                        const buttonPhone = button.phone_number;
+                                        // Acceder a otros detalles del botón si es necesario (text, type, etc.)
+                                        const buttonText = button.text;
+                                        if (buttonUrl) {
+                                            detailsHtml +=
+                                                `<li>
+                                            <p class="pre-wrap">${buttonText}</p>
+                                            <p class="pre-wrap">${buttonUrl}</p>
+                                            <div class="my-5"><h5 class="text-h5">Boton Estatico</h5>
+                                        </li>`;
+                                        } else {
+                                            detailsHtml +=
+                                                `<li>
+                                            <p class="pre-wrap">${buttonText}</p>
+                                            <p class="pre-wrap">${buttonPhone}</p>
+                                            <div class="my-5"><h5 class="text-h5">Boton Estatico</h5>
+                                        </li>`;
+                                        }
 
-                                // Acceder a otros detalles del botón si es necesario (text, type, etc.)
-                                const buttonText = button.text;
+                                    } else if (button.type = 'PHONE_NUMBER') {
+                                        const buttonUrl = button.phone_number;
 
-                                detailsHtml +=
-                                    `<li>
+                                        // Acceder a otros detalles del botón si es necesario (text, type, etc.)
+                                        const buttonText = button.text;
+
+                                        detailsHtml +=
+                                            `<li>
                                         <p class="pre-wrap">${buttonText}</p>
                                         <p class="pre-wrap">${buttonUrl}</p>
-                                        <div class="my-5"><h5 class="text-h5">Boton dinamico</h5>
-                                        <div class="form-group">
-                                            <label for="buttons">Completa la url del botton</label>
-                                            <input type="text" class="form-control" id="buttons" name="buttons" required>
-                                        </div>
+                                        <div class="my-5"><h5 class="text-h5">Boton Estatico</h5>
                                     </li>`;
+                                    } else {
+                                        detailsHtml +=
+                                            `<li>
+                                                    <p class="pre-wrap">Boton dinamico desconocido</p>
+                                                </li>`;
+                                    }
+                                }
+
                             });
 
                             detailsHtml += '</ul>';
@@ -400,22 +561,21 @@
                         }
 
                         detailsHtml += '</div>';
-                        // detailsHtml +=
-                        //     `<div class="my-5"><h5 class="text-h5">Buttons</h5><p class="pre-wrap">${component.type}</p></div>`;
+
                     }
                 });
 
                 // Inyecta los detalles construidos en el contenedor
                 $('#templateDetails').html(detailsHtml);
+                inicializarEventListenersDeImagen();
             });
         });
+
         $(document).ready(function() {
             $('#createSend').submit(function(e) {
+                var fileInput = document.getElementById('input-file');
+                var imageUrl = "{{ route('upload.pdf') }}";
                 e.preventDefault(); // Prevenir la recarga de la página
-
-                // Preparar los datos de los placeholders como un array
-                var body_placeholders = [];
-
                 Swal.fire({
                     title: 'Enviando...',
                     allowOutsideClick: false,
@@ -424,96 +584,309 @@
                     },
                 });
 
-                $('#templateDetails .format').each(function() {
-                    body_placeholders.push($(this).val());
-                });
-
-                // Inicializar variables en null
-                var header_type = null;
-                var header_url = null;
-                var buttons_url = null;
-                var id_c_business = null;
-                var id_c_business2 = null;
-                var phone_id2 = null;
-                var phone_id = null;
-                var recipients = null;
-                var template_language = null;
-                var template_name = null;
-                var token_api = null;
-                var programar = null;
-                var status_send = null;
-                var solicitudId = null;
-                var messageTemplatesUrl = "{{ route('send.message.templates') }}";
-
-
-                // Luego, asignar valores a las variables
-                header_type = templateType; // Ahora asignas el valor deseado
-                header_url = $('#header').val() ? $('#header').val() :
-                    null; // Ahora asignas el valor deseado
-                buttons_url = $('#buttons').val() ? $('#buttons').val() :
-                    null; // Ahora asignas el valor deseado
-                id_c_business2 = $('#selectPlantilla option:selected').data('id_c_business');
-                id_c_business = id_c_business2.toString();
-                phone_id2 = $('#selectPlantilla option:selected').data(
-                    'id_telefono'); // Ahora asignas el valor deseado, si es dinámico, ajusta
-                phone_id = phone_id2.toString();
-                recipients = $('#exampleFormControlTextarea1')
-                    .val(); // Ahora asignas el valor deseado, si es dinámico, ajusta
-                template_language = templateLanguage; // Ahora asignas el valor deseado
-                template_name = templateName; // Ahora asignas el valor deseado
-                token_api = $('#selectPlantilla option:selected').data('token_api');
-                programar = $('#programar').val() ? $('#programar').val() :
-                    null;
-                status_send = $('#status_send').val();
-                solicitudId = $('#solicitudId').val();
-
-
-                // Organizar la información en un objeto
-                var dataToSend = {
-                    body_placeholders: body_placeholders,
-                    header_type: header_type,
-                    header_url: header_url,
-                    buttons_url: buttons_url,
-                    id_c_business: id_c_business,
-                    phone_id: phone_id,
-                    recipients: recipients,
-                    template_language: template_language,
-                    template_name: template_name,
-                    token_api: token_api,
-                    programar: programar,
-                    status_send: status_send,
-                    solicitudId: solicitudId
-                };
-                $.ajax({
-                    type: "POST",
-                    url: messageTemplatesUrl,
-                    contentType: "application/json",
-                    data: JSON.stringify(dataToSend),
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    async: true,
-                    success: function(response) {
-                        // Ocultar el mensaje de carga
-                        Swal.close();
-
-                        //limpiar formularo
-                        $('#createSend').trigger("reset");
-
-                        // Mostrar SweetAlert con la respuesta
-                        Swal.fire('¡Enviado!', 'Tu mensaje ha sido enviado correctamente.',
-                            'success');
-                    },
-                    error: function(error) {
-                        // Ocultar el mensaje de carga
-                        Swal.close();
-
-                        // Mostrar SweetAlert con el mensaje de error
-                        Swal.fire('Error en el envío',
-                            'No se pudo enviar el mensaje. Inténtalo de nuevo.', 'error');
+                if ($('#header').val()) {
+                    header_url = $('#header').val();
+                    enviarDatos(header_url); // Envía los datos inmediatamente si solo es un enlace
+                } else if (fileInput !== null) {
+                    var formData = new FormData();
+                    if (fileInput.files[0]) {
+                        formData.append('pdf', fileInput.files[0]);
                     }
-                });
+                    // Ahora, envía formData a Laravel usando AJAX
+                    $.ajax({
+                        url: imageUrl,
+                        type: 'POST',
+                        data: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        processData: false, // Importante: no procesar los datos
+                        contentType: false, // Importante: no establecer el tipo de contenido
+                        success: function(response) {
+                            // Puedes continuar aquí con el envío de los demás datos de tu formulario
+                            enviarDatos(response.url);
+                        },
+                        error: function(err) {
+                            console.log(err);
+                            // Ocultar el mensaje de carga
+                            Swal.close();
+
+                            // Mostrar SweetAlert con el mensaje de error
+                            Swal.fire('Error en el envío',
+                                'No se pudo enviar el mensaje. Inténtalo de nuevo.', 'error'
+                            );
+                        }
+                    });
+                } else {
+                    const url = null;
+                    enviarDatos(url);
+                }
             });
         });
     </script>
+    <script>
+        function enviarDatos(url) {
+            // Preparar los datos de los placeholders como un array
+            var body_placeholders = [];
+
+            $('#templateDetails .format').each(function() {
+                body_placeholders.push($(this).val());
+            });
+
+            // Inicializar variables en null
+            var header_type = null;
+            var header_url = null;
+            var buttons_url = null;
+            var id_c_business = null;
+            var id_c_business2 = null;
+            var phone_id2 = null;
+            var phone_id = null;
+            var recipients = null;
+            var template_language = null;
+            var template_name = null;
+            var token_api = null;
+            var programar = null;
+            var status_send = null;
+            var solicitudId = null;
+            var messageTemplatesUrl = "{{ route('send.message.templates') }}";
+
+            // header_url = $('#header').val() ? $('#header').val() :
+            //     null;
+            // Luego, asignar valores a las variables
+            header_type = templateType; // Ahora asignas el valor deseado
+            header_url = url;
+            buttons_url = $('#buttons').val() ? $('#buttons').val() :
+                null; // Ahora asignas el valor deseado
+            id_c_business2 = $('#selectPlantilla option:selected').data('id_c_business');
+            id_c_business = id_c_business2.toString();
+            phone_id2 = $('#selectPlantilla option:selected').data(
+                'id_telefono'); // Ahora asignas el valor deseado, si es dinámico, ajusta
+            phone_id = phone_id2.toString();
+            recipients = $('#exampleFormControlTextarea1')
+                .val(); // Ahora asignas el valor deseado, si es dinámico, ajusta
+            template_language = templateLanguage; // Ahora asignas el valor deseado
+            template_name = templateName; // Ahora asignas el valor deseado
+            token_api = $('#selectPlantilla option:selected').data('token_api');
+            programar = $('#programar').val() ? $('#programar').val() :
+                null;
+            status_send = $('#status_send').val();
+            solicitudId = $('#solicitudId').val();
+
+            // Organizar la información en un objeto
+            var dataToSend = {
+                body_placeholders: body_placeholders,
+                header_type: header_type,
+                header_url: header_url,
+                buttons_url: buttons_url,
+                id_c_business: id_c_business,
+                phone_id: phone_id,
+                recipients: recipients,
+                template_language: template_language,
+                template_name: template_name,
+                token_api: token_api,
+                programar: programar,
+                status_send: status_send,
+                solicitudId: solicitudId
+            };
+            $.ajax({
+                type: "POST",
+                url: messageTemplatesUrl,
+                contentType: "application/json",
+                data: JSON.stringify(dataToSend),
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                async: true,
+                success: function(response) {
+                    // Ocultar el mensaje de carga
+                    Swal.close();
+
+                    //limpiar formularo
+                    $('#createSend').trigger("reset");
+
+                    // Mostrar SweetAlert con la respuesta
+                    Swal.fire({
+                        title: '¡Enviado!',
+                        text: 'Tu mensaje ha sido enviado correctamente.'
+                    }).then(() => {
+                        // Recargar la página después de cerrar el SweetAlert, independientemente de cómo se cerró
+                        window.location.reload();
+                    });
+                },
+                error: function(error) {
+                    // Ocultar el mensaje de carga
+                    Swal.close();
+
+                    // Mostrar SweetAlert con el mensaje de error
+                    Swal.fire('Error en el envío',
+                        'No se pudo enviar el mensaje. Inténtalo de nuevo.', 'error');
+                }
+            });
+        }
+    </script>
+    <script>
+        function inicializarEventListenersDeImagen() {
+            document.getElementsByName('PDFInputType').forEach((radio) => {
+                radio.addEventListener('change', function(e) {
+                    toggleImageInput(e.target.value);
+                });
+            });
+        }
+
+        function toggleImageInput(value) {
+            if (value === 'PDFlink') {
+                document.querySelector('.linkInput').style.display = '';
+                document.querySelector('.uploadInput').style.display = 'none';
+                // Hace el campo de enlace requerido y quita el atributo requerido del campo de subida de archivo
+                document.querySelector('.linkInput input[type="text"]').required = true;
+                document.querySelector('.uploadInput input[type="file"]').required = false;
+                // Limpia el valor del input de archivo ya que no se está usando
+                limpiarFormularioDeSubida();
+            } else {
+                document.querySelector('.linkInput').style.display = 'none';
+                document.querySelector('.uploadInput').style.display = '';
+                // Limpia el valor del input de texto ya que no se está usando
+                document.querySelector('.linkInput input[type="text"]').value = '';
+                // Hace el campo de subida de archivo requerido y quita el atributo requerido del campo de enlace
+                document.querySelector('.uploadInput input[type="file"]').required = true;
+                document.querySelector('.linkInput input[type="text"]').required = false;
+
+                //selecting all required elements
+                const dropArea = document.querySelector(".drag-area");
+                const dragText = dropArea.querySelector("h2");
+                const button = dropArea.querySelector("button");
+                const input = dropArea.querySelector("#input-file");
+
+                button.addEventListener("click", (e) => {
+                    input.click(); //if user click on the button then the input also clicked
+                });
+                input.addEventListener("change", function(e) {
+                    e.preventDefault();
+                    files = input.files;
+                    dropArea.classList.add("active");
+                    showFiles(files); //calling function
+                    dropArea.classList.remove("active");
+                });
+
+                //If user Drag File Over DropArea
+                dropArea.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                    dropArea.classList.add("active");
+                    dragText.textContent = "Suelta para cargar el PDF";
+                });
+
+                //If user leave dragged File from DropArea
+                dropArea.addEventListener("dragleave", (e) => {
+                    e.preventDefault();
+                    dropArea.classList.remove("active");
+                    dragText.textContent = "Arrastre y suelta el PDF";
+                });
+
+                //If user drop File on DropArea
+                dropArea.addEventListener("drop", (e) => {
+                    e.preventDefault();
+                    files = e.dataTransfer.files;
+                    showFiles(files);
+                    dropArea.classList.remove("active");
+                    dragText.textContent = "Arrastre y suelta el PDF";
+                });
+
+                function showFiles(files) {
+                    if (files.length === undefined) {
+                        proccessFile(files);
+                    } else {
+                        for (const file of files) {
+                            proccessFile(file);
+                        }
+                    }
+                }
+
+
+                function proccessFile(file) {
+                    const docType = file.type; //getting selected file type
+                    const validExtensions = ["application/pdf"];
+
+                    if (validExtensions.includes(docType)) {
+                        const fileReader = new FileReader();
+                        const id = `file-${Math.random().toString(32).substring(7)}`;
+
+                        fileReader.addEventListener("load", (e) => {
+                            const fileUrl = fileReader.result;
+                            const pdfPreview = `
+                        <div id="${id}" class="file-container">
+                            <div class="status">
+                                <span><i class="fa fa-file-pdf"></i></span>
+                                <span>${file.name}</span>
+                            </div>
+                        </div>
+                    `;
+
+                            // Limpia la vista previa existente antes de añadir la nueva
+                            document.querySelector("#preview").innerHTML =
+                                pdfPreview; // Sustituyendo la vista previa del PDF
+                        });
+                        fileReader.readAsDataURL(file);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Archivo no válido',
+                            text: 'Por favor, selecciona un archivo PDF.',
+                        });
+                        dropArea.classList.remove("active");
+                        dragText.textContent = "Drag & Drop to Upload File";
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        function limpiarFormularioDeSubida() {
+            // Limpiar el campo de subida de archivos
+            var inputArchivo = document.getElementById('input-file');
+            // Reemplaza el input por uno nuevo para evitar problemas de seguridad en algunos navegadores
+            var nuevoInputArchivo = inputArchivo.cloneNode(true);
+            inputArchivo.parentNode.replaceChild(nuevoInputArchivo, inputArchivo);
+
+            // Limpiar la vista previa del archivo PDF
+            document.getElementById('preview').innerHTML = '';
+        }
+    </script>
+
+
+
+
+
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                Swal.fire({
+                    position: 'bottom-end', // Posiciona la alerta en la esquina inferior derecha.
+                    title: 'Enlace copiado en portapapeles',
+                    showConfirmButton: false,
+                    timer: 1500, // El mensaje se cierra después de 1.5 segundos.
+                    backdrop: 'rgba(0,0,0,0)', // hace el fondo completamente transparente
+                    allowOutsideClick: true,
+                    customClass: {
+                        popup: 'swal-wide' // Clase personalizada para ajustar el tamaño del texto y el color.
+                    }
+                });
+            }, function(err) {
+                Swal.fire({
+                    position: 'bottom-end',
+                    title: 'Error al copiar el enlace',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    backdrop: 'rgba(0,0,0,0)', // hace el fondo completamente transparente
+                    allowOutsideClick: true,
+                    customClass: {
+                        popup: 'swal-wide'
+                    }
+                });
+                console.error('Error al copiar el enlace: ', err);
+            });
+        }
+    </script>
+
+
+
 @stop
