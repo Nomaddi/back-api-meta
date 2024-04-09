@@ -181,7 +181,7 @@
     transition: .5s ease-in-out;
 }
 
-.metadata .tick svg:first-child {
+/* .metadata .tick svg:first-child {
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     -webkit-transform: perspective(800px) rotateY(180deg);
@@ -203,4 +203,4 @@
 .metadata .tick-animation svg:last-child {
     -webkit-transform: perspective(800px) rotateY(-179.9deg);
     transform: perspective(800px) rotateY(-179.9deg);
-}
+} */

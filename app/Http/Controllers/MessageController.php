@@ -50,13 +50,6 @@ class MessageController extends Controller
         $phone_id = $input['id_phone'];
 
         try {
-            // $messages = DB::table('messages', 'm')
-            //     ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
-            //     ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 WHERE m2.phone_id = ? GROUP BY wa_id)', [$phone_id])
-            //     ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
-            //     ->where('m.outgoing', '=', 0) // Agregar condición para outgoing igual a 0
-            //     ->orderByDesc('m.id')
-            //     ->get();
             $messages = DB::table('messages', 'm')
                 ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
                 // ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas

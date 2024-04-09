@@ -47,7 +47,7 @@
         <div class="row h-100">
             <div class="col-12 col-sm-5 col-md-4 d-flex flex-column" id="chat-list-area" style="position:relative;">
 
-                <!-- Navbar -->
+                <!-- titulo del perfil -->
                 <div class="row d-flex flex-row align-items-center p-2" id="navbar">
                     <img src="{{ asset('images/user.jpg') }}" alt="Profile Photo" class="img-fluid rounded-circle mr-2"
                         style="height:50px; cursor:pointer;" onclick="showProfileSettings()" id="display-pic">
@@ -66,7 +66,7 @@
                     </div>
                 </div>
 
-                <!-- Chat List -->
+                <!--aqui se inserta lista de todos los chat disponibles-->
                 <div class="row" id="chat-list" style="overflow:auto; max-height: 515px;"></div>
 
                 <!-- Profile Settings -->
@@ -102,7 +102,7 @@
             <div class="d-none d-sm-flex flex-column col-12 col-sm-7 col-md-8 p-0 h-100" id="message-area">
                 <div class="w-100 h-100 overlay"></div>
 
-                <!-- Navbar -->
+                <!-- titulo del chat actual -->
                 <div class="row d-flex flex-row align-items-center p-2 m-0 w-100" id="navbar">
                     <div class="d-block d-sm-none">
                         <i class="fas fa-arrow-left p-2 mr-2 text-white" style="font-size: 1.5rem; cursor: pointer;"
@@ -157,7 +157,7 @@
         };
         document.addEventListener("DOMContentLoaded", function() {
 
-            // Pusher.logToConsole = true;
+            Pusher.logToConsole = true;
 
             var pusher = new Pusher('52c212ce563c5534e98c', { // Usa tu clave real aquí
                 cluster: 'us2' // Usa tu cluster real aquí
@@ -174,10 +174,23 @@
                     if (changed === false) {
                         appendMessage(message);
                         scrollToBottom();
+                        highlightAndMoveChatItem(message.wa_id, message.id, message.wa_id, message.body,
+                            "{{ asset('images/user.jpg') }}", message.created_at, message.status,
+                            message.outgoing);
+                        console.log('plantilla text1')
                     } else {
+                        console.log('plantilla text2')
                         let iconHTML = getStatusIcon(message.status);
                         updateMessageStatus(message.id, iconHTML);
+                        highlightAndMoveChatItem(message.wa_id, message.id, message.wa_id, message.body,
+                            "{{ asset('images/user.jpg') }}", message.created_at, message.status,
+                            message.outgoing);
                     }
+                } else if (message.type === "text") {
+                    console.log('plantilla text3')
+                    highlightAndMoveChatItem(message.wa_id, message.id, message.wa_id, message.body,
+                        "{{ asset('images/user.jpg') }}", message.created_at, message.status, message
+                        .outgoing);
                 }
             });
         });
@@ -187,13 +200,17 @@
             fechaFormateada = formatISODateToCustomString(message.created_at);
 
             DOMNEWMESSAGE.messages.innerHTML += `
-                    <div data-id="${message.id}" class="align-self-${message.outgoing ? "end self" : "start"} p-1 my-1 mx-3 rounded bg-white shadow-sm message-item">
+                    <div data-id-message="${message.id}" class="align-self-${message.outgoing ? "end self" : "start"} p-1 my-1 mx-3 rounded bg-white shadow-sm message-item">
                         <div class="options">
                             <a href="#"><i class="fas fa-angle-down text-muted px-2"></i></a>
                         </div>
                         <div class="message-content">
-                            <div class="body m-1">${message.body}</div>
-                            <div class="time ml-auto small text-muted" style="text-align: right;">${fechaFormateada}</div>
+                            <div class="message sent">${message.body}
+                                <span class="metadata">
+                                    <span class="time">${mDate(message.created_at).getTime()}</span>
+                                    ${(message.outgoing === 1) ? iconHTML : ""}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -289,18 +306,21 @@
 
                             let iconHTML = getStatusIcon(response.data.status);
 
-                            let fechaM = formatISODateToCustomString(response.data.created_at)
+                            // let fechaM = formatISODateToCustomString(response.data.created_at)
 
                             // Agregar el nuevo mensaje al DOM
                             DOM.messages.innerHTML += `
-                                <div data-id="${response.data.id}" class="align-self-${response.data.outgoing ? "end self" : "start"} p-1 my-1 mx-3 rounded bg-white shadow-sm message-item">
+                                <div data-wa-id="${response.data.wa_id}" data-id-message="${response.data.id}" class="align-self-${response.data.outgoing ? "end self" : "start"} p-1 my-1 mx-3 rounded bg-white shadow-sm message-item">
                                     <div class="options">
                                         <a href="#"><i class="fas fa-angle-down text-muted px-2"></i></a>
                                     </div>
                                     <div class="message-content">
-                                        <div class="body m-1">${response.data.body}</div>
-                                        <div class="hora time ml-auto small text-muted" style="text-align: right;">${fechaM}${(response.data.outgoing === 1) ? iconHTML : ""}</div>
-                                        ${(response.dataoutgoing === 1) ? iconHTML : ""}
+                                        <div class="message sent">${response.data.body}
+                                            <span class="metadata">
+                                                <span class="time">${mDate(response.data.created_at).getTime()}</span>
+                                                ${(response.data.outgoing === 1) ? iconHTML : ""}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                             `;
@@ -363,14 +383,15 @@
 
 
                                     // Construir el HTML para cada elemento del chat, incluyendo un data-id
-                                    var chatItemHtml = `<div class="chat-list-item d-flex flex-row w-100 p-2 border-bottom" data-id="${elem.id}" onclick="generateMessageArea2('${elem.wa_id}', '${elem.phone_id}')">
+                                    //lista de chat de perfiles disponibles
+                                    var chatItemHtml = `<div class="chat-list-item d-flex flex-row w-100 p-2 border-bottom" data-wa-id="${elem.wa_id}" data-id="${elem.id}" onclick="generateMessageArea2('${elem.wa_id}', '${elem.phone_id}')">
                                                             <img src="{{ asset('images/user.jpg') }}" alt="Profile Photo" class="img-fluid rounded-circle mr-2" style="height:50px;">
                                                             <div class="w-50">
                                                                 <div class="name">${elem.wa_id}</div>
                                                                 <div class="small last-message">${(elem.outgoing === 1) ? iconHTML : ""}${elem.body}</div>
                                                             </div>
                                                             <div class="flex-grow-1 text-right">
-                                                                <div class="small time">${mDate(elem.created_at).chatListFormat()}</div>
+                                                                <div class="small">${mDate(elem.created_at).chatListFormat()}</div>
                                                             </div>
                                                         </div>`;
 
@@ -498,20 +519,22 @@
 
                                     // Si necesitas actualizar la UI con datos específicos de 'chat', asegúrate de hacerlo correctamente aquí.
                                     // Por ejemplo, si quieres actualizar el nombre y la imagen en el área de mensajes basado en 'chat'.
+                                    //AQUI SE CARGAN TODOS LOS CHAT DISPONIBLES DEL PERFIL SELECIONADO
+
                                     let messageHTML = `
-                                    <div data-id="${elem.id}" class="align-self-${elem.outgoing === 1 ? "end self" : "start"} p-1 my-1 mx-3 rounded bg-white shadow-sm message-item">
+                                    <div data-id-message="${elem.id}" class="align-self-${elem.outgoing === 1 ? "end self" : "start"} p-1 my-1 mx-3 rounded bg-white shadow-sm message-item">
                                         <div class="options">
                                             <a href="#"><i class="fas fa-angle-down text-muted px-2"></i></a>
                                         </div>
 
                                         <div class="message-content">
-                                        <div class="message sent">${elem.body}
-                                            <span class="metadata">
-                                                <span class="time">${mDate(elem.created_at).getTime()}</span>
-                                                ${(elem.outgoing === 1) ? iconHTML : ""}
-                                            </span>
+                                            <div class="message sent">${elem.body}
+                                                <span class="metadata">
+                                                    <span class="time">${mDate(elem.created_at).getTime()}</span>
+                                                    ${(elem.outgoing === 1) ? iconHTML : ""}
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
                                     </div>
                                     `;
                                     groupHTML += messageHTML; // Agrega el mensaje al grupo.
@@ -591,13 +614,16 @@
 
             switch (status) {
                 case 'read':
-                    statusIcon = '<span class="tick"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" id="msg-dblcheck-ack" x="2063" y="2076"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.892 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" fill="#4fc3f7"></path></svg></span>';
+                    statusIcon =
+                        '<span class="tick"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" id="msg-dblcheck-ack" x="2063" y="2076"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.892 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" fill="#4fc3f7"></path></svg></span>';
                     break;
                 case 'delivered':
-                    statusIcon = '<span class="tick"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" id="msg-dblcheck-ack" x="2063" y="2076"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.892 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" fill="#7D8489"></path></svg></span>';
+                    statusIcon =
+                        '<span class="tick"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" id="msg-dblcheck-ack" x="2063" y="2076"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.892 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" fill="#7D8489"></path></svg></span>';
                     break;
                 case 'sent':
-                    statusIcon = '<span class="tick"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" id="msg-check-ack" x="2063" y="2076"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.892 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" fill="#7D8489"></path></svg></span>';
+                    statusIcon =
+                        '<span class="tick"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" id="msg-check-ack" x="2063" y="2076"><path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.892 7.77a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" fill="#7D8489"></path></svg></span>';
                     break;
                 default:
                     statusIcon = "";
@@ -608,19 +634,127 @@
         }
     </script>
     <script>
-        function updateMessageStatus(messageId, status) {
-            // Encuentra el elemento específico por su data-id.
-            const messageElement = document.querySelector(`div[data-id="${messageId}"]`);
+        function updateMessageStatus(messageId, statusIconHTML) {
+            // console.log("Entró en la función");
+            // Encuentra el elemento específico por su data-id-message.
+            const messageElement = document.querySelector(`div[data-id-message="${messageId}"]`);
             if (messageElement) {
-                // Encuentra el contenedor de tiempo dentro de ese elemento.
-                const timeContainer = messageElement.querySelector('.time');
-                if (timeContainer) {
-                    // Actualiza el HTML del contenedor de tiempo con el nuevo ícono.
-                    // Asumiendo que quieres mantener la fecha/hora existente y solo cambiar el ícono.
-                    // Separa el contenido actual por el ícono para mantener el texto existente.
-                    const parts = timeContainer.innerHTML.split('<i');
-                    const newText = parts[0].trim(); // Elimina espacios en blanco innecesarios.
-                    timeContainer.innerHTML = `${newText} ${status}`;
+                // console.log("Encontró el ID");
+                // Intenta encontrar el contenedor de íconos de estado dentro de ese elemento.
+                let tickContainer = messageElement.querySelector('.tick');
+                // Si no encuentra el contenedor .tick, lo crea y lo añade al contenedor .metadata.
+                if (!tickContainer) {
+                    // console.log("No encontró .tick, creando uno nuevo");
+                    // Encuentra o crea el contenedor .metadata para asegurar donde insertar el .tick.
+                    let metadataContainer = messageElement.querySelector('.metadata');
+                    if (!metadataContainer) { // Si no existe .metadata, lo crea.
+                        // console.log("No encontró .metadata, creando uno nuevo");
+                        metadataContainer = document.createElement('span');
+                        metadataContainer.className = 'metadata';
+                        // Asume que .message es el contenedor inmediato para .metadata.
+                        const messageContainer = messageElement.querySelector('.message');
+                        if (messageContainer) {
+                            messageContainer.appendChild(metadataContainer);
+                        } else {
+                            // console.error("Error: Contenedor .message no encontrado.");
+                            return;
+                        }
+                    }
+
+                    // Crea el contenedor .tick y lo añade a .metadata.
+                    tickContainer = document.createElement('span');
+                    tickContainer.className = 'tick';
+                    metadataContainer.appendChild(tickContainer);
+                }
+
+                // Actualiza el HTML del contenedor de íconos con el nuevo ícono de estado.
+                tickContainer.innerHTML = statusIconHTML;
+                // console.log("Actualizado con éxito el ícono de estado");
+            }
+        }
+    </script>
+    <script>
+        function highlightAndMoveChatItem(messageWaId, messageId, nameText, lastMessageText, profilePhotoUrl, timeStamp,
+            status, outgoing) {
+            const chatList = document.getElementById('chat-list');
+            const chatItem = chatList.querySelector(`div.chat-list-item[data-wa-id="${messageWaId}"]`);
+
+            if (chatItem) {
+                let existingLoadMoreBtn = document.getElementById('loadMoreMessagesBtn');
+                if (existingLoadMoreBtn) {
+                    existingLoadMoreBtn.parentNode.removeChild(existingLoadMoreBtn);
+                }
+                // Mover el chatItem al principio de la lista
+                console.log("existe");
+                chatList.prepend(chatItem);
+
+                let fecha = mDate(timeStamp).getTime()
+                let iconHTML = getStatusIcon(status);
+                // Resaltar el nombre y el último mensaje en negrita
+                const name = chatItem.querySelector('.name');
+                const lastMessage = chatItem.querySelector('.last-message');
+                const horaMessage = chatItem.querySelector('.flex-grow-1 .small');
+
+                if (name && lastMessage) {
+                    name.style.fontWeight = 'bold';
+                    lastMessage.style.fontWeight = 'bold';
+                    horaMessage.style.fontWeight = 'bold';
+                    lastMessage.innerHTML = ((outgoing === 1) ? iconHTML : "") + lastMessageText;
+                    horaMessage.textContent = fecha;
+                }
+                // Insertamos el botón de "Cargar más mensajes" si existe nextPageUrl en la respuesta.
+                if (response.nextPageUrl && !document.getElementById('loadMoreMessagesBtn')) {
+                    const loadMoreBtn = document.createElement('button');
+                    loadMoreBtn.id = 'loadMoreMessagesBtn';
+                    loadMoreBtn.textContent = 'Cargar más mensajes';
+                    loadMoreBtn.onclick = function() {
+                        generateMessageArea2(waId, phoneId, response.nextPageUrl);
+                    };
+                    DOM.messages.insertBefore(loadMoreBtn, DOM.messages.firstChild);
+                }
+
+            } else {
+                console.log("No existe");
+                let existingLoadMoreBtn = document.getElementById('loadMoreMessagesBtn');
+                if (existingLoadMoreBtn) {
+                    existingLoadMoreBtn.parentNode.removeChild(existingLoadMoreBtn);
+                }
+                // Crear un nuevo chat list item si no existe
+                const newItem = document.createElement('div');
+                let fecha = mDate(timeStamp).getTime();
+                let iconHTML = getStatusIcon(status);
+                newItem.classList.add('chat-list-item', 'd-flex', 'flex-row', 'w-100', 'p-2', 'border-bottom');
+                newItem.setAttribute('data-id', messageId);
+                newItem.setAttribute('data-wa-id', messageWaId);
+                newItem.setAttribute('onclick',
+                    `generateMessageArea2('${messageWaId}', '131481643386780')`
+                ); // Asumiendo un valor fijo para id_phone, ajusta según sea necesario
+
+                newItem.innerHTML = `
+                                            <img src="${profilePhotoUrl}" alt="Profile Photo" class="img-fluid rounded-circle mr-2" style="height:50px;">
+                                            <div class="w-50">
+                                                <div class="name" style="font-weight:bold;">${nameText}</div>
+                                                <div class="small last-message" style="font-weight:bold;">${lastMessageText}</div>
+                                            </div>
+                                            <div class="flex-grow-1 text-right">
+                                                <div class="small" style="font-weight:bold;">${fecha}</div>
+                                                ${(elem.outgoing === 1) ? iconHTML : ""}
+                                            </div>
+                                        `;
+
+                // Prepend the new chat list item to the chat list
+                chatList.prepend(newItem);
+
+
+                // Insertamos el botón de "Cargar más mensajes" si existe nextPageUrl en la respuesta.
+                if (response.nextPageUrl && !document.getElementById('loadMoreMessagesBtn')) {
+                    const loadMoreBtn = document.createElement('button');
+                    loadMoreBtn.id = 'loadMoreMessagesBtn';
+                    loadMoreBtn.textContent = 'Cargar más mensajes';
+                    loadMoreBtn.onclick = function() {
+                        generateMessageArea2(waId, phoneId, response.nextPageUrl);
+                    };
+                    DOM.messages.insertBefore(loadMoreBtn, DOM.messages.firstChild);
                 }
             }
         }
