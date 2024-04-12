@@ -149,6 +149,12 @@
     {{-- pusher --}}
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     <script>
+        var NEXT = {
+            nextPageUrl: null,
+            waId: null,
+            phoneId: null
+        };
+
         var PUSHERGLOBAL = {
             pusherId: null,
         };
@@ -157,7 +163,7 @@
         };
         document.addEventListener("DOMContentLoaded", function() {
 
-            Pusher.logToConsole = true;
+            // Pusher.logToConsole = true;
 
             var pusher = new Pusher('52c212ce563c5534e98c', { // Usa tu clave real aquí
                 cluster: 'us2' // Usa tu cluster real aquí
@@ -228,6 +234,23 @@
             const chatContainer = document.querySelector("#chat-container");
             chatContainer.innerHTML = ''; // Limpia los mensajes actuales
             messages.forEach(appendMessage); // Re-añade los mensajes con la información actualizada
+        }
+
+        function addLoadMoreMessagesButton(response, waId, phoneId, DOM) {
+            // Revisa si ya existe un botón de "Cargar más mensajes" y lo remueve
+            let existingLoadMoreBtn = document.getElementById('loadMoreMessagesBtn');
+            if (existingLoadMoreBtn) {
+                existingLoadMoreBtn.parentNode.removeChild(existingLoadMoreBtn);
+            }
+            if (response && !document.getElementById('loadMoreMessagesBtn')) {
+                const loadMoreBtn = document.createElement('button');
+                loadMoreBtn.id = 'loadMoreMessagesBtn';
+                loadMoreBtn.textContent = 'Cargar más mensajes';
+                loadMoreBtn.onclick = function() {
+                    generateMessageArea2(waId, phoneId, response);
+                };
+                DOM.insertBefore(loadMoreBtn, DOM.firstChild);
+            }
         }
     </script>
     <script>
@@ -380,7 +403,10 @@
                                     // Decidir el ícono según el estado del mensaje
 
                                     let iconHTML = getStatusIcon(elem.status);
-
+                                    //agregar a variables globales pra reutilizar:
+                                    //agregar a variables globales pra reutilizar:
+                                    NEXT.waId = elem.wa_id;
+                                    NEXT.phoneId = elem.phone_id;
 
                                     // Construir el HTML para cada elemento del chat, incluyendo un data-id
                                     //lista de chat de perfiles disponibles
@@ -468,11 +494,7 @@
                                 DOM.messages.innerHTML = '';
                             }
                             let messagesHTML = '';
-                            // Revisa si ya existe un botón de "Cargar más mensajes" y lo remueve
-                            let existingLoadMoreBtn = document.getElementById('loadMoreMessagesBtn');
-                            if (existingLoadMoreBtn) {
-                                existingLoadMoreBtn.parentNode.removeChild(existingLoadMoreBtn);
-                            }
+
                             // Itera sobre cada grupo de mensajes por fecha.
                             $.each(response.data, function(date, messages) {
                                 // Agrega un divisor para cada fecha
@@ -547,17 +569,22 @@
                             if (!nextPageUrl) {
                                 DOM.messages.scrollTo(0, DOM.messages.scrollHeight);
                             }
+                            //hago que la url de la siguiente pagina sea global para reutilizar
+                            NEXT.nextPageUrl = response.nextPageUrl;
 
                             // Insertamos el botón de "Cargar más mensajes" si existe nextPageUrl en la respuesta.
-                            if (response.nextPageUrl && !document.getElementById('loadMoreMessagesBtn')) {
-                                const loadMoreBtn = document.createElement('button');
-                                loadMoreBtn.id = 'loadMoreMessagesBtn';
-                                loadMoreBtn.textContent = 'Cargar más mensajes';
-                                loadMoreBtn.onclick = function() {
-                                    generateMessageArea2(waId, phoneId, response.nextPageUrl);
-                                };
-                                DOM.messages.insertBefore(loadMoreBtn, DOM.messages.firstChild);
-                            }
+                            // if (response.nextPageUrl && !document.getElementById('loadMoreMessagesBtn')) {
+                            //     const loadMoreBtn = document.createElement('button');
+                            //     loadMoreBtn.id = 'loadMoreMessagesBtn';
+                            //     loadMoreBtn.textContent = 'Cargar más mensajes';
+                            //     loadMoreBtn.onclick = function() {
+                            //         generateMessageArea2(waId, phoneId, response.nextPageUrl);
+                            //     };
+                            //     DOM.messages.insertBefore(loadMoreBtn, DOM.messages.firstChild);
+                            // }
+                            // Llamada a la función con los valores necesarios
+                            addLoadMoreMessagesButton(NEXT.nextPageUrl, NEXT.waId, NEXT.phoneId, DOMNEWMESSAGE
+                                .messages);
 
                             // DOM.messages.scrollTo(0, DOM.messages.scrollHeight);
                         }
@@ -680,10 +707,6 @@
             const chatItem = chatList.querySelector(`div.chat-list-item[data-wa-id="${messageWaId}"]`);
 
             if (chatItem) {
-                let existingLoadMoreBtn = document.getElementById('loadMoreMessagesBtn');
-                if (existingLoadMoreBtn) {
-                    existingLoadMoreBtn.parentNode.removeChild(existingLoadMoreBtn);
-                }
                 // Mover el chatItem al principio de la lista
                 console.log("existe");
                 chatList.prepend(chatItem);
@@ -702,23 +725,11 @@
                     lastMessage.innerHTML = ((outgoing === 1) ? iconHTML : "") + lastMessageText;
                     horaMessage.textContent = fecha;
                 }
-                // Insertamos el botón de "Cargar más mensajes" si existe nextPageUrl en la respuesta.
-                if (response.nextPageUrl && !document.getElementById('loadMoreMessagesBtn')) {
-                    const loadMoreBtn = document.createElement('button');
-                    loadMoreBtn.id = 'loadMoreMessagesBtn';
-                    loadMoreBtn.textContent = 'Cargar más mensajes';
-                    loadMoreBtn.onclick = function() {
-                        generateMessageArea2(waId, phoneId, response.nextPageUrl);
-                    };
-                    DOM.messages.insertBefore(loadMoreBtn, DOM.messages.firstChild);
-                }
+
+                addLoadMoreMessagesButton(NEXT.nextPageUrl, NEXT.waId, NEXT.phoneId, DOMNEWMESSAGE.messages);
 
             } else {
                 console.log("No existe");
-                let existingLoadMoreBtn = document.getElementById('loadMoreMessagesBtn');
-                if (existingLoadMoreBtn) {
-                    existingLoadMoreBtn.parentNode.removeChild(existingLoadMoreBtn);
-                }
                 // Crear un nuevo chat list item si no existe
                 const newItem = document.createElement('div');
                 let fecha = mDate(timeStamp).getTime();
@@ -738,24 +749,15 @@
                                             </div>
                                             <div class="flex-grow-1 text-right">
                                                 <div class="small" style="font-weight:bold;">${fecha}</div>
-                                                ${(elem.outgoing === 1) ? iconHTML : ""}
+                                                ${(outgoing === 1) ? iconHTML : ""}
                                             </div>
                                         `;
 
                 // Prepend the new chat list item to the chat list
                 chatList.prepend(newItem);
 
+                addLoadMoreMessagesButton(NEXT.nextPageUrl, NEXT.waId, NEXT.phoneId, DOMNEWMESSAGE.messages);
 
-                // Insertamos el botón de "Cargar más mensajes" si existe nextPageUrl en la respuesta.
-                if (response.nextPageUrl && !document.getElementById('loadMoreMessagesBtn')) {
-                    const loadMoreBtn = document.createElement('button');
-                    loadMoreBtn.id = 'loadMoreMessagesBtn';
-                    loadMoreBtn.textContent = 'Cargar más mensajes';
-                    loadMoreBtn.onclick = function() {
-                        generateMessageArea2(waId, phoneId, response.nextPageUrl);
-                    };
-                    DOM.messages.insertBefore(loadMoreBtn, DOM.messages.firstChild);
-                }
             }
         }
     </script>

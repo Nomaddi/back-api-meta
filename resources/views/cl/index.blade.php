@@ -18,7 +18,7 @@
             <tr>
                 <th>No</th>
                 <th>Empresa</th>
-                <th>Tipo</th>
+                <th>Fecha de creación</th>
                 <th>Fecha de inicio</th>
                 <th>Contrato</th>
                 <th>Estado</th>
@@ -30,7 +30,7 @@
                 <tr>
                     <th>{{ $app->id }}</th>
                     <th>{{ $app->empresa }}</th>
-                    <td>{{ $app->contrato }}</td>
+                    <td>{{ $app->contrato }} {{ $app->created_at }}</td>
                     <td>{{ $app->fecha_inicio }}</td>
                     <td>
                         <a href="{{ $app->contrato == 'MO' ? env('PROJECT2_URL_MANO') : env('PROJECT2_URL_SERVICIO') }}/{{ $app->id_pdf }}" target="_blank" rel="noopener noreferrer" style="text-decoration: none">

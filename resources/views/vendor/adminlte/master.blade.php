@@ -112,7 +112,6 @@
         Swal.fire({
             title: '¡Nuevo Contrato Publicado!',
             text: `La empresa ${data.data.empresa} acaba de publicar un contrato.`,
-            icon: 'success',
             confirmButtonText: 'Aceptar'
         });
       });

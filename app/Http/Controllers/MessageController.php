@@ -52,10 +52,11 @@ class MessageController extends Controller
         try {
             $messages = DB::table('messages', 'm')
                 ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
-                // ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
+                ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
+                ->where('m.outgoing', '=', '0') // Filtrar por las últimas 24 horas
                 ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 GROUP BY wa_id)')
                 ->orderByDesc('m.id')
-                ->limit(10) // Limitar a los 10 primeros registros
+                ->limit(30) // Limitar a los 30 primeros registros
                 ->get();
 
             return response()->json([

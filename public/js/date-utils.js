@@ -1,6 +1,6 @@
 
 const mDate = (dateString) => {
-	
+
 	let date = dateString ? new Date(dateString) : new Date();
 
 	let dualize = (x) => x < 10 ? "0" + x : x;
@@ -13,7 +13,7 @@ const mDate = (dateString) => {
 		},
 		lastSeenFormat: () => {
 			let dateDiff = Math.round(new Date() - date) / (1000 * 60 * 60 * 24);
-			let value = (dateDiff === 0) ? "today" : (dateDiff === 1) ? "yesterday" : getDate();
+			let value = (dateDiff === 0) ? "Hoy" : (dateDiff === 1) ? "Ayer" : getDate();
 			return value + " at " + getTime();
 		},
 		chatListFormat: () => {
@@ -21,7 +21,7 @@ const mDate = (dateString) => {
 			if (dateDiff === 0) {
 				return getTime();
 			} else if (dateDiff === 1) {
-				return "Yesterday";
+				return "Ayer";
 			} else {
 				return getDate();
 			}
