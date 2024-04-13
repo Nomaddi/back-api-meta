@@ -467,6 +467,7 @@
             var template_name = null;
             var token_api = null;
             var programar = null;
+            var selectedTags = null;
 
             // header_url = $('#header').val() ? $('#header').val() :
             //     null;
@@ -487,6 +488,8 @@
             token_api = $('#selectPlantilla option:selected').data('token_api');
             programar = $('#programar').val() ? $('#programar').val() :
                 null;
+            // Obtener los IDs seleccionados en el select con id "etiqueta"
+            selectedTags = $('#etiqueta').val();
 
             // Organizar la información en un objeto
             var dataToSend = {
@@ -500,7 +503,8 @@
                 template_language: template_language,
                 template_name: template_name,
                 token_api: token_api,
-                programar: programar
+                programar: programar,
+                selectedTags: selectedTags
             };
             $.ajax({
                 type: "POST",

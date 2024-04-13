@@ -1,8 +1,9 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use App\Models\Contacto;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 class CreateMessagesTable extends Migration
 {
@@ -26,8 +27,11 @@ class CreateMessagesTable extends Migration
             $table->binary('data');
             $table->timestamps();
 
+            $table->foreign('wa_id')->references('telefono')->on('contactos')->onDelete('set null');
         });
     }
+
+    
 
     /**
      * Reverse the migrations.

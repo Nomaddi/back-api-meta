@@ -26,6 +26,10 @@ class Contacto extends Model
     // {
     //     return $this->hasMany(Message::class, 'wa_id', 'telefono');
     // }
+    public function messages()
+    {
+        return $this->hasMany(Message::class, 'telefono', 'wa_id');
+    }
 
     public function createWithTags(array $data)
     {
@@ -37,6 +41,19 @@ class Contacto extends Model
 
         // Relaciona los tags al contacto
         $contacto->tags()->sync($tags);
+
+        return $contacto;
+    }
+
+    public function createWithDefaultTag(array $data, $defaultTagName = 'Pendiente')
+    {
+        $contacto = $this->create($data);
+
+        // Encuentra el tag 'Pendiente' o crea uno si no existe
+        $tag = Tag::firstOrCreate(['nombre' => $defaultTagName], ['descripcion' => 'Descripción pendiente', 'color' => 'gray']);
+
+        // Asigna el tag 'Pendiente' al nuevo contacto
+        $contacto->tags()->attach($tag->id);
 
         return $contacto;
     }

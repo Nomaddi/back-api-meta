@@ -9,6 +9,7 @@ use App\Models\Envio;
 use App\Events\Webhook;
 use App\Models\Message;
 use App\Models\Numeros;
+use App\Models\Contacto;
 use PhpParser\Node\Expr;
 use App\Jobs\SendMessage;
 use App\Libraries\Whatsapp;
@@ -296,6 +297,20 @@ class MessageController extends Controller
                 $exists = Message::where('wam_id', $value['messages'][0]['id'])->first();
 
                 if (empty($exists->id)) {
+
+                    // Verificar si el contacto existe
+                    $contacto = Contacto::where('telefono', $value['messages'][0]['from'])->first();
+                    // Si no existe, crearlo
+                    if (!$contacto) {
+                        $contacto = Contacto::createWithDefaultTag([
+                            'nombre' => $value['contacts'][0]['profile']['name'],  // Asumiendo que no sabemos el nombre
+                            'telefono' => $value['contacts'][0]['profile']['wa_id'],
+                            'notas' => 'Contacto creado automáticamente por webhook'
+                        ]);
+                    }else if ($contacto->nombre == $contacto->telefono){
+                        $contacto->nombre = $value['contacts'][0]['profile']['name'];
+                        $contacto->save();
+                    }
                     $mediaSupported = ['audio', 'document', 'image', 'video', 'sticker'];
 
                     if ($value['messages'][0]['type'] == 'text') {
@@ -316,7 +331,7 @@ class MessageController extends Controller
                         //consulta para traer token
                         $num = Numeros::where('id_telefono', $value['metadata']['phone_number_id'])->first();
 
-                        $app = Aplicaciones::where('id', $num->aplicacion)->first();
+                        $app = Aplicaciones::where('id', $num->aplicacion_id)->first();
 
                         $tk = $app->token_api;
 
@@ -423,6 +438,7 @@ class MessageController extends Controller
             $phone_id = $input['phone_id'];
             $waba_id_app = $input['id_c_business'];
             $fechaProgramada = $input['programar'];
+            $tags = !empty($input['selectedTags']) ? $input['selectedTags'] : [22];
             $template = $wp->loadTemplateByName($templateName, $templateLang, $tokenApp, $waba_id_app);
 
             if (!$template) {
@@ -544,6 +560,21 @@ class MessageController extends Controller
                 foreach ($recipients as $recipient) {
                     $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
                     $payload['to'] = $phone;
+                    //aqui se crea el usuario si no existe
+                    // Verifica si el contacto existe en la base de datos
+                    $contacto = Contacto::where('telefono', $phone)->first();
+
+                    // Si el contacto no existe, créalo
+                    if (!$contacto) {
+                        $contacto = new Contacto();
+                        $contacto->telefono = $phone;
+                        $contacto->nombre = $phone;
+                        $contacto->notas = "Contacto creado automáticamente por colas";
+                        $contacto->save();
+
+                        // Asociar los tags seleccionados al nuevo contacto
+                        $contacto->tags()->attach($tags);
+                    }
                     SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData);
                 }
 
