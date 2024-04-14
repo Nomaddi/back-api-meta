@@ -212,22 +212,30 @@
             $('#createFormContactos').submit(function(e) {
                 e.preventDefault(); // Prevenir la recarga de la página
                 var formData = $(this).serialize(); // Serializa los datos del formulario
-                // console.log(formData);
+
                 $.ajax({
                     type: "POST",
                     url: "{{ route('contactos.store') }}",
                     data: formData,
                     success: function(response) {
+                        // Si la solicitud es exitosa, maneja la respuesta del servidor
                         $('#contactosTable').DataTable().ajax.reload();
                         $('#createContactoModal').modal('hide');
                         // Resetea el formulario
                         $('#createFormContactos').trigger("reset");
-                        Swal.fire('Contacto creado correctamente', response.message, 'success');
+                        // Muestra un mensaje de éxito utilizando la respuesta del servidor
+                        Swal.fire('Contacto creado correctamente', response.success, 'success');
                     },
-                    error: function(error) {
-                        Swal.fire('Error al crear el contacto',
-                            'Ha ocurrido un error durante la creacion.',
-                            'error');
+                    error: function(xhr, status, error) {
+                        // Si hay un error en la solicitud, muestra el mensaje de error devuelto por el servidor
+                        if (xhr.status === 422) {
+                            var errorMessage = JSON.parse(xhr.responseText).errors.telefono[0];
+                            Swal.fire('Error al crear el contacto', errorMessage, 'error');
+                        } else {
+                            Swal.fire('Error al crear el contacto',
+                                'Ha ocurrido un error durante la creación. Por favor, inténtalo de nuevo más tarde.',
+                                'error');
+                        }
                     }
                 });
             });

@@ -10,6 +10,7 @@ use App\Models\Tag;
 use App\Imports\ContactosImport;
 use Maatwebsite\Excel\Facades\Excel;
 use DataTables;
+use Illuminate\Validation\ValidationException;
 
 class ContactoController extends Controller
 {
@@ -40,33 +41,45 @@ class ContactoController extends Controller
 
     public function store(Request $request)
     {
+        // Define las reglas de validación
         $request->validate([
             'nombre' => 'required',
-            'apellido' => 'required',
-            'correo' => 'required',
-            'telefono' => 'required',
-            'notas' => 'required',
+            'correo' => 'email',
+            'telefono' => 'required|unique:contactos', // Asegura que el teléfono sea único
             'etiqueta' => 'required|array',
         ]);
 
-        $contacto = new Contacto();
-        $contacto->nombre = $request->nombre;
-        $contacto->apellido = $request->apellido;
-        $contacto->correo = $request->correo;
-        $contacto->telefono = $request->telefono;
-        $contacto->notas = $request->notas;
-        $contacto->save();
+        try {
+            // Crear el contacto si la validación pasa
+            $contacto = new Contacto();
+            $contacto->nombre = $request->nombre;
+            $contacto->apellido = $request->apellido;
+            $contacto->correo = $request->correo;
+            $contacto->telefono = $request->telefono;
+            $contacto->notas = $request->notas;
+            $contacto->save();
 
-        $tag = Tag::whereIn('id', $request->etiqueta)->get();
+            $tag = Tag::whereIn('id', $request->etiqueta)->get();
 
-        if ($tag->count() > 0) {
-            $contacto->tags()->attach($tag);
+            if ($tag->count() > 0) {
+                $contacto->tags()->attach($tag);
+            }
+
+            return response()->json(['success' => 'Contacto creado con éxito.']);
+        } catch (Exception $e) {
+            // Captura y maneja cualquier excepción que ocurra durante la creación del contacto
+            if ($e instanceof \Illuminate\Database\QueryException) {
+                // Si es un error de duplicado (teléfono o correo electrónico)
+                if ($e->errorInfo[1] == 1062) {
+                    return response()->json(['error' => 'No se puede crear el contacto porque ya existe un registro con el mismo número de teléfono o correo electrónico.'], 400);
+                }
+            }
+
+            // Otro tipo de errores
+            return response()->json(['error' => 'Ha ocurrido un error al crear el contacto.'], 500);
         }
-
-        return response()->json(['success' => 'Contacto creado con éxito.']);
-
-
     }
+
 
     public function edit($id)
     {
@@ -81,10 +94,8 @@ class ContactoController extends Controller
     {
         $request->validate([
             'nombre' => 'required',
-            'apellido' => 'required',
-            'correo' => 'required',
+            'correo' => 'email',
             'telefono' => 'required',
-            'notas' => 'required',
             'etiqueta' => 'required|array', // Asegúrate de que 'etiqueta' sea un array
         ]);
         $contacto = Contacto::findOrFail($request->hidden_id);
@@ -115,9 +126,24 @@ class ContactoController extends Controller
 
     public function uploadUsers(Request $request)
     {
-        Excel::import(new ContactosImport, $request->file);
-        return redirect()->route('contactos.index')->with('success', 'Contactos importados con exito');
+        try {
+            Excel::import(new ContactosImport, $request->file);
+            return redirect()->route('contactos.index')->with('success', 'Contactos importados con éxito');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            // Obtener los errores de validación del CSV
+            $failures = $e->failures();
+            $errors = [];
+            foreach ($failures as $failure) {
+                $errors[] = "Fila " . $failure->row() . ": " . $failure->errors()[0];
+            }
+            // Redireccionar de vuelta con los errores
+            return redirect()->back()->withErrors($errors)->withInput();
+        } catch (Exception $e) {
+            // Otro tipo de errores
+            return redirect()->back()->withErrors(['error' => 'Ha ocurrido un error al importar los contactos.'])->withInput();
+        }
     }
+
 
     public function exportar()
     {

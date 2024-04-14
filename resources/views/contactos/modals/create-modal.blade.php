@@ -18,11 +18,11 @@
                     </div>
                     <div class="form-group">
                         <label for="apellido">Apellido</label>
-                        <input type="text" class="form-control" id="apellido" name="apellido" required>
+                        <input type="text" class="form-control" id="apellido" name="apellido">
                     </div>
                     <div class="form-group">
                         <label for="correo">Correo</label>
-                        <input type="email" class="form-control" id="correo" name="correo" required>
+                        <input type="email" class="form-control" id="correo" name="correo">
                     </div>
                     <div class="form-group">
                         <label for="telefono">Telefono</label>
@@ -39,7 +39,7 @@
                     </div>
                     <div class="form-group">
                         <label for="notas">Notas</label>
-                        <input type="text" class="form-control" id="notas" name="notas" required>
+                        <input type="text" class="form-control" id="notas" name="notas">
                     </div>
                 </div>
                 <div class="modal-footer">

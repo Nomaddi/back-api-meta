@@ -11,7 +11,7 @@ use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class ContactosImport implements ToModel, WithHeadingRow, WithValidation, WithBatchInserts, WithChunkReading
+class  ContactosImport implements ToModel, WithHeadingRow, WithValidation, WithBatchInserts, WithChunkReading
 {
     // , WithBatchInserts, WithChunkReading
     /**
@@ -71,6 +71,7 @@ class ContactosImport implements ToModel, WithHeadingRow, WithValidation, WithBa
             '*.telefono' => [
                 'integer',
                 'digits:12',
+                'unique:contactos',
                 'required'
             ],
             '*.tags' => [

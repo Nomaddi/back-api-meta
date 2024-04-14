@@ -18,7 +18,7 @@ class CreateContactosTable extends Migration
             $table->string('nombre');
             $table->string('apellido')->nullable();
             $table->string('correo')->nullable();
-            $table->string('telefono');
+            $table->string('telefono')->unique();
             $table->text('notas')->nullable();;
             $table->timestamps();
         });
