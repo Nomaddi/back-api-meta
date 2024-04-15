@@ -63,6 +63,8 @@ Route::post('upload-pdf', [MessageController::class, 'upload'])->name('upload.pd
 Route::get('estadisticas', [EstadisticasController::class, 'index']); //mostrar todos los registros
 Route::post('/estadisticas/get-statistics', [EstadisticasController::class, 'getStatistics'])->name('get-statistics');
 Route::get('envios-plantillas', [EnvioController::class, 'index']); //mostrar todos los registros
+// exporta mensajes
+Route::get('exportar-mensajes/{id}', [EstadisticasController::class,'exportar'])->name('exportar-mensajes');
 
 //programados
 Route::get('programados', [ProgramadosControllers::class, 'index']); //mostrar todos los registros

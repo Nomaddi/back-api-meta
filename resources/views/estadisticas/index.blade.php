@@ -29,7 +29,6 @@
     <br>
     <section class="content">
         <div class="container-fluid">
-
             <div class="row">
 
                 <section class="col-lg-6 connectedSortable ui-sortable">
@@ -38,10 +37,6 @@
                             <h3 class="card-title">Estados de cargue: [<span id="startDate"></span> - <span
                                     id="endDate"></span>] </h3>
                             <div class="card-tools">
-                                <a data-toggle="modal" data-target="#downloadModal" class="btn btn-tool"
-                                    title="Importar">
-                                    <i class="fa fa-download"></i>
-                                </a>
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                     <i class="fas fa-minus"></i>
                                 </button>
@@ -157,8 +152,93 @@
                 </section>
 
             </div>
+            <div class="row">
+
+                <section class="col-lg-6 connectedSortable ui-sortable">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Exportación de reporte</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+                            <table id="resporteTable" class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Fecha Inicio</th>
+                                        <th>Fecha Fin</th>
+                                        <th>Fecha Creación</th>
+                                        <th>CSV</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($reportes as $reporte)
+                                        <tr> <!-- Agregamos esta línea para definir una fila de la tabla -->
+                                            <td>{{ $reporte->id }}</td>
+                                            <td>{{ $reporte->fechaInicio }}</td>
+                                            <td>{{ $reporte->fechaFin }}</td>
+                                            <td>{{ $reporte->created_at }}</td>
+                                            <td>
+                                                <a href="{{ route('exportar-mensajes', $reporte->id) }}"
+                                                    class="btn btn-primary btn-sm mb-2">
+                                                    <i class="fa fa-download"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
 
 
+
+
+                </section>
+
+
+                <section class="col-lg-6 connectedSortable ui-sortable">
+                    <div class="card card-success">
+                        <div class="card-header">
+                            <h3 class="card-title">Confirmación mensaje: [<span id="startDate2"></span> - <span
+                                    id="endDate2"></span>]</h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h4>Total de eventos: <span id="totalEventos"></span></h4>
+                            <div class="chartjs-size-monitor">
+                                <div class="chartjs-size-monitor-expand">
+                                    <div class=""></div>
+                                </div>
+                                <div class="chartjs-size-monitor-shrink">
+                                    <div class=""></div>
+                                </div>
+                            </div>
+                            <canvas id="donutChart"
+                                style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; display: block; width: 389px;"
+                                width="486" height="312" class="chartjs-render-monitor"></canvas>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
         </div>
     </section>
 @stop
@@ -167,6 +247,9 @@
 @stop
 
 @section('js')
+    <script src="https://code.jquery.com/jquery-3.7.0.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#statisticsForm').submit(function(event) {
@@ -180,7 +263,24 @@
                     type: 'POST',
                     data: formData,
                     success: function(response) {
+                        // Actualizar el contenido de la tabla con los nuevos datos de los reportes
+                        var tableBody = $('#resporteTable tbody');
+                        tableBody.empty(); // Limpiar el contenido actual de la tabla
+                        // Iterar sobre los nuevos reportes y agregar filas a la tabla
+                        response.reportes.forEach(function(reporte) {
+                            var newRow = '<tr>' +
+                                '<td>' + reporte.id + '</td>' +
+                                '<td>' + reporte.fechaInicio + '</td>' +
+                                '<td>' + reporte.fechaFin + '</td>' +
+                                '<td>' + new Date(reporte.created_at).toLocaleString() +
+                                '</td>' +
+                                '<td><a href="{{ route('exportar-mensajes', '') }}/' +
+                                reporte.id +
+                                '" class="btn btn-primary btn-sm mb-2"><i class="fa fa-download"></i></a></td>' +
+                                '</tr>';
+                            tableBody.append(newRow);
 
+                        });
                         // Asignar los valores recibidos a las variables de la vista
                         var sentCount = response.sentCount;
                         var deliveredCount = response.deliveredCount;
@@ -253,5 +353,8 @@
                 });
             });
         });
+    </script>
+    <script>
+        new DataTable('#resporteTable');
     </script>
 @stop
