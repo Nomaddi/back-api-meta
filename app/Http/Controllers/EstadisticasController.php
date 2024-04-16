@@ -7,9 +7,12 @@ use App\Models\Envio;
 use App\Models\Message;
 use App\Models\Reporte;
 use Illuminate\Http\Request;
-use App\Exports\MultiSheetExport;
+use App\Exports\MessagesSheet;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class EstadisticasController extends Controller
 {
@@ -74,7 +77,7 @@ class EstadisticasController extends Controller
                 'endDate' => $endDate,
                 'reportes' => $reportes,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['error' => 'Error al obtener estadísticas.'], 500);
         }
     }
@@ -83,21 +86,38 @@ class EstadisticasController extends Controller
     {
         try {
             $report = Reporte::findOrFail($id);
-
-            $messages = Message::whereBetween('created_at', [$report->fechaInicio, $report->fechaFin])
+            $messages = Message::with(['contacto.tags'])
+                ->whereBetween('created_at', ['2023-12-01', '2024-04-15'])
                 ->where('outgoing', 1)
-                ->get();
+                ->get()
+                ->map(function ($message) {
+                    $etiquetas = $message->contacto && !$message->contacto->tags->isEmpty()
+                        ? $message->contacto->tags->pluck('nombre')->join(', ')
+                        : 'Sin etiquetas';
+                    return [
+                        'nombre' => $message->contacto ? $message->contacto->nombre : 'Desconocido',
+                        'telefono' => $message->contacto ? $message->contacto->telefono : 'Desconocido',
+                        'mensaje' => $message->body,
+                        'estado' => $message->status,
+                        'creado_en' => $message->created_at,
+                        'etiquetas' => $etiquetas
+                    ];
+                });
 
-            $plantillas = Envio::select('nombrePlantilla', 'body', 'numeroDestinatarios')
-                ->whereBetween('created_at', [$report->fechaInicio, $report->fechaFin])
-                ->get();
-            // Utiliza la clase de exportación para generar el archivo Excel
-            return Excel::download(new MultiSheetExport($messages, $plantillas), 'reporte_' . $report->created_at . '.xlsx');
+
+            (new MessagesSheet($messages))->queue('reporte_' . $id . '.xlsx')->chain([
+                // jobs to execute
+            ]);
+        } catch (ModelNotFoundException $e) {
+            Log::error("Reporte no encontrado: {$e->getMessage()}", ['exception' => $e]);
+            return response()->json(['error' => 'Reporte no encontrado.'], Response::HTTP_NOT_FOUND);
         } catch (Exception $e) {
-            // Maneja el error aquí
-            return response()->json(['error' => 'Ocurrió un error al exportar el archivo.'], 500);
+            Log::error("Error al exportar mensajes: {$e->getMessage()}", ['exception' => $e]);
+            return response()->json(['error' => 'Ocurrió un error al exportar el archivo.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+
 
 
 }
