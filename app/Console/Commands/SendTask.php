@@ -69,7 +69,7 @@ class SendTask extends Command
                             // $linea contiene el contenido de cada línea
                             // Puedes realizar las operaciones necesarias con cada línea aquí
                             $payload['to'] = $linea;
-                            SendMessage::dispatch($tarea->token_app, $tarea->phone_id, $payload, $tarea->body, $tarea->messageData);
+                            SendMessage::dispatch($tarea->token_app, $tarea->phone_id, $payload, $tarea->body, $tarea->messageData, $tarea->distintivo);
 
                         }
 
@@ -79,6 +79,7 @@ class SendTask extends Command
                         $contacto->nombrePlantilla = $payload['template']['name'];
                         $contacto->numeroDestinatarios = count($lineas);
                         $contacto->body = $tarea->body;
+                        $contacto->tag = $tarea->tag;
                         $contacto->save();
                     } else {
                         \Log::error("El archivo no existe en la ruta: $rutaArchivo");

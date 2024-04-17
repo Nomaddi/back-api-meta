@@ -22,19 +22,21 @@ class SendMessage implements ShouldQueue
     public $messageData;
     public $tokenApp;
     public $phone_id;
+    public $distintivo;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($tokenApp, $phone_id, $payload, $body, $messageData = [])
+    public function __construct($tokenApp, $phone_id, $payload, $body, $messageData = [], $distintivo)
     {
         $this->payload = $payload;
         $this->body = $body;
         $this->messageData = $messageData;
         $this->tokenApp = $tokenApp;
         $this->phone_id = $phone_id;
+        $this->distintivo = $distintivo;
     }
 
     /**
@@ -58,6 +60,8 @@ class SendMessage implements ShouldQueue
                 $wam->status = 'sent';
                 $wam->caption = '';
                 $wam->data = serialize($this->messageData);
+                $wam->distintivo = $this->distintivo;
+                $wam->code = '';
                 $wam->save();
             } else {
                 // Encuentra el JSON en el mensaje de error
@@ -80,8 +84,10 @@ class SendMessage implements ShouldQueue
                     $wam->wam_id = $fbtrace_id;
                     $wam->phone_id = $this->phone_id;
                     $wam->status = 'failed';
-                    $wam->caption = $errorCode;
+                    $wam->caption = '';
                     $wam->data = serialize($this->messageData);
+                    $wam->distintivo = $this->distintivo;
+                    $wam->code = $errorCode;
                     $wam->save();
                 } else {
                     // Manejo de error si la respuesta no contiene el formato esperado o la decodificación falló

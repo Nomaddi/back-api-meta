@@ -17,7 +17,8 @@ class CreateEnviosTable extends Migration
             $table->id();
             $table->string('nombrePlantilla');
             $table->string('numeroDestinatarios');
-            $table->longText('body')->nullable();;
+            $table->longText('body')->nullable();
+            $table->json('tag')->nullable();
             $table->timestamps();
         });
     }

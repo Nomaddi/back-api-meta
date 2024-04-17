@@ -20,6 +20,7 @@
                 <th>Nombre plantilla</th>
                 <th>N° de envios</th>
                 <th>Mensaje</th>
+                <th>Etiquetas</th>
                 <th>Fecha</th>
                 <th>Acciones</th>
             </tr>
@@ -31,6 +32,21 @@
                     <th>{{ $app->nombrePlantilla }}</th>
                     <td>{{ $app->numeroDestinatarios }}</td>
                     <td title="{{ $app->body }}">{{ Str::limit($app->body, 50) }}</td>
+                    <td>
+                        @if ($app->tag && count($app->tag) > 0)
+                            @foreach ($app->tag as $tId)
+                                @if (isset($tags[$tId]))
+                                    <span
+                                        style="background-color: {{ $tags[$tId]->color }}; padding: 3px; border-radius: 4px; font-size: 12px; margin-right: 5px;">
+                                        {{ $tags[$tId]->nombre }}
+                                    </span>
+                                @endif
+                            @endforeach
+                        @else
+                            <span style="padding: 3px; border-radius: 4px; font-size: 12px; margin-right: 5px;">Sin
+                                etiqueta</span>
+                        @endif
+                    </td>
                     <td>{{ $app->created_at }}</td>
                     <td>
                         <a data-toggle="modal" data-target="#modal-show-{{ $app->id }}"
@@ -56,7 +72,9 @@
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     <script>
         new DataTable('#enviosTable', {
-            "order": [[ 0, "desc" ]] // Ordenar por la primera columna (created_at) de manera descendente
+            "order": [
+                [0, "desc"]
+            ] // Ordenar por la primera columna (created_at) de manera descendente
         });
     </script>
 

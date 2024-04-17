@@ -7,7 +7,7 @@ use App\Models\Envio;
 use App\Models\Message;
 use App\Models\Reporte;
 use Illuminate\Http\Request;
-use App\Exports\MessagesSheet;
+use App\Jobs\ExportMessages;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
@@ -86,28 +86,9 @@ class EstadisticasController extends Controller
     {
         try {
             $report = Reporte::findOrFail($id);
-            $messages = Message::with(['contacto.tags'])
-                ->whereBetween('created_at', ['2023-12-01', '2024-04-15'])
-                ->where('outgoing', 1)
-                ->get()
-                ->map(function ($message) {
-                    $etiquetas = $message->contacto && !$message->contacto->tags->isEmpty()
-                        ? $message->contacto->tags->pluck('nombre')->join(', ')
-                        : 'Sin etiquetas';
-                    return [
-                        'nombre' => $message->contacto ? $message->contacto->nombre : 'Desconocido',
-                        'telefono' => $message->contacto ? $message->contacto->telefono : 'Desconocido',
-                        'mensaje' => $message->body,
-                        'estado' => $message->status,
-                        'creado_en' => $message->created_at,
-                        'etiquetas' => $etiquetas
-                    ];
-                });
+            ExportMessages::dispatch($report->fechaInicio, $report->fechaFin, $id);
 
-
-            (new MessagesSheet($messages))->queue('reporte_' . $id . '.xlsx')->chain([
-                // jobs to execute
-            ]);
+            return response()->json(['status' => 'Exportación iniciada']);
         } catch (ModelNotFoundException $e) {
             Log::error("Reporte no encontrado: {$e->getMessage()}", ['exception' => $e]);
             return response()->json(['error' => 'Reporte no encontrado.'], Response::HTTP_NOT_FOUND);

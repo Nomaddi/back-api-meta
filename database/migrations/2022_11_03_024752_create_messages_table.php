@@ -25,13 +25,15 @@ class CreateMessagesTable extends Migration
             $table->string('status', 15);
             $table->longText('caption')->nullable();
             $table->binary('data');
+            $table->string('distintivo');
+            $table->string('code');
             $table->timestamps();
 
             $table->foreign('wa_id')->references('telefono')->on('contactos')->onDelete('set null');
         });
     }
 
-    
+
 
     /**
      * Reverse the migrations.

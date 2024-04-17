@@ -18,7 +18,7 @@
             <div class="card-body">
                 <div>
                     <label for="selectPlantilla">Seleccione un numero disponible</label>
-                    <select id="selectPlantilla" class="form-select form-control mb-3">
+                    <select id="selectPlantilla" class="form-select form-control mb-3" required>
                         <option value="">Selecciona un Número</option>
                         @foreach ($numeros as $numero)
                             <option value="{{ $numero->id }}" data-id_telefono="{{ $numero->id_telefono }}"
@@ -32,9 +32,20 @@
 
                 <div>
                     <label for="templatesSelect">Seleccione una plantilla disponible</label>
-                    <select id="templatesSelect" class="form-select form-control mb-3">
+                    <select id="templatesSelect" class="form-select form-control mb-3" required>
                         <option value="">Selecciona una plantilla</option>
                         <!-- Las opciones se cargarán aquí dinámicamente -->
+                    </select>
+                </div>
+                <div>
+                    <label for="distintivoSelect">Seleccione un distintivo</label>
+                    <select id="distintivoSelect" class="form-select form-control mb-3" required>
+                        <option value="">Esto servirá para los reportes</option>
+                        @foreach ($distintivos as $dis)
+                            <option value="{{ $dis->id }}">
+                                {{ $dis->nombre }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
                 <div>
@@ -468,6 +479,7 @@
             var token_api = null;
             var programar = null;
             var selectedTags = null;
+            var distintivoSelect = null;
 
             // header_url = $('#header').val() ? $('#header').val() :
             //     null;
@@ -490,6 +502,8 @@
                 null;
             // Obtener los IDs seleccionados en el select con id "etiqueta"
             selectedTags = $('#etiqueta').val();
+            distintivoSelect = $('#distintivoSelect').val();
+
 
             // Organizar la información en un objeto
             var dataToSend = {
@@ -504,7 +518,8 @@
                 template_name: template_name,
                 token_api: token_api,
                 programar: programar,
-                selectedTags: selectedTags
+                selectedTags: selectedTags,
+                distintivoSelect: distintivoSelect
             };
             $.ajax({
                 type: "POST",

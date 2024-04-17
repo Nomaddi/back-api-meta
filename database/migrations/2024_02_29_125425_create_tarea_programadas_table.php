@@ -23,6 +23,8 @@ class CreateTareaProgramadasTable extends Migration
             $table->binary('messageData');
             $table->string('status', 15);
             $table->string('fecha_programada');
+            $table->json('tag');
+            $table->string('distintivo');
             $table->timestamps();
         });
     }

@@ -13,5 +13,11 @@ class Envio extends Model
         'nombrePlantilla',
         'numeroDestinatarios',
         'body',
+        'tag',
     ];
+
+    protected $casts = [
+        'tag' => 'array',
+    ];
+
 }

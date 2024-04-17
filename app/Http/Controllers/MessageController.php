@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Distintivo;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Tag;
@@ -29,10 +30,12 @@ class MessageController extends Controller
     public function NumbersApps()
     {
         $numeros = Numeros::all();
+        $distintivos = Distintivo::all();
         $tags = Tag::with('contactos')->get();
         return view('plantillas/index', [
             'numeros' => $numeros,
             'tags' => $tags,
+            'distintivos' => $distintivos,
         ]);
     }
     public function chat()
@@ -65,7 +68,7 @@ class MessageController extends Controller
                 'data' => $messages,
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes1: ' . json_encode($e->getMessage()));
+            Log::error('Error al obtener chats: ' . json_encode($e->getMessage()));
 
             // Utilizar el mensaje de la excepción o un mensaje predeterminado
             $errorMessage = isset($e->getMessage()['message']) ? $e->getMessage()['message'] : 'Error interno del servidor';
@@ -113,7 +116,7 @@ class MessageController extends Controller
                 'data' => $message,
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes2: ' . $e->getMessage());
+            Log::error('Error al enviar mensaje: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -168,7 +171,7 @@ class MessageController extends Controller
                 'prevPageUrl' => $messagesQuery->previousPageUrl(), // Proporciona la URL para la página anterior (si la necesitas)
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes: ' . $e->getMessage());
+            Log::error('Error al obtener mensajes del chat: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -224,7 +227,7 @@ class MessageController extends Controller
                 'data' => $message,
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes4: ' . $e->getMessage());
+            Log::error('Error al enviar mensaje de prueba a jhon: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -250,7 +253,7 @@ class MessageController extends Controller
 
             throw new Exception('Invalid request');
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes5: ' . $e->getMessage());
+            Log::error('Error al verificar el webhook: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -380,7 +383,7 @@ class MessageController extends Controller
                 'data' => $body,
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes6: ' . $e->getMessage());
+            Log::error('Error al procesar el webhook: ' . $e->getMessage());
             Log::error('Exception trace: ' . $e->getTraceAsString());
             return response()->json([
                 'success' => false,
@@ -402,7 +405,7 @@ class MessageController extends Controller
                 'data' => $templates['data'],
             ], 200);
         } catch (Exception $e) {
-            Log::error('Error al obtener mensajes7: ' . $e->getMessage());
+            Log::error('Error al cargar las plantillas: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -441,6 +444,7 @@ class MessageController extends Controller
             $phone_id = $input['phone_id'];
             $waba_id_app = $input['id_c_business'];
             $fechaProgramada = $input['programar'];
+            $distintivo = $input['distintivoSelect'];
             $tags = !empty($input['selectedTags']) ? $input['selectedTags'] : [22];
             $template = $wp->loadTemplateByName($templateName, $templateLang, $tokenApp, $waba_id_app);
 
@@ -546,9 +550,10 @@ class MessageController extends Controller
                 $tarea->payload = json_encode($payload);
                 $tarea->body = $body;
                 $tarea->messageData = json_encode($messageData);
-                ;
                 $tarea->status = 'pendiente';
                 $tarea->fecha_programada = $fechaFormateada;
+                $tarea->tag = $tags;
+                $tarea->distintivo = $distintivo;
                 $tarea->save();
 
                 // Ejecutar el comando SendTask con la opción --scheduled
@@ -578,13 +583,14 @@ class MessageController extends Controller
                         // Asociar los tags seleccionados al nuevo contacto
                         $contacto->tags()->attach($tags);
                     }
-                    SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData);
+                    SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData, $distintivo);
                 }
 
                 $contacto = new Envio();
                 $contacto->nombrePlantilla = $templateName;
                 $contacto->numeroDestinatarios = count($recipients);
                 $contacto->body = $body;
+                $contacto->tag = $tags;
                 $contacto->save();
 
                 Log::info('envio encolado' . count($recipients));

@@ -1,15 +1,16 @@
 <?php
 
+use App\Models\Reporte;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\EnvioController;
+use App\Http\Controllers\ClocalController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NumerosController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
-use App\Http\Controllers\ClocalController;
 
 
 
@@ -28,7 +29,8 @@ Route::resource(
 );
 
 //Contactos
-Route::get('contactos', [ContactoController::class, 'index'])->name('contactos.index');; //mostrar todos los registros
+Route::get('contactos', [ContactoController::class, 'index'])->name('contactos.index');
+; //mostrar todos los registros
 Route::get('contactos/getData', [ContactoController::class, 'getData'])->name('contactos.getData');
 Route::post('contactos', [ContactoController::class, 'store'])->name('contactos.store'); //crear un registro
 Route::get('contactos/edit/{id}', [ContactoController::class, 'edit']); //obtener datos para editar un registro
@@ -48,7 +50,7 @@ Route::get('tags/{id}/contactos', [TagController::class, 'showContacts'])->name(
 // importar contactos
 Route::post('upload-contactos', [ContactoController::class, 'uploadUsers'])->name('importar-contactos');
 // exporta contactos
-Route::get('exportar-contactos', [ContactoController::class,'exportar'])->name('exportar-contactos');
+Route::get('exportar-contactos', [ContactoController::class, 'exportar'])->name('exportar-contactos');
 
 
 // enviar mensaje plantilla
@@ -64,7 +66,7 @@ Route::get('estadisticas', [EstadisticasController::class, 'index']); //mostrar 
 Route::post('/estadisticas/get-statistics', [EstadisticasController::class, 'getStatistics'])->name('get-statistics');
 Route::get('envios-plantillas', [EnvioController::class, 'index']); //mostrar todos los registros
 // exporta mensajes
-Route::get('exportar-mensajes/{id}', [EstadisticasController::class,'exportar'])->name('exportar-mensajes');
+Route::get('exportar-mensajes/{id}', [EstadisticasController::class, 'exportar'])->name('exportar-mensajes');
 
 //programados
 Route::get('programados', [ProgramadosControllers::class, 'index']); //mostrar todos los registros
@@ -75,6 +77,17 @@ Route::put('/actualizar-estado/{id}', [ProgramadosControllers::class, 'actualiza
 Route::get('solicitudes', [ClocalController::class, 'index']); //mostrar todos los registroscl
 Route::get('solicitudes/send/{id}', [ClocalController::class, 'send'])->name('enviar.solicitud'); //mostrar todos los registroscl
 
+//descargar informe
+Route::get('/download/{id}', function ($id) {
+    $reporte = Reporte::findOrFail($id);
+    $filePath = storage_path('app/' . $reporte->archivo);
+
+    if (file_exists($filePath)) {
+        return response()->download($filePath);
+    } else {
+        return response()->json(['error' => 'Archivo no encontrado.'], 404);
+    }
+})->name('download');
 
 
 Route::resource(

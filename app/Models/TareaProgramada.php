@@ -17,6 +17,13 @@ class TareaProgramada extends Model
         'body',
         'messageData',
         'status',
-        'fecha_programada'
+        'fecha_programada',
+        'tag',
+        'distintivo',
     ];
+
+    protected $casts = [
+        'tag' => 'array',
+    ];
+
 }

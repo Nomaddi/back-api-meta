@@ -176,7 +176,8 @@
                                         <th>Fecha Inicio</th>
                                         <th>Fecha Fin</th>
                                         <th>Fecha Creación</th>
-                                        <th>CSV</th>
+                                        <th>generar</th>
+                                        <th>descargar</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -192,6 +193,17 @@
                                                     <i class="fa fa-download"></i>
                                                 </a>
                                             </td>
+                                            @if ($reporte->archivo)
+                                                <td>
+                                                    <a href="{{ route('download', $reporte->id) }}">Descargar</a>
+                                                </td>
+                                            @else
+                                                <td>
+                                                    <span>
+                                                        <p>esparando..</p>
+                                                    </span>
+                                                </td>
+                                            @endif
                                         </tr>
                                     @endforeach
                                 </tbody>
