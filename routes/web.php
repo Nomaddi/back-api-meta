@@ -36,17 +36,6 @@ Route::get('/send-message', [MessageController::class, 'sendMessages']);
 
 // Agrupando rutas y aplicando el middleware 'auth'
 Route::middleware(['auth'])->group(function () {
-
-
-    //estadisticas
-
     Route::get('/statistics', [MessageController::class, 'getStatistics']);
-
-
-
-    //import
-// Route::get('/import-users', [ContactoController::class, 'importUsers'])->name('import');
-
-
-
 });
+

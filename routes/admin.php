@@ -12,7 +12,7 @@ use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
 
-
+use Illuminate\Support\Facades\DB;
 
 Route::resource(
     'aplicaciones',
@@ -89,6 +89,20 @@ Route::get('/download/{id}', function ($id) {
     }
 })->name('download');
 
+Route::get('data', function () {
+    try {
+        $results = DB::select('CALL GetMessagesReport(?, ?)', ['2024-03-29', '2024-04-15']);
+        if (!empty ($results)) {
+            foreach ($results as $result) {
+                echo "Nombre: " . $result->contacto_nombre . ", Teléfono: " . $result->contacto_telefono . ", Mensaje: " . $result->mensaje . "\n";
+            }
+        } else {
+            echo "No se encontraron resultados.";
+        }
+    } catch (\Exception $e) {
+        echo 'Error: ' . $e->getMessage();
+    }
+});
 
 Route::resource(
     'messages',

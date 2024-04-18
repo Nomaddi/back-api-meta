@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tag;
 use App\Models\Clocal;
 use App\Models\Numeros;
+use App\Models\Distintivo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -23,10 +24,12 @@ class ClocalController extends Controller
         $solicitud = Clocal::findOrFail($id);
         $numeros = Numeros::all();
         $tags = Tag::with('contactos')->get();
+        $distintivos = Distintivo::all();
         return view('cl/send', [
             'solicitud' => $solicitud,
             'numeros' => $numeros,
             'tags' => $tags,
+            'distintivos' => $distintivos,
         ]);
     }
 
