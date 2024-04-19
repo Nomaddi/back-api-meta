@@ -175,7 +175,6 @@
                                         <th>Id</th>
                                         <th>Fecha Inicio</th>
                                         <th>Fecha Fin</th>
-                                        <th>Fecha Creación</th>
                                         <th>generar</th>
                                         <th>descargar</th>
                                     </tr>
@@ -186,16 +185,18 @@
                                             <td>{{ $reporte->id }}</td>
                                             <td>{{ $reporte->fechaInicio }}</td>
                                             <td>{{ $reporte->fechaFin }}</td>
-                                            <td>{{ $reporte->created_at }}</td>
                                             <td>
-                                                <a href="{{ route('exportar-mensajes', $reporte->id) }}"
-                                                    class="btn btn-primary btn-sm mb-2">
-                                                    <i class="fa fa-download"></i>
+                                                <a href="#"
+                                                    onclick="exportarMensaje({{ $reporte->id }}); return false;"
+                                                    class="btn btn-success btn-sm mb-2">
+                                                    Crear
                                                 </a>
                                             </td>
                                             @if ($reporte->archivo)
                                                 <td>
-                                                    <a href="{{ route('download', $reporte->id) }}">Descargar</a>
+                                                    <a href="{{ route('download', $reporte->id) }}"
+                                                        class="btn btn-primary btn-sm mb-2">
+                                                        <i class="fa fa-download"></i></a>
                                                 </td>
                                             @else
                                                 <td>
@@ -263,6 +264,9 @@
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     <script>
+        var baseUrl = "{{ url('/') }}";
+        var exportUrl = "{{ route('exportar-mensajes', '_id_') }}";
+        var downloadUrl = "{{ route('download', '_id_') }}";
         $(document).ready(function() {
             $('#statisticsForm').submit(function(event) {
                 event.preventDefault(); // Evitar el envío del formulario por defecto
@@ -284,11 +288,13 @@
                                 '<td>' + reporte.id + '</td>' +
                                 '<td>' + reporte.fechaInicio + '</td>' +
                                 '<td>' + reporte.fechaFin + '</td>' +
-                                '<td>' + new Date(reporte.created_at).toLocaleString() +
-                                '</td>' +
-                                '<td><a href="{{ route('exportar-mensajes', '') }}/' +
-                                reporte.id +
-                                '" class="btn btn-primary btn-sm mb-2"><i class="fa fa-download"></i></a></td>' +
+                                '<td><a href="#" onclick="exportarMensaje(' + reporte
+                                .id +
+                                ')" class="btn btn-success btn-sm mb-2">crear</a></td>' +
+                                (reporte.archivo ? '<td><a href="' + downloadUrl
+                                    .replace('_id_', reporte.id) +
+                                    '" class="btn btn-primary btn-sm mb-2"><i class="fa fa-download"></i></a></td>' :
+                                    '<td><span><p>esperando...</p></span></td>') +
                                 '</tr>';
                             tableBody.append(newRow);
 
@@ -359,7 +365,13 @@
                         })
                     },
                     error: function(xhr, status, error) {
-                        // Manejar errores de la solicitud AJAX aquí
+                        // Mostrar el error con SweetAlert2
+                        Swal.fire({
+                            icon: 'error',
+                            title: '¡Error!',
+                            text: 'Hubo un problema con la solicitud: ' + error,
+                            footer: '<a href>¿Necesitas ayuda?</a>'
+                        });
                         console.error(error);
                     }
                 });
@@ -368,5 +380,46 @@
     </script>
     <script>
         new DataTable('#resporteTable');
+    </script>
+    <script>
+        function exportarMensaje(reporteId) {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡Iniciarás la exportación de los mensajes!",
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '¡Sí, exportar ahora!',
+            }).then((result) => {
+                if (result.value) {
+                    console.log("Confirmación del usuario");
+                    $.ajax({
+                        url: 'exportar-mensajes/' + reporteId,
+                        type: 'GET',
+                        success: function(response) {
+                            Swal.fire(
+                                '¡Iniciado!',
+                                'La exportación ha comenzado.',
+                                'success'
+                            );
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire(
+                                'Error',
+                                'No se pudo iniciar la exportación: ' + error,
+                                'error'
+                            );
+                        }
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    console.log("Cancelado por el usuario");
+                    Swal.fire(
+                        'Cancelado',
+                        'No se inició la exportación.',
+                        'info'
+                    );
+                }
+            });
+        }
     </script>
 @stop

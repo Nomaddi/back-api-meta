@@ -22,6 +22,7 @@
                 <th>Mensaje</th>
                 <th>Etiquetas</th>
                 <th>Fecha</th>
+                <th>Estado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -30,7 +31,7 @@
                 <tr>
                     <th>{{ $app->id }}</th>
                     <th>{{ $app->nombrePlantilla }}</th>
-                    <td>{{ $app->numeroDestinatarios }}</td>
+                    <td>{{ $app->numeroDestinatarios }}/{{ $app->sent_messages }}</td>
                     <td title="{{ $app->body }}">{{ Str::limit($app->body, 50) }}</td>
                     <td>
                         @if ($app->tag && count($app->tag) > 0)
@@ -48,6 +49,15 @@
                         @endif
                     </td>
                     <td>{{ $app->created_at }}</td>
+                    <td>
+                        @if ($app->status == 'Pendiente')
+                            <span class="badge badge-warning">{{ $app->status }}</span>
+                        @elseif($app->status == 'Completado')
+                            <span class="badge badge-success">{{ $app->status }}</span>
+                        @else
+                            Sin estado
+                        @endif
+                    </td>
                     <td>
                         <a data-toggle="modal" data-target="#modal-show-{{ $app->id }}"
                             class="btn btn-warning btn-sm mb-2" title="Ver">

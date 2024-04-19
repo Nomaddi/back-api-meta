@@ -21,6 +21,6 @@ class MessagesExport implements FromCollection, WithHeadings
 
     public function headings(): array
     {
-        return ['Nombre', 'Teléfono', 'Mensaje', 'Estado', 'Creado en', 'Etiquetas'];
+        return ['id', 'Nombre', 'Teléfono', 'Estado', 'Distintivo', 'Creado en'];
     }
 }

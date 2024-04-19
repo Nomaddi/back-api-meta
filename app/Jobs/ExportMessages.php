@@ -6,11 +6,13 @@ use App\Models\Message;
 use App\Models\Reporte;
 use Illuminate\Bus\Queueable;
 use App\Exports\MessagesExport;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use App\Http\Controllers\MessageController;
 
 class ExportMessages implements ShouldQueue
 {
@@ -29,34 +31,29 @@ class ExportMessages implements ShouldQueue
 
     public function handle()
     {
-        Message::with(['contacto.tags'])
-            ->whereBetween('created_at', [$this->startDate, $this->endDate])
-            ->where('outgoing', 1)
-            ->cursor()
-            ->each(function ($message) use (&$data) {
-                $etiquetas = $message->contacto && !$message->contacto->tags->isEmpty()
-                    ? $message->contacto->tags->pluck('nombre')->join(', ')
-                    : 'Sin etiquetas';
-                $data[] = [
-                    'Nombre' => $message->contacto ? $message->contacto->nombre : 'Desconocido',
-                    'Teléfono' => $message->contacto ? $message->contacto->telefono : 'Desconocido',
-                    'Mensaje' => $message->body,
-                    'Estado' => $message->status,
-                    'Creado en' => $message->created_at->format('Y-m-d H:i:s'),
-                    'Etiquetas' => $etiquetas
-                ];
-            });
+        try {
+            $results = DB::select('CALL GetMessagesReport(?, ?)', [$this->startDate, $this->endDate]);
+            if (!empty($results)) {
 
-        $fileName = 'messages_export_' . now()->format('Y-m-d_His') . '.xlsx';
-        Excel::store(new MessagesExport($data), $fileName, 'local');
+                $fileName = 'messages_export_' . now()->format('Y-m-d_His') . '.xlsx';
+                Excel::store(new MessagesExport($results), $fileName, 'local');
 
-        // Actualizar el registro del reporte con la ruta del archivo
-        $report = Reporte::find($this->reportId);
-        if ($report) {
-            $report->archivo = $fileName;
-            $report->save();
+                // Actualizar el registro del reporte con la ruta del archivo
+                $report = Reporte::find($this->reportId);
+                if ($report) {
+                    $report->archivo = $fileName;
+                    $report->save();
+                }
+            } else {
+                echo "No se encontraron resultados.";
+            }
+        } catch (\Exception $e) {
+            echo 'Error: ' . $e->getMessage();
         }
 
+
         // Opcional: aquí podrías despachar otro job para enviar notificaciones de que el archivo está listo, etc.
+        $controller = new MessageController();
+        $controller->sendReport($this->reportId);
     }
 }

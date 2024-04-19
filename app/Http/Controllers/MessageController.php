@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Distintivo;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Tag;
@@ -13,12 +12,14 @@ use App\Models\Numeros;
 use App\Models\Contacto;
 use PhpParser\Node\Expr;
 use App\Jobs\SendMessage;
+use App\Models\Distintivo;
 use App\Libraries\Whatsapp;
 use App\Models\Aplicaciones;
 use Illuminate\Http\Request;
 use App\Models\TareaProgramada;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
@@ -202,36 +203,109 @@ class MessageController extends Controller
         //
     }
 
-    public function sendMessages()
+    public function sendReport($id_report)
     {
         try {
-            $token = env('WHATSAPP_API_TOKEN');
-            $phoneId = env('WHATSAPPI_API_PHONE_ID');
-            $version = 'v15.0';
-            $payload = [
-                'messaging_product' => 'whatsapp',
-                'to' => '5731184021643',
-                'type' => 'template',
-                "template" => [
-                    "name" => "hello_world",
-                    "language" => [
-                        "code" => "en_US"
+            // Verificar si el usuario está autenticado
+            if (Auth::check()) {
+                // Obtener el usuario autenticado
+                $user = Auth::user();
+                // Acceder a la información del usuario
+
+                $token = env('WHATSAPP_API_TOKEN');
+                $phoneId = env('WHATSAPPI_API_PHONE_ID');
+                $version = 'v18.0';
+                $payload = [
+                    'messaging_product' => 'whatsapp',
+                    'to' => $user->phone,
+                    'type' => 'template',
+                    "template" => [
+                        "name" => "reporte_mensual",
+                        "language" => [
+                            "code" => "es"
+                        ],
+                        "components" => [
+                            [
+                                "type" => "header",
+                                "parameters" => [
+                                    [
+                                        "type" => "text",
+                                        "text" => $user->name
+
+                                    ]
+                                ]
+                            ],
+                            [
+                                "type" => "button",
+                                'index' => '0',
+                                "sub_type" => "url",
+                                "parameters" => [
+                                    [
+                                        "type" => "text",
+                                        "text" => $id_report
+                                    ]
+                                ]
+                            ],
+                        ]
                     ]
-                ]
-            ];
-            $message = Http::withToken($token)->post('https://graph.facebook.com/' . $version . '/' . $phoneId . '/messages', $payload)->throw()->json();
-            // $wp = new Whatsapp();
-            // $message = $wp->sendText('14842918777', 'Is this working?');
-            return response()->json([
-                'success' => true,
-                'data' => $message,
-            ], 200);
+                ];
+                $message = Http::withToken($token)->post('https://graph.facebook.com/' . $version . '/' . $phoneId . '/messages', $payload)->throw()->json();
+                Log::info('Mensaje enviado correctamente: ', ['data' => $message]);
+            }
         } catch (Exception $e) {
             Log::error('Error al enviar mensaje de prueba a jhon: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
+        }
+    }
+
+    public function sendMessages($plantilla)
+    {
+        try {
+            // Verificar si el usuario está autenticado
+            if (Auth::check()) {
+                // Obtener el usuario autenticado
+                $user = Auth::user();
+                // Acceder a la información del usuario
+
+                $token = env('WHATSAPP_API_TOKEN');
+                $phoneId = env('WHATSAPPI_API_PHONE_ID');
+                $version = 'v18.0';
+                $payload = [
+                    'messaging_product' => 'whatsapp',
+                    'to' => $user->phone,
+                    'type' => 'template',
+                    "template" => [
+                        "name" => "finalizacion_de_envio",
+                        "language" => [
+                            "code" => "es"
+                        ],
+                        "components" => [
+                            [
+                                "type" => "header",
+                                "parameters" => [
+                                    [
+                                        "type" => "text",
+                                        "text" => $user->name
+
+                                    ]
+                                ]
+                            ],
+                            [
+                                "type" => "body",
+                                "parameters" => [
+                                    [
+                                        "type" => "text",
+                                        "text" => $plantilla
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ];
+                $message = Http::withToken($token)->post('https://graph.facebook.com/' . $version . '/' . $phoneId . '/messages', $payload)->throw()->json();
+                Log::info('Mensaje enviado correctamente: ', ['data' => $message]);
+            }
+        } catch (Exception $e) {
+            Log::error('Error al enviar mensaje de prueba a jhon: ' . $e->getMessage());
         }
     }
 
@@ -565,33 +639,39 @@ class MessageController extends Controller
                 ], 200);
 
             } else {
-                foreach ($recipients as $recipient) {
-                    $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
-                    $payload['to'] = $phone;
-                    //aqui se crea el usuario si no existe
-                    // Verifica si el contacto existe en la base de datos
-                    $contacto = Contacto::where('telefono', $phone)->first();
+                $envio = new Envio([
+                    'nombrePlantilla' => $templateName,
+                    'numeroDestinatarios' => count($recipients),
+                    'status' => 'Pendiente',
+                    'sent_messages' => 0,
+                    'body' => $body,
+                    'tag' => $tags
+                ]);
+                $envio->save();
+                if ($envio->id) {
+                    foreach ($recipients as $recipient) {
+                        $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
+                        $payload['to'] = $phone;
+                        //aqui se crea el usuario si no existe
+                        // Verifica si el contacto existe en la base de datos
+                        $contacto = Contacto::where('telefono', $phone)->first();
 
-                    // Si el contacto no existe, créalo
-                    if (!$contacto) {
-                        $contacto = new Contacto();
-                        $contacto->telefono = $phone;
-                        $contacto->nombre = $phone;
-                        $contacto->notas = "Contacto creado automáticamente por colas";
-                        $contacto->save();
+                        // Si el contacto no existe, créalo
+                        if (!$contacto) {
+                            $contacto = new Contacto();
+                            $contacto->telefono = $phone;
+                            $contacto->nombre = $phone;
+                            $contacto->notas = "Contacto creado automáticamente por colas";
+                            $contacto->save();
 
-                        // Asociar los tags seleccionados al nuevo contacto
-                        $contacto->tags()->attach($tags);
+                            // Asociar los tags seleccionados al nuevo contacto
+                            $contacto->tags()->attach($tags);
+                        }
+                        SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData, $distintivo, $envio->id);
                     }
-                    SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData, $distintivo);
+                } else {
+                    Log::error('Error al guardar el objeto Envio');
                 }
-
-                $contacto = new Envio();
-                $contacto->nombrePlantilla = $templateName;
-                $contacto->numeroDestinatarios = count($recipients);
-                $contacto->body = $body;
-                $contacto->tag = $tags;
-                $contacto->save();
 
                 Log::info('envio encolado' . count($recipients));
             }

@@ -2,16 +2,18 @@
 
 namespace App\Jobs;
 
-use App\Libraries\Whatsapp;
-use App\Models\Message;
+use App\Models\Envio;
 use Exception;
+use App\Models\Message;
+use App\Libraries\Whatsapp;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use App\Http\Controllers\MessageController;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 
 class SendMessage implements ShouldQueue
 {
@@ -23,13 +25,14 @@ class SendMessage implements ShouldQueue
     public $tokenApp;
     public $phone_id;
     public $distintivo;
+    public $envio_id;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($tokenApp, $phone_id, $payload, $body, $messageData = [], $distintivo)
+    public function __construct($tokenApp, $phone_id, $payload, $body, $messageData = [], $distintivo, $envio_id)
     {
         $this->payload = $payload;
         $this->body = $body;
@@ -37,6 +40,7 @@ class SendMessage implements ShouldQueue
         $this->tokenApp = $tokenApp;
         $this->phone_id = $phone_id;
         $this->distintivo = $distintivo;
+        $this->envio_id = $envio_id; // Corregido aquí
     }
 
     /**
@@ -89,6 +93,7 @@ class SendMessage implements ShouldQueue
                     $wam->distintivo = $this->distintivo;
                     $wam->code = $errorCode;
                     $wam->save();
+
                 } else {
                     // Manejo de error si la respuesta no contiene el formato esperado o la decodificación falló
                     Log::error("Error al procesar la respuesta de error o la respuesta no contiene el formato esperado: " . $errorJsonString);
@@ -96,6 +101,26 @@ class SendMessage implements ShouldQueue
             }
         } catch (Exception $e) {
             Log::error('error en catch' . $e->getMessage());
+        }
+
+        try {
+            $campaign = Envio::find($this->envio_id);
+            if ($campaign !== null) {
+                $campaign->increment('sent_messages');
+                if ($campaign->sent_messages == $campaign->numeroDestinatarios) {
+                    $campaign->status = 'Completado';
+                    $campaign->save();
+                    Log::info("Campaña completada: {$campaign->id}");
+                    // Aquí puedes también disparar un evento o realizar otras acciones
+                    $envio = new MessageController();
+                    $envio->sendMessages($this->payload["template"]["name"]);
+                }
+            } else {
+                Log::error("No se encontró la campaña con ID: {$this->envio_id}");
+                // Considera lanzar una excepción o manejar este caso de manera adecuada
+            }
+        } catch (Exception $e) {
+            Log::error("Error al enviar la confirmacion del envio total: " . $e->getMessage());
         }
 
     }

@@ -14,6 +14,8 @@ class Envio extends Model
         'numeroDestinatarios',
         'body',
         'tag',
+        'sent_messages',
+        'status',
     ];
 
     protected $casts = [

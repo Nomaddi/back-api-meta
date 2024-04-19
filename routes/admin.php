@@ -78,7 +78,7 @@ Route::get('solicitudes', [ClocalController::class, 'index']); //mostrar todos l
 Route::get('solicitudes/send/{id}', [ClocalController::class, 'send'])->name('enviar.solicitud'); //mostrar todos los registroscl
 
 //descargar informe
-Route::get('/download/{id}', function ($id) {
+Route::get('download/{id}', function ($id) {
     $reporte = Reporte::findOrFail($id);
     $filePath = storage_path('app/' . $reporte->archivo);
 
@@ -93,9 +93,10 @@ Route::get('data', function () {
     try {
         $results = DB::select('CALL GetMessagesReport(?, ?)', ['2024-03-29', '2024-04-15']);
         if (!empty ($results)) {
-            foreach ($results as $result) {
-                echo "Nombre: " . $result->contacto_nombre . ", Teléfono: " . $result->contacto_telefono . ", Mensaje: " . $result->mensaje . "\n";
-            }
+            // foreach ($results as $result) {
+            //     echo "Nombre: " . $result->contacto_nombre . ", Teléfono: " . $result->contacto_telefono . ", Estado: " . $result->estado . ", enviado: " . $result->distintivo_nombre . ", fecha: " . $result->created_at . "\n";
+            // }
+            dd($results);
         } else {
             echo "No se encontraron resultados.";
         }
