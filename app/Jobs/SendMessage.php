@@ -104,7 +104,7 @@ class SendMessage implements ShouldQueue
         }
 
         try {
-            $campaign = Envio::find($this->envio_id);
+            $campaign = Envio::lockForUpdate()->find($this->envio_id);
             if ($campaign !== null) {
                 $campaign->increment('sent_messages');
                 if ($campaign->sent_messages == $campaign->numeroDestinatarios) {
