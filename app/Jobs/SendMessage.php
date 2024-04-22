@@ -2,11 +2,12 @@
 
 namespace App\Jobs;
 
-use App\Models\Envio;
 use Exception;
+use App\Models\Envio;
 use App\Models\Message;
 use App\Libraries\Whatsapp;
 use Illuminate\Bus\Queueable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -67,6 +68,7 @@ class SendMessage implements ShouldQueue
                 $wam->distintivo = $this->distintivo;
                 $wam->code = '';
                 $wam->save();
+
             } else {
                 // Encuentra el JSON en el mensaje de error
                 $jsonStartPos = strpos($request, '{');
@@ -103,25 +105,27 @@ class SendMessage implements ShouldQueue
             Log::error('error en catch' . $e->getMessage());
         }
 
-        try {
-            $campaign = Envio::lockForUpdate()->find($this->envio_id);
-            if ($campaign !== null) {
-                $campaign->increment('sent_messages');
-                if ($campaign->sent_messages == $campaign->numeroDestinatarios) {
-                    $campaign->status = 'Completado';
-                    $campaign->save();
-                    Log::info("Campaña completada: {$campaign->id}");
-                    // Aquí puedes también disparar un evento o realizar otras acciones
-                    $envio = new MessageController();
-                    $envio->sendMessages($this->payload["template"]["name"]);
-                }
-            } else {
-                Log::error("No se encontró la campaña con ID: {$this->envio_id}");
-                // Considera lanzar una excepción o manejar este caso de manera adecuada
-            }
-        } catch (Exception $e) {
-            Log::error("Error al enviar la confirmacion del envio total: " . $e->getMessage());
-        }
+        // try {
+        //     $campaignId = $this->envio_id;
+        //     DB::transaction(function () use ($campaignId) {
+        //         $campaign = Envio::lockForUpdate()->find($campaignId);
+        //         if ($campaign) {
+        //             $campaign->increment('sent_messages');
+        //             if ($campaign->sent_messages == $campaign->numeroDestinatarios) {
+        //                 $campaign->status = 'Completado';
+        //                 $campaign->save();
+        //                 Log::info("Campaña completada: {$campaign->id}");
+        //                 // Aquí puedes también disparar un evento o realizar otras acciones
+        //                 $envio = new MessageController();
+        //                 $envio->sendMessages($this->payload["template"]["name"]);
+        //             }
+        //         } else {
+        //             Log::error("No se encontró la campaña con ID: {$campaignId}");
+        //         }
+        //     });
+        // } catch (Exception $e) {
+        //     Log::error("Error al enviar la confirmacion del envio total: " . $e->getMessage());
+        // }
 
     }
 }

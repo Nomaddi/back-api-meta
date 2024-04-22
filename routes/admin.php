@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Reporte;
+use Illuminate\Support\Facades\DB;
+// use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\EnvioController;
@@ -9,10 +11,9 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NumerosController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\AplicacionesController;
+
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
-
-use Illuminate\Support\Facades\DB;
 
 Route::resource(
     'aplicaciones',
@@ -104,6 +105,15 @@ Route::get('data', function () {
         echo 'Error: ' . $e->getMessage();
     }
 });
+
+// Route::get('/redis-test', function () {
+//     try {
+//         Redis::set('test', 'Redis is connected!');
+//         return Redis::get('test');
+//     } catch (\Exception $e) {
+//         return "Failed to connect to Redis: " . $e->getMessage();
+//     }
+// });
 
 Route::resource(
     'messages',
