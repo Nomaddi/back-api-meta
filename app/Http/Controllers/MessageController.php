@@ -639,39 +639,33 @@ class MessageController extends Controller
                 ], 200);
 
             } else {
-                $envio = new Envio([
-                    'nombrePlantilla' => $templateName,
-                    'numeroDestinatarios' => count($recipients),
-                    'status' => 'Pendiente',
-                    'sent_messages' => 0,
-                    'body' => $body,
-                    'tag' => $tags
-                ]);
-                $envio->save();
-                if ($envio->id) {
-                    foreach ($recipients as $recipient) {
-                        $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
-                        $payload['to'] = $phone;
-                        //aqui se crea el usuario si no existe
-                        // Verifica si el contacto existe en la base de datos
-                        $contacto = Contacto::where('telefono', $phone)->first();
+                foreach ($recipients as $recipient) {
+                    $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
+                    $payload['to'] = $phone;
+                    //aqui se crea el usuario si no existe
+                    // Verifica si el contacto existe en la base de datos
+                    $contacto = Contacto::where('telefono', $phone)->first();
 
-                        // Si el contacto no existe, créalo
-                        if (!$contacto) {
-                            $contacto = new Contacto();
-                            $contacto->telefono = $phone;
-                            $contacto->nombre = $phone;
-                            $contacto->notas = "Contacto creado automáticamente por colas";
-                            $contacto->save();
+                    // Si el contacto no existe, créalo
+                    if (!$contacto) {
+                        $contacto = new Contacto();
+                        $contacto->telefono = $phone;
+                        $contacto->nombre = $phone;
+                        $contacto->notas = "Contacto creado automáticamente por colas";
+                        $contacto->save();
 
-                            // Asociar los tags seleccionados al nuevo contacto
-                            $contacto->tags()->attach($tags);
-                        }
-                        SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData, $distintivo, $envio->id);
+                        // Asociar los tags seleccionados al nuevo contacto
+                        $contacto->tags()->attach($tags);
                     }
-                } else {
-                    Log::error('Error al guardar el objeto Envio');
+                    SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData, $distintivo);
                 }
+                $envio = new Envio();
+                $envio->nombrePlantilla = $templateName;
+                $envio->numeroDestinatarios = count($recipients);
+                $envio->status = 'Completado';
+                $envio->body = $body;
+                $envio->tag = $tags;
+                $envio->save();
 
                 Log::info('envio encolado' . count($recipients));
             }

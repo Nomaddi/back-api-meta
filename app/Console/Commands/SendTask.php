@@ -65,24 +65,21 @@ class SendTask extends Command
                     if ($rutaArchivo !== false && file_exists($rutaArchivo)) {
                         $lineas = file($rutaArchivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-                        $envio = new Envio([
-                            'nombrePlantilla' => $payload['template']['name'],
-                            'numeroDestinatarios' => count($lineas),
-                            'status' => 'Pendiente',
-                            'sent_messages' => 0,
-                            'body' => $tarea->body,
-                            'tag' => $tarea->tag
-                        ]);
-                        $envio->save();
 
                         foreach ($lineas as $linea) {
                             // $linea contiene el contenido de cada línea
                             // Puedes realizar las operaciones necesarias con cada línea aquí
                             $payload['to'] = $linea;
-                            SendMessage::dispatch($tarea->token_app, $tarea->phone_id, $payload, $tarea->body, $tarea->messageData, $tarea->distintivo, $envio->id);
+                            SendMessage::dispatch($tarea->token_app, $tarea->phone_id, $payload, $tarea->body, $tarea->messageData, $tarea->distintivo);
 
                         }
-
+                        $contacto = new Envio();
+                        $contacto->nombrePlantilla = $payload['template']['name'];
+                        $contacto->numeroDestinatarios = count($lineas);
+                        $contacto->status = 'Completado';
+                        $contacto->body = $tarea->body;
+                        $contacto->tag = $tarea->tag;
+                        $contacto->save();
                     } else {
                         \Log::error("El archivo no existe en la ruta: $rutaArchivo");
                     }

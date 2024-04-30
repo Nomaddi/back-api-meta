@@ -26,14 +26,13 @@ class SendMessage implements ShouldQueue
     public $tokenApp;
     public $phone_id;
     public $distintivo;
-    public $envio_id;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($tokenApp, $phone_id, $payload, $body, $messageData = [], $distintivo, $envio_id)
+    public function __construct($tokenApp, $phone_id, $payload, $body, $messageData = [], $distintivo)
     {
         $this->payload = $payload;
         $this->body = $body;
@@ -41,7 +40,6 @@ class SendMessage implements ShouldQueue
         $this->tokenApp = $tokenApp;
         $this->phone_id = $phone_id;
         $this->distintivo = $distintivo;
-        $this->envio_id = $envio_id; // Corregido aquí
     }
 
     /**
@@ -104,28 +102,5 @@ class SendMessage implements ShouldQueue
         } catch (Exception $e) {
             Log::error('error en catch' . $e->getMessage());
         }
-
-        // try {
-        //     $campaignId = $this->envio_id;
-        //     DB::transaction(function () use ($campaignId) {
-        //         $campaign = Envio::lockForUpdate()->find($campaignId);
-        //         if ($campaign) {
-        //             $campaign->increment('sent_messages');
-        //             if ($campaign->sent_messages == $campaign->numeroDestinatarios) {
-        //                 $campaign->status = 'Completado';
-        //                 $campaign->save();
-        //                 Log::info("Campaña completada: {$campaign->id}");
-        //                 // Aquí puedes también disparar un evento o realizar otras acciones
-        //                 $envio = new MessageController();
-        //                 $envio->sendMessages($this->payload["template"]["name"]);
-        //             }
-        //         } else {
-        //             Log::error("No se encontró la campaña con ID: {$campaignId}");
-        //         }
-        //     });
-        // } catch (Exception $e) {
-        //     Log::error("Error al enviar la confirmacion del envio total: " . $e->getMessage());
-        // }
-
     }
 }

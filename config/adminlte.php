@@ -291,13 +291,14 @@ return [
 
     'menu' => [
         // Navbar items:
+
         [
-            'type'         => 'navbar-search',
-            'text'         => 'search',
+            'type' => 'navbar-search',
+            'text' => 'search',
             'topnav_right' => false,
         ],
         [
-            'type'         => 'fullscreen-widget',
+            'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
 
@@ -305,65 +306,99 @@ return [
 
         [
             'text' => 'blog',
-            'url'  => 'admin/blog',
-            'can'  => 'manage-blog',
+            'url' => 'admin/blog',
+            'can' => 'manage-blog',
         ],
-        ['header' => 'WHATSAPP'],
         [
-            'text' => 'Chats',
-            'url'  => 'admin/messages-index',
+            'text' => 'WHATSAPP',
             'icon' => 'fab fa-fw fa-whatsapp',
-
+            'submenu' => [
+                [
+                    'text' => 'Chats',
+                    'url' => 'admin/messages-index',
+                    'icon' => 'fab fa-fw fa-whatsapp',
+                ],
+                [
+                    'text' => 'Plantillas',
+                    'url' => 'admin/plantillas',
+                    'icon' => 'fas fa-fw fa-file-invoice',
+                ],
+                [
+                    'text' => 'Programados',
+                    'url' => 'admin/programados',
+                    'icon' => 'fas fa-fw fa-clock',
+                ],
+            ],
         ],
         [
-            'text' => 'Plantillas',
-            'url'  => 'admin/plantillas',
-            'icon' => 'fas fa-fw fa-file-invoice',
+            'text' => 'CONTRATACION LOCAL',
+            'icon' => 'fas fa-fw fa-check',
+            'submenu' => [
+                [
+                    'text' => 'Solicitudes',
+                    'url' => 'admin/solicitudes',
+                    'icon' => 'fab fa-fw fa-readme',
+                ],
+            ],
         ],
         [
-            'text' => 'Programados',
-            'url'  => 'admin/programados',
-            'icon' => 'fas fa-fw fa-clock',
-        ],
-        ['header' => 'CONTRATACION LOCAL'],
-        [
-            'text' => 'Solicitudes',
-            'url'  => 'admin/solicitudes',
-            'icon' => 'fab fa-fw fa-readme',
-
-        ],
-        ['header' => 'BASE DE DATOS'],
-        [
-            'text' => 'Contactos',
-            'url'  => 'admin/contactos',
-            'icon' => 'fas fa-fw fa-users',
+            'text' => 'USUARIOS',
+            'icon' => 'fas fa-fw fa-user',
+            'submenu' => [
+                [
+                    'text' => 'Contactos',
+                    'url' => 'admin/contactos',
+                    'icon' => 'fas fa-fw fa-users',
+                ],
+                [
+                    'text' => 'Etiquetas',
+                    'url' => 'admin/tags',
+                    'icon' => 'fas fa-fw fa-tags',
+                ],
+            ],
         ],
         [
-            'text' => 'Etiquetas',
-            'url'  => 'admin/tags',
-            'icon' => 'fas fa-fw fa-tags',
-        ],
-        ['header' => 'INFORMES'],
-        [
-            'text' => 'Estadisticas',
-            'url'  => 'admin/estadisticas',
-            'icon' => 'fas fa-fw fa-chart-line',
-        ],
-        [
-            'text' => 'Envios plantilla',
-            'url'  => 'admin/envios-plantillas',
-            'icon' => 'fas fa-fw fa-chart-line',
-        ],
-        ['header' => 'CONFIGURACION'],
-        [
-            'text' => 'Aplicaciones',
-            'url'  => 'admin/aplicaciones',
-            'icon' => 'fas fa-fw fa-window-restore',
+            'text' => 'INFORMES',
+            'icon' => 'fas fa-fw fa-flag',
+            'submenu' => [
+                [
+                    'text' => 'Estadisticas',
+                    'url' => 'admin/estadisticas',
+                    'icon' => 'fas fa-fw fa-chart-line',
+                ],
+                [
+                    'text' => 'Envios plantilla',
+                    'url' => 'admin/envios-plantillas',
+                    'icon' => 'fas fa-fw fa-chart-line',
+                ],
+            ],
         ],
         [
-            'text' => 'Numeros',
-            'url'  => 'admin/numeros',
-            'icon' => 'fas fa-fw fa-mobile',
+            'text' => 'CONFIGURACION',
+            'icon' => 'fas fa-fw fa-cogs',
+            'submenu' => [
+                [
+                    'text' => 'Aplicaciones',
+                    'url' => 'admin/aplicaciones',
+                    'icon' => 'fas fa-fw fa-window-restore',
+                ],
+                [
+                    'text' => 'Numeros',
+                    'url' => 'admin/numeros',
+                    'icon' => 'fas fa-fw fa-mobile',
+                ],
+            ],
+        ],
+        [
+            'text' => 'ADMIN',
+            'icon' => 'fas fa-fw fa-stethoscope',
+            'submenu' => [
+                [
+                    'text' => 'Logs',
+                    'url' => 'log-viewer',
+                    'icon' => 'fas fa-exclamation-triangle',
+                ],
+            ],
         ],
     ],
 

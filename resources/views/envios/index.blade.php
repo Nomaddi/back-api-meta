@@ -31,7 +31,7 @@
                 <tr>
                     <th>{{ $app->id }}</th>
                     <th>{{ $app->nombrePlantilla }}</th>
-                    <td>{{ $app->numeroDestinatarios }}/{{ $app->sent_messages }}</td>
+                    <td>{{ $app->numeroDestinatarios }}</td>
                     <td title="{{ $app->body }}">{{ Str::limit($app->body, 50) }}</td>
                     <td>
                         @if ($app->tag && count($app->tag) > 0)
