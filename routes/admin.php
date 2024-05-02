@@ -10,8 +10,9 @@ use App\Http\Controllers\ClocalController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NumerosController;
 use App\Http\Controllers\ContactoController;
-use App\Http\Controllers\AplicacionesController;
+use App\Http\Controllers\ErrorLogController;
 
+use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
 
@@ -122,3 +123,5 @@ Route::resource(
 
 Route::get('messages-index', [MessageController::class, 'chat']); //mostrar todos los registroscl
 
+//envios de errores
+Route::post('log-client-error', [ErrorLogController::class, 'store'])->name('log-client-error');

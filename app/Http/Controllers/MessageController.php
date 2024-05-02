@@ -685,7 +685,10 @@ class MessageController extends Controller
                 'data' => ' Mensajes encolado correctamente.',
             ], 200);
         } catch (Exception $e) {
-            Log::info('Error al obtener mensajes8: ' . $e->getMessage());
+            Log::error('Error en sendMessageTemplate: ' . $e->getMessage(), [
+                'input' => $input,
+                'trace' => $e->getTraceAsString() // esto puede ser muy largo, considera loguear solo si es necesario
+            ]);
             return response()->json([
                 'success' => false,
                 'error' => $e->getMessage(),

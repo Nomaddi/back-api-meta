@@ -546,13 +546,48 @@
                         window.location.reload();
                     });
                 },
-                error: function(error) {
+                error: function(xhr, status, error) {
                     // Ocultar el mensaje de carga
                     Swal.close();
 
-                    // Mostrar SweetAlert con el mensaje de error
-                    Swal.fire('Error en el envío',
-                        'No se pudo enviar el mensaje. Inténtalo de nuevo.', 'error');
+                    // Mostrar detalles del error en la consola para depuración
+                    console.error("AJAX Error: ", status, error);
+                    console.error("Response Text: ", xhr.responseText);
+                    console.error("Status Code: ", xhr.status);
+
+
+                    // Preparar datos de error
+                    var errorData = {
+                        error: status + ' - ' + error,
+                        details: xhr.responseText || 'No response text.'
+                    };
+
+                    // Enviar error al servidor para registro
+                    $.ajax({
+                        type: "POST",
+                        url: "log-client-error",
+                        data: errorData,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            console.log("Error logged in server");
+                        },
+                        error: function(xhr) {
+                            console.log("Failed to log error on server");
+                        }
+                    });
+
+                    // Mostrar mensaje al usuario
+                    // Swal.fire('Error en el envío', 'No se pudo enviar el mensaje. Inténtalo de nuevo.',
+                    // 'error');
+
+                    // Mostrar SweetAlert con detalles del error
+                    Swal.fire({
+                        title: 'Error en el envío',
+                        text: 'No se pudo enviar el mensaje. Inténtalo de nuevo. Detalles: ' + xhr
+                            .responseText
+                    });
                 }
             });
         }

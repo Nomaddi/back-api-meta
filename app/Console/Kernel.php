@@ -16,11 +16,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('send:task --scheduled')->everyFiveMinutes()->when(function () {
-            return TareaProgramada::where('fecha_programada', '<=', now())
-                ->where('status', 'pendiente')
-                ->exists();
-        });
+        $schedule->command('send:task --scheduled')
+                ->everyFiveMinutes()
+                ->when(function () {
+                    return TareaProgramada::where('fecha_programada', '<=', now())
+                        ->where('status', 'pendiente')
+                        ->exists();
+        })
+        ->withoutOverlapping(1500);
     }
 
     /**
