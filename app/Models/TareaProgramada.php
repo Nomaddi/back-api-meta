@@ -26,4 +26,9 @@ class TareaProgramada extends Model
         'tag' => 'array',
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
 }

@@ -5,17 +5,25 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Models\TareaProgramada;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ProgramadosControllers extends Controller
 {
     public function index()
     {
-        // $tareas = TareaProgramada::all();
-        $tareas = TareaProgramada::select('id', 'numeros', 'payload', 'body', 'status', 'fecha_programada', 'created_at')
-            ->orderByDesc('created_at')
+        $user = Auth::user();
+        $tareas = $user->tareasProgramadas()->select(
+            'tarea_programadas.id', // Especifica la tabla de donde se selecciona 'id'
+            'numeros',
+            'payload',
+            'body',
+            'status',
+            'fecha_programada',
+            'tarea_programadas.created_at' // Especifica la tabla para 'created_at' también
+        )
+            ->orderByDesc('tarea_programadas.created_at') // Especifica la tabla para 'created_at' en el orderBy
             ->get();
-
 
         return view(
             'programados.index',

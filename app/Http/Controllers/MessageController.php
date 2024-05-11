@@ -635,6 +635,8 @@ class MessageController extends Controller
                 $tarea->distintivo = $distintivo;
                 $tarea->save();
 
+                $user->tareasProgramadas()->attach($tarea->id);
+
                 // Ejecutar el comando SendTask con la opción --scheduled
                 Artisan::call('send:task', ['--scheduled' => true]);
 

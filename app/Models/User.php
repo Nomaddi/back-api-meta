@@ -71,4 +71,11 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Envio::class, 'user_envios');
     }
+
+    public function tareasProgramadas()
+    {
+        return $this->belongsToMany(TareaProgramada::class, 'user_tarea_programada', 'user_id', 'tarea_programada_id');
+    }
+
+
 }
