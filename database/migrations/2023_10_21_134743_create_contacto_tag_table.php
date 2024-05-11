@@ -16,13 +16,11 @@ class CreateContactoTagTable extends Migration
         Schema::create('contacto_tag', function (Blueprint $table) {
             $table->id();
             $table->foreignId('contacto_id')
-                ->nullable()
                 ->constrained('contactos')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();
 
             $table->foreignId('tag_id')
-                ->nullable()
                 ->constrained('tags')
                 ->cascadeOnUpdate()
                 ->cascadeOnDelete();

@@ -47,7 +47,8 @@
                             class="btn btn-success btn-sm mb-2" title="Editar">
                             <i class="fa fa-edit"></i>
                         </a>
-                        <a href="{{ route('tags.showContacts', $app->id) }}" class="btn btn-primary btn-sm mb-2"><i class="fa fa-user"></i></a>
+                        <a href="{{ route('tags.showContacts', $app->id) }}" class="btn btn-primary btn-sm mb-2"><i
+                                class="fa fa-user"></i></a>
 
                         <button class="btn btn-danger btn-sm mb-2 deleteApp" data-appid="{{ $app->id }}"
                             data-toggle="modal" data-target="#deleteConfirmationModal"><i class="fa fa-trash"></i></button>
@@ -69,12 +70,22 @@
 @section('css')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css" rel="stylesheet" />
+    <style>
+        #preview-color {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #ccc; // Añade un borde para mejorar la visibilidad
+            border-radius: 4px; // Opcional: bordes redondeados
+        }
+    </style>
 @stop
 
 @section('js')
     <script src="https://code.jquery.com/jquery-3.7.0.js" crossorigin="anonymous"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
     <script>
         new DataTable('#tagsTable');
     </script>
@@ -139,30 +150,11 @@
         });
     </script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Obtiene los elementos del DOM por su ID
-            const colorPicker = document.getElementById('colorPicker');
-            const colorInput = document.getElementById('color');
-
-            // Añade un event listener para el input de color
-            colorPicker.addEventListener('input', function() {
-                // Actualiza el valor del input de texto con el valor seleccionado en el input de color
-                colorInput.value = colorPicker.value;
-            });
-        });
-
-        document.addEventListener('DOMContentLoaded', function() {
-            // Obtiene los elementos del DOM por su ID
-            const colorPicker = document.getElementById('colorPicker2');
-            const colorInput = document.getElementById('color-{{ $app->id }}');
-
-            // Añade un event listener para el input de color
-            colorPicker.addEventListener('input', function() {
-                console.log('hi');
-                // Actualiza el valor del input de texto con el valor seleccionado en el input de color
-                colorInput.value = colorPicker.value;
-            });
-        });
+        function updateColorValue(appId) {
+            var colorPicker = document.querySelector('#modal-edit-' + appId + ' input[type="color"]');
+            var colorInput = document.getElementById('color-' + appId);
+            colorInput.value = colorPicker.value;
+        }
     </script>
     <script>
         $(document).ready(function() {

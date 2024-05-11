@@ -14,6 +14,7 @@ use PhpParser\Node\Expr;
 use App\Jobs\SendMessage;
 use App\Models\Distintivo;
 use App\Libraries\Whatsapp;
+use App\Models\UserContact;
 use App\Models\Aplicaciones;
 use Illuminate\Http\Request;
 use App\Models\TareaProgramada;
@@ -30,23 +31,26 @@ class MessageController extends Controller
 {
     public function NumbersApps()
     {
-        $numeros = Numeros::all();
+        $user = Auth::user();
+        $aplicaciones = $user->aplicaciones()->with('numeros')->get();
         $distintivos = Distintivo::all();
-        $tags = Tag::with('contactos')->get();
+        $tags = $user->tags()->with('contactos')->get();
         return view('plantillas/index', [
-            'numeros' => $numeros,
+            'numeros' => $aplicaciones->pluck('numeros')->flatten(),
             'tags' => $tags,
             'distintivos' => $distintivos,
         ]);
     }
     public function chat()
     {
-        $numeros = Numeros::all();
-        $aplicaciones = Aplicaciones::all();
+        $user = Auth::user();
+
+        // $numeros = Numeros::all();
+        $numeros = $user->numeros()->with('aplicacion')->get();
+
 
         return view('chat/index', [
-            'numeros' => $numeros,
-            'aplicaciones' => $aplicaciones
+            'numeros' => $numeros
         ]);
     }
     public function index(Request $request)
@@ -58,10 +62,10 @@ class MessageController extends Controller
             $messages = DB::table('messages', 'm')
                 ->where('m.phone_id', $phone_id) // Filtrar por el valor de phone_id
                 ->where('m.created_at', '>', Carbon::now()->subDay()) // Filtrar por las últimas 24 horas
-                ->where('m.outgoing', '=', '0') // Filtrar por las últimas 24 horas
+                // ->where('m.outgoing', '=', '0') // Filtrar por las últimas 24 horas
                 ->whereRaw('m.id IN (SELECT MAX(id) FROM messages m2 GROUP BY wa_id)')
                 ->orderByDesc('m.id')
-                ->limit(30) // Limitar a los 30 primeros registros
+                ->limit(100) // Limitar a los 100 primeros registros
                 ->get();
 
             return response()->json([
@@ -509,6 +513,7 @@ class MessageController extends Controller
 
     public function sendMessageTemplate(Request $request)
     {
+        $user = Auth::user();
         try {
             $input = $request->all();
             $wp = new Whatsapp();
@@ -644,19 +649,29 @@ class MessageController extends Controller
                     $payload['to'] = $phone;
                     //aqui se crea el usuario si no existe
                     // Verifica si el contacto existe en la base de datos
+                    // $contacto = Contacto::where('telefono', $phone)->first();
                     $contacto = Contacto::where('telefono', $phone)->first();
 
                     // Si el contacto no existe, créalo
                     if (!$contacto) {
                         $contacto = new Contacto();
-                        $contacto->telefono = $phone;
                         $contacto->nombre = $phone;
+                        $contacto->telefono = $phone;
                         $contacto->notas = "Contacto creado automáticamente por colas";
                         $contacto->save();
 
-                        // Asociar los tags seleccionados al nuevo contacto
-                        $contacto->tags()->attach($tags);
+                        $userContact = new UserContact();
+                        $userContact->user_id = $user->id;
+                        $userContact->contacto_id = $contacto->id;
+                        $userContact->save();
+
+                        if ($tags) {
+                            $contacto->tags()->syncWithoutDetaching($tags);
+                        }
                     }
+
+
+
                     SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData, $distintivo);
                 }
                 $envio = new Envio();
@@ -666,6 +681,8 @@ class MessageController extends Controller
                 $envio->body = $body;
                 $envio->tag = $tags;
                 $envio->save();
+
+                $user->envios()->attach($envio->id);
 
                 Log::info('envio encolado' . count($recipients));
             }

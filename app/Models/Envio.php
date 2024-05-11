@@ -21,4 +21,8 @@ class Envio extends Model
         'tag' => 'array',
     ];
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_envios');
+    }
 }

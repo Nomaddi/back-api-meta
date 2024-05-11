@@ -8,6 +8,7 @@ use App\Models\Numeros;
 use App\Models\Distintivo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class ClocalController extends Controller
 {
@@ -22,9 +23,28 @@ class ClocalController extends Controller
     public function send(Request $request, $id)
     {
         $solicitud = Clocal::findOrFail($id);
-        $numeros = Numeros::all();
-        $tags = Tag::with('contactos')->get();
+
+        // Obtener el usuario logueado
+        $user = Auth::user();
+
+        // Verificar si hay un usuario logueado
+        if (!$user) {
+            // Opcional: manejar el caso en que no haya usuario logueado
+            // Por ejemplo, redirigir al login o mostrar un mensaje
+            return redirect('login')->with('error', 'Debe estar logueado para ver las aplicaciones.');
+        }
+
+        // Obtener las aplicaciones asociadas al usuario logueado
+        $aplicaciones = $user->aplicaciones;
+
+        // Obtener solo los números relacionados con las aplicaciones del usuario
+        $numeros = Numeros::whereIn('aplicacion_id', $aplicaciones->pluck('id'))->get();
+
+
+        $tags = $user->tags()->with('contactos')->get();
+
         $distintivos = Distintivo::all();
+
         return view('cl/send', [
             'solicitud' => $solicitud,
             'numeros' => $numeros,

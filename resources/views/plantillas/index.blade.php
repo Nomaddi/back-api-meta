@@ -37,17 +37,19 @@
                         <!-- Las opciones se cargarán aquí dinámicamente -->
                     </select>
                 </div>
-                <div>
-                    <label for="distintivoSelect">Seleccione un distintivo</label>
-                    <select id="distintivoSelect" class="form-select form-control mb-3" required>
-                        <option value="">Esto servirá para los reportes</option>
-                        @foreach ($distintivos as $dis)
-                            <option value="{{ $dis->id }}">
-                                {{ $dis->nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                @hasanyrole('ContratacionL|Administrador')
+                    <div>
+                        <label for="distintivoSelect">Seleccione un distintivo</label>
+                        <select id="distintivoSelect" class="form-select form-control mb-3" required>
+                            <option value="">Esto servirá para los reportes</option>
+                            @foreach ($distintivos as $dis)
+                                <option value="{{ $dis->id }}">
+                                    {{ $dis->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                @endhasanyrole
                 <div>
                     <label for="selectTag">Seleccione un grupo para enviar</label>
                     <div>
@@ -157,7 +159,7 @@
                         },
                     });
                     $.ajax({
-                        url: 'message-templates', // Cambia esto por la ruta real a tu controlador
+                        url: 'message-templates',
                         type: 'GET',
                         data: {
                             id_c_business: idCBusiness,
@@ -502,7 +504,7 @@
                 null;
             // Obtener los IDs seleccionados en el select con id "etiqueta"
             selectedTags = $('#etiqueta').val();
-            distintivoSelect = $('#distintivoSelect').val();
+            var distintivoSelect = $('#distintivoSelect').val() ? $('#distintivoSelect').val() : null;
 
 
             // Organizar la información en un objeto

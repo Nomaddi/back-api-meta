@@ -2,81 +2,113 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Exception;
 use Throwable;
-use App\Models\Contacto;
-use App\Models\Tag;
-use App\Imports\ContactosImport;
-use Maatwebsite\Excel\Facades\Excel;
 use DataTables;
+use App\Models\Tag;
+use App\Models\Contacto;
+use App\Models\UserContact;
+use Illuminate\Http\Request;
+use App\Imports\ContactosImport;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ContactoController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
         if ($request->ajax()) {
-            $data = Contacto::with('tags');
-            return DataTables::of($data)->addIndexColumn()
+
+            $data = $user->contactos()->with([
+                'tags' => function ($query) use ($user) {
+                    $query->where('user_id', $user->id);  // Filtrar los tags por el usuario actual
+                }
+            ])->get();
+
+            return DataTables::of($data)
+                ->addIndexColumn()
                 ->addColumn('tags', function ($contacto) {
                     return $contacto->tags->map(function ($tag) {
                         return '<span style="background-color: ' . $tag->color . '; padding: 5px; border-radius: 4px;">' . $tag->nombre . '</span>';
                     })->implode(' ');
                 })
-
                 ->addColumn('action', function ($data) {
                     $button = '<button type="button" name="edit" id="' . $data->id . '" class="edit btn btn-primary btn-sm" style="margin-right: 8px;"> <i class="fa fa-edit"></i></button>';
-                    $button .= '<button type="button" name="edit" id="' . $data->id . '" class="delete btn btn-danger btn-sm"> <i class="fa fa-trash"></i></button>';
+                    $button .= '<button type="button" name="delete" id="' . $data->id . '" class="delete btn btn-danger btn-sm"> <i class="fa fa-trash"></i></button>';
                     return $button;
                 })
-
                 ->rawColumns(['tags', 'action'])
                 ->make(true);
         }
 
-        $tags = Tag::all(); // O cualquier lógica que uses para obtener las etiquetas
+        // Solo tags asociados al usuario
+        $tags = $user->tags()->get();
         return view('contactos.index', compact('tags'));
     }
 
+
+
+
     public function store(Request $request)
     {
-        // Define las reglas de validación
-        $request->validate([
-            'nombre' => 'required',
-            'correo' => 'email',
-            'telefono' => 'required|unique:contactos', // Asegura que el teléfono sea único
-            'etiqueta' => 'required|array',
-        ]);
-
         try {
-            // Crear el contacto si la validación pasa
-            $contacto = new Contacto();
-            $contacto->nombre = $request->nombre;
-            $contacto->apellido = $request->apellido;
-            $contacto->correo = $request->correo;
-            $contacto->telefono = $request->telefono;
-            $contacto->notas = $request->notas;
-            $contacto->save();
 
-            $tag = Tag::whereIn('id', $request->etiqueta)->get();
+            $user = Auth::user();  // Asegúrate de tener el usuario actual
+            // Validar la entrada
+            $data = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'apellido' => 'sometimes|string|max:255',
+                'correo' => 'sometimes|email|max:255',
+                'telefono' => 'required|string',
+                'notas' => 'nullable|string',
+                'etiqueta' => 'sometimes|array',
+                'etiqueta.*' => 'integer|exists:tags,id,user_id,' . $user->id  // Asegura que los tags existen y pertenecen al usuario
+            ]);
 
-            if ($tag->count() > 0) {
-                $contacto->tags()->attach($tag);
-            }
 
-            return response()->json(['success' => 'Contacto creado con éxito.']);
-        } catch (Exception $e) {
-            // Captura y maneja cualquier excepción que ocurra durante la creación del contacto
-            if ($e instanceof \Illuminate\Database\QueryException) {
-                // Si es un error de duplicado (teléfono o correo electrónico)
-                if ($e->errorInfo[1] == 1062) {
-                    return response()->json(['error' => 'No se puede crear el contacto porque ya existe un registro con el mismo número de teléfono o correo electrónico.'], 400);
+            // Verificar si existe un contacto con el mismo teléfono
+            $contacto = Contacto::where('telefono', $data['telefono'])->first();
+
+            if ($contacto) {
+                // Si el contacto ya existe, verificar si el usuario actual ya lo tiene asociado
+                if (!$user->contactos->contains($contacto->id)) {
+                    // Asociar el contacto existente con el usuario actual en user_contacts
+                    $userContact = new UserContact();
+                    $userContact->user_id = $user->id;
+                    $userContact->contacto_id = $contacto->id;
+                    $userContact->save();
                 }
+            } else {
+                // Si no existe, crear un nuevo contacto
+                $contacto = new Contacto();
+                $contacto->fill($data);
+                $contacto->save();
+
+                // Asociar el nuevo contacto con el usuario autenticado en user_contacts
+                $userContact = new UserContact();
+                $userContact->user_id = $user->id;
+                $userContact->contacto_id = $contacto->id;
+                $userContact->save();
             }
 
-            // Otro tipo de errores
-            return response()->json(['error' => 'Ha ocurrido un error al crear el contacto.'], 500);
+            // Asociar tags si se proporcionan, tanto para contactos nuevos como existentes
+            if (!empty($data['etiqueta'])) {
+                $contacto->tags()->syncWithoutDetaching($data['etiqueta']);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $contacto
+            ], 201);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -84,44 +116,127 @@ class ContactoController extends Controller
     public function edit($id)
     {
         if (request()->ajax()) {
-            $data = Contacto::with('tags')
-                ->findOrFail($id);
-            return response()->json(['result' => $data]);
+            try {
+                $user = Auth::user(); // Obtener el usuario autenticado
+
+                // Cargar el contacto junto con sus tags asociados
+                $data = $user->contactos()->where('contactos.id', $id)->with('tags')->first();
+
+                if (!$data) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Contacto no encontrado o no tienes permiso para editarlo.'
+                    ], 404);
+                }
+
+                return response()->json(['result' => $data]);
+            } catch (Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ], 500);
+            }
         }
     }
 
+
     public function update(Request $request)
     {
-        $request->validate([
-            'nombre' => 'required',
-            'correo' => 'email',
-            'telefono' => 'required',
-            'etiqueta' => 'required|array', // Asegúrate de que 'etiqueta' sea un array
-        ]);
-        $contacto = Contacto::findOrFail($request->hidden_id);
-        $contacto->nombre = $request->nombre;
-        $contacto->apellido = $request->apellido;
-        $contacto->correo = $request->correo;
-        $contacto->telefono = $request->telefono;
-        $contacto->notas = $request->notas;
-        $contacto->save();
+        if (request()->ajax()) {
+            try {
+                $user = Auth::user(); // Obtener el usuario autenticado
 
-        $tagIds = $request->etiqueta ?? []; // Obtén un array de IDs de etiquetas a asignar al contacto
+                $contacto = $user->contactos()->where('contactos.id', $request->hidden_id)->with([
+                    'tags' => function ($query) use ($user) {
+                        $query->where('user_id', $user->id); // Cargar solo tags del usuario
+                    }
+                ])->first();
 
-        $contacto->tags()->sync($tagIds);
+                if (!$contacto) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Contacto no encontrado o no tienes permiso para actualizarlo.'
+                    ], 404);
+                }
 
-        return response()->json(['success' => 'Contacto actualizado con exito']);
+                // Validar la entrada
+                $data = $request->validate([
+                    'nombre' => 'sometimes|string|max:255',
+                    'apellido' => 'sometimes|string|max:255',
+                    'correo' => 'sometimes|email|max:255',
+                    'telefono' => 'sometimes|string|max:255|unique:contactos,telefono,' . $contacto->id,
+                    'notas' => 'nullable|string',
+                    'etiqueta' => 'sometimes|array',
+                    'etiqueta.*' => 'integer|exists:tags,id,user_id,' . $user->id
+                ]);
+
+                // Actualizar el contacto
+                $contacto->update($data);
+
+                // Sincronizar tags específicamente para este usuario
+                if (isset($data['etiqueta'])) {
+                    // Encontrar todos los tags actuales del usuario para este contacto
+                    $currentTags = $contacto->tags()->where('user_id', $user->id)->pluck('tags.id')->toArray();
+
+                    // Determinar los tags para agregar y los tags para quitar
+                    $tagsToAdd = array_diff($data['etiqueta'], $currentTags);
+                    $tagsToRemove = array_diff($currentTags, $data['etiqueta']);
+
+                    // Sincronizar los cambios
+                    $contacto->tags()->syncWithoutDetaching($tagsToAdd);    // Añadir nuevos tags
+                    $contacto->tags()->detach($tagsToRemove);                // Eliminar tags no deseados
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $contacto
+                ], 200);
+            } catch (Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
     }
+
+
+
+
 
     public function destroy($id)
     {
-        $contacto = Contacto::findOrFail($id);
+        if (request()->ajax()) {
+            try {
+                $user = Auth::user(); // Obtener el usuario autenticado
 
-        // Elimina las relaciones de muchos a muchos con las etiquetas
-        $contacto->tags()->detach();
+                // Encontrar el contacto asegurándose de que el usuario tiene permiso para eliminarlo
+                $contacto = $user->contactos()->where('contactos.id', $id)->first();
 
-        // Luego elimina el contacto
-        $contacto->delete();
+                if (!$contacto) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Contacto no encontrado o no tienes permiso para eliminarlo.'
+                    ], 404);
+                }
+
+                // Eliminar las relaciones de tags antes de eliminar el contacto
+                $contacto->tags()->detach();
+
+                // Eliminar el contacto
+                $contacto->delete();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Contacto eliminado exitosamente.'
+                ], 200);
+            } catch (Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ], 500);
+            }
+        }
     }
 
     public function uploadUsers(Request $request)
@@ -147,7 +262,10 @@ class ContactoController extends Controller
 
     public function exportar()
     {
-        $contactos = Contacto::with('tags')->get(); // Cargar anticipadamente las etiquetas
+        $user = Auth::user(); // Asegúrate de usar Auth para obtener el usuario actual
+
+        // Cargar anticipadamente las etiquetas de los contactos asociados al usuario
+        $contactos = $user->contactos()->with('tags')->get();
         $nombreArchivo = 'contactos.csv';
 
         $headers = array(
@@ -158,7 +276,7 @@ class ContactoController extends Controller
             "Expires" => "0"
         );
 
-        $columnas = array('ID', 'Nombre', 'Teléfono', 'Etiquetas'); // Agrega 'Etiquetas'
+        $columnas = array('ID', 'Nombre', 'Apellido', 'Correo', 'Teléfono', 'Etiquetas'); // Considera incluir otros campos útiles
 
         $callback = function () use ($contactos, $columnas) {
             $file = fopen('php://output', 'w');
@@ -168,13 +286,20 @@ class ContactoController extends Controller
                 // Concatenar todas las etiquetas en una cadena separada por comas
                 $etiquetas = $contacto->tags->pluck('nombre')->implode(', ');
 
-                fputcsv($file, array ($contacto->id, $contacto->nombre, $contacto->telefono, $etiquetas));
+                // Asegúrate de incluir todos los campos necesarios
+                fputcsv($file, [
+                    $contacto->id,
+                    $contacto->nombre,
+                    $contacto->apellido,  // Asumiendo que también quieres incluir el apellido
+                    $contacto->correo,    // y el correo electrónico
+                    $contacto->telefono,
+                    $etiquetas
+                ]);
             }
             fclose($file);
         };
 
         return response()->stream($callback, 200, $headers);
     }
-
 
 }

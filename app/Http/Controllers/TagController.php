@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Exception;
 use App\Models\Tag;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TagController extends Controller
 {
     public function index()
     {
-        $tags = Tag::with('contactos')->get();
+        $user = Auth::user();
+        // Obtener todos los tags del usuario autenticado
+        $tags = Tag::where('user_id', $user->id)->get();
+
         return view('tags/index', [
             'tags' => $tags
         ]);
@@ -18,16 +22,27 @@ class TagController extends Controller
     public function store(Request $request)
     {
         try {
-            $tags = new Tag();
-            $tags->nombre = $request->nombre;
-            $tags->descripcion = $request->descripcion;
-            $tags->color = $request->color;
-            $tags->save();
+            $user = Auth::user();
+            // Validar la entrada
+            $data = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'descripcion' => 'required|string|max:500',
+                'color' => 'required|string|max:255',
+            ]);
+
+            // Crear el tag
+            $tag = new Tag;
+            $tag->nombre = $data['nombre'];
+            $tag->descripcion = $data['descripcion'];
+            $tag->color = $data['color'];
+            $tag->user_id = $user->id;
+            $tag->save();
+
 
             return response()->json([
                 'success' => true,
-                'data' => $tags,
-            ], 200);
+                'data' => $tag,
+            ], 201);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
@@ -39,49 +54,67 @@ class TagController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $tag = Tag::findOrFail($id); // Corrige aquí el uso de $id
-            $tag->nombre = $request->nombre;
-            $tag->descripcion = $request->descripcion;
-            $tag->color = $request->color;
-            $tag->save();
+            $user = Auth::user();
+
+            // Buscar el tag y asegurarse de que pertenece al usuario autenticado
+            $tag = Tag::where('id', $id)->where('user_id', $user->id)->first();
+
+            // Si el tag no existe o no pertenece al usuario, devolver error
+            if (!$tag) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tag no encontrado o no tienes permiso para modificarlo.'
+                ], 404);
+            }
+
+            // Validar la entrada
+            $data = $request->validate([
+                'nombre' => 'sometimes|string|max:255',
+                'descripcion' => 'sometimes|string|max:500',
+                'color' => 'sometimes|string|max:255'
+            ]);
+
+            // Actualizar el tag
+            $tag->update($data);
 
             return response()->json([
                 'success' => true,
-                'data' => $tag,
+                'data' => $tag
             ], 200);
         } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'error' => $e->getMessage(),
+                'error' => $e->getMessage()
             ], 500);
         }
     }
     public function destroy(Request $request)
     {
-        $tag = Tag::findOrFail($request->id);
+        try {
+            $user = Auth::user();
+            $tag = Tag::where('id', $request->id)->where('user_id', $user->id)->first();
 
-        //elimina el tag y de todos los contactos
-        // $tag->contactos()->detach();
+            if (!$tag) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tag no encontrado o no tienes permiso para eliminarlo.'
+                ], 404);
+            }
+            // Si no hay contactos ni usuarios relacionados, eliminar la etiqueta
+            $tag->delete();
 
-        //No deja eliminar una etiqueta si un usuario la tiene agregada
-        // Verifica si la etiqueta está relacionada con algún contacto
-        if ($tag->contactos->count() > 0) {
-            // Si hay contactos que dependen de esta etiqueta, muestra un mensaje de advertencia
+            return response()->json([
+                'success' => true,
+                'message' => 'Etiqueta eliminada correctamente.',
+            ], 200);
+        } catch (Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'No se puede eliminar la etiqueta porque está relacionada con contactos.',
-                'related_contacts' => $tag->contactos, // Puedes enviar información sobre los contactos relacionados
-            ], 400);
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Si no hay contactos relacionados, elimina la etiqueta
-        $tag->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Etiqueta eliminada correctamente.',
-        ], 200);
     }
+
 
     public function showContacts($tagId)
     {

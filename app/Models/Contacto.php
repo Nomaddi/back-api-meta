@@ -17,10 +17,7 @@ class Contacto extends Model
         'notas'
     ];
 
-    public function tags()
-    {
-        return $this->belongsToMany(Tag::class, 'contacto_tag', 'contacto_id', 'tag_id');
-    }
+
 
     // public function mensajes()
     // {
@@ -31,13 +28,13 @@ class Contacto extends Model
         return $this->hasMany(Message::class, 'telefono', 'wa_id');
     }
 
-    public function createWithTags(array $data)
+    public function createWithTags(array $data, $clientId)
     {
         $contacto = $this->create($data);
 
-        // Obtén los tags a partir de los datos
+        // Obtén los tags a partir de los datos y el cliente específico
         $tagNames = explode(',', $data['tags']);
-        $tags = Tag::whereIn('nombre', $tagNames)->pluck('id');
+        $tags = Tag::where('client_id', $clientId)->whereIn('nombre', $tagNames)->pluck('id');
 
         // Relaciona los tags al contacto
         $contacto->tags()->sync($tags);
@@ -56,5 +53,15 @@ class Contacto extends Model
         $contacto->tags()->attach($tag->id);
 
         return $contacto;
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_contacts', 'user_id', 'contacto_id');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'contacto_tag', 'contacto_id', 'tag_id');
     }
 }

@@ -25,4 +25,9 @@ class Numeros extends Model
         return $this->belongsTo(Aplicaciones::class, 'aplicacion_id');
     }
 
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'user_numeros', 'numero_id', 'user_id');
+    }
+
 }

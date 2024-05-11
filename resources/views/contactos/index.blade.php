@@ -190,6 +190,9 @@
                         $('#contactosTable').DataTable().ajax.reload();
                         Swal.fire('Eliminado', 'Contacto eliminado correctamente', 'success');
                     }, 2000);
+                },
+                error: function(error) {
+                    Swal.fire('Error', 'No se pudo eliminar el contacto', 'error');
                 }
             })
         });

@@ -45,8 +45,9 @@
                             <i class="fa fa-edit"></i>
                         </a>
 
-                        <button class="btn btn-danger btn-sm mb-2 deleteApp" data-appid="{{ $app->id }}"
-                            data-toggle="modal" data-target="#deleteConfirmationModal"><i class="fa fa-trash"></i></button>
+                        <button class="btn btn-danger btn-sm mb-2 deleteApp" data-appid="{{ $app->id }}">
+                            <i class="fa fa-trash"></i>
+                        </button>
 
                     </td>
                 </tr>
@@ -54,47 +55,64 @@
                 @include('aplicaciones.modals.show-modal')
                 {{-- modal edit --}}
                 @include('aplicaciones.modals.edit-modal')
-                <!-- Modal de Confirmación de Eliminación -->
-                @include('aplicaciones.modals.delete-modal')
-                {{-- modal create --}}
             @endforeach
         </tbody>
     </table>
     @include('aplicaciones.modals.create-modal')
 @endsection
 @section('css')
-<link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.bootstrap4.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.bootstrap4.css">
 @stop
 
 @section('js')
     <script src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script>
     <script src="//cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap4.min.js"></script>
     <script>
-        // new DataTable('#aplicacionesTable');
-        $('#aplicacionesTable').DataTable({
+        var table = $('#aplicacionesTable').DataTable({
             responsive: true
         });
     </script>
     <script>
         $(document).ready(function() {
             $('form[id^="editForm-"]').on('submit', function(e) {
-                e.preventDefault(); // Evitar la recarga de la página
-                var appId = this.id.split('-')[1]; // Obtener el ID de la aplicación
-                var formData = $(this).serialize(); // Serializar los datos del formulario
+                e.preventDefault();
+                var appId = this.id.split('-')[1];
+                var formData = $(this).serialize();
+                var row = table.row($(this).parents('tr'));
 
                 $.ajax({
                     type: "POST",
-                    url: "aplicaciones/" + appId, // Ajusta esta URL según tu enrutamiento
+                    url: "aplicaciones/" + appId,
                     data: formData,
                     success: function(response) {
-                        // $('#modal-show-' + appId).modal('hide'); // Ocultar el modal
-                        alert("Aplicación actualizada con éxito"); // Mostrar mensaje de éxito
-                        location
-                            .reload(); // Opcional: recargar la página o actualizar la vista de alguna otra manera
+                        if (response.data) {
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Creado!',
+                                text: 'Aplicación actualizada con éxito',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Recarga la página para reflejar los cambios
+                                    location.reload();
+                                }
+                            });
+
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo actualizar la aplicación.',
+                            });
+                        }
                     },
                     error: function(error) {
-                        console.log(error);
-                        alert("Error al actualizar la aplicación");
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Error al actualizar la aplicación',
+                        });
                     }
                 });
             });
@@ -102,34 +120,47 @@
     </script>
     <script>
         $(document).ready(function() {
-            // Cuando se clickea el botón de eliminar, asignar el ID al botón del modal
-            $('.deleteApp').click(function() {
-                var appId = $(this).attr('data-appid');
-                $('#delete-btn').data('appid',
-                    appId); // Asignar el ID como un atributo data del botón de eliminar
-            });
-
-            // Manejar el evento click del botón de eliminar en el modal
-            $('#delete-btn').click(function() {
+            // Escuchar clics en botones de eliminar dentro de la tabla
+            $('#aplicacionesTable').on('click', '.deleteApp', function() {
                 var appId = $(this).data('appid');
+                var row = table.row($(this).parents('tr')); // Encuentra la fila del botón clickeado
 
-                $.ajax({
-                    url: 'aplicaciones/' +
-                        appId, // Asegúrate de ajustar la URL a tu ruta de eliminación
-                    type: 'POST',
-                    data: {
-                        _method: 'DELETE',
-                        _token: $('meta[name="csrf-token"]').attr(
-                            'content') // Asegúrate de tener un meta tag con el CSRF token
-                    },
-                    success: function(result) {
-                        // Aquí puedes recargar la tabla o eliminar la fila del DOM para reflejar el cambio
-                        alert("Registro eliminado con éxito");
-                        location
-                            .reload(); // Opcional: actualiza la página o haz los ajustes necesarios en el DOM
-                    },
-                    error: function(request, status, error) {
-                        alert("No se pudo eliminar el registro");
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: "No podrás revertir esto!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, eliminar!',
+                    cancelButtonText: 'No, cancelar!',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'aplicaciones/' +
+                                appId, // Asegúrate de que esta es la URL correcta
+                            type: 'POST',
+                            data: {
+                                _method: 'DELETE',
+                                _token: $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function(result) {
+                                row.remove().draw();
+                                Swal.fire(
+                                    'Eliminado!',
+                                    'La aplicación ha sido eliminada.',
+                                    'success'
+                                );
+                            },
+                            error: function(request, status, error) {
+                                Swal.fire(
+                                    'Error!',
+                                    'No se pudo eliminar la aplicación. ' + request
+                                    .responseText,
+                                    'error'
+                                );
+                            }
+                        });
                     }
                 });
             });
@@ -138,24 +169,46 @@
     <script>
         $(document).ready(function() {
             $('#createForm').submit(function(e) {
-                e.preventDefault(); // Prevenir la recarga de la página
-                var formData = $(this).serialize(); // Serializa los datos del formulario
+                e.preventDefault();
+                var formData = $(this).serialize();
 
                 $.ajax({
                     type: "POST",
-                    url: "{{ route('aplicaciones.store') }}", // Asegúrate de que esta es la ruta correcta
+                    url: "{{ route('aplicaciones.store') }}",
                     data: formData,
                     success: function(response) {
-                        alert("Aplicación creada con éxito"); // Mensaje de éxito
-                        location
-                            .reload();
+                        if (response.data) {
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Creado!',
+                                text: 'Aplicación creada con éxito',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Recarga la página para reflejar los cambios
+                                    location.reload();
+                                }
+                            });
+
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudo obtener la información de la aplicación.',
+                            });
+                        }
                     },
                     error: function(error) {
-                        console.log(error);
-                        alert("Error al crear la aplicación");
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error al crear la aplicación',
+                        });
                     }
                 });
             });
         });
     </script>
+
 @stop

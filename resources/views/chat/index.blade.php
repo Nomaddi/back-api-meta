@@ -384,9 +384,9 @@
                         title: 'Cargando chats...',
                         text: 'Por favor espera',
                         allowOutsideClick: false,
-                        onBeforeOpen: () => {
+                        willOpen: () => {
                             Swal.showLoading();
-                        },
+                        }
                     });
                     $.ajax({
                         url: 'messages', // Cambia esto por la ruta real a tu controlador
@@ -450,9 +450,9 @@
                     title: 'Cargando mensajes...',
                     text: 'Por favor espera',
                     allowOutsideClick: false,
-                    onBeforeOpen: () => {
+                    willOpen: () => {
                         Swal.showLoading();
-                    },
+                    }
                 });
                 // Si nextPageUrl es null, usamos la URL inicial para cargar los mensajes más recientes.
                 // Si no, usamos nextPageUrl para cargar más mensajes.
