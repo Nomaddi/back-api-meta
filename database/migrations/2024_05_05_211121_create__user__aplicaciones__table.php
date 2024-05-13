@@ -10,7 +10,7 @@ class CreateUserAplicacionesTable extends Migration
     {
         Schema::create('user_aplicaciones', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('user')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('aplicacion_id')->constrained('aplicaciones')->onDelete('cascade');
             $table->timestamps();
         });
