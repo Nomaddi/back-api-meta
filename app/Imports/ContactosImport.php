@@ -93,7 +93,7 @@ class ContactosImport implements ToModel, WithHeadingRow, WithValidation, WithBa
             ],
             '*.telefono' => [
                 'integer',
-                'digits:12',
+                // 'digits:12',
                 'required'
             ],
             '*.tags' => [
@@ -108,7 +108,7 @@ class ContactosImport implements ToModel, WithHeadingRow, WithValidation, WithBa
             '*.nombre.required' => 'El campo nombre es obligatorio.',
             '*.nombre.max' => 'El campo nombre no debe superar los 255 caracteres.',
             '*.telefono.integer' => 'El campo teléfono debe ser un número entero.',
-            '*.telefono.max' => 'El campo teléfono no debe superar los 12 dígitos.',
+            // '*.telefono.max' => 'El campo teléfono no debe superar los 12 dígitos.',
             '*.telefono.required' => 'El campo teléfono es obligatorio.',
             '*.tags.required' => 'El campo tags es obligatorio.',
         ];
