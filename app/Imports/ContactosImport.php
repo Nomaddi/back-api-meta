@@ -4,7 +4,7 @@ namespace App\Imports;
 
 use App\Models\Tag;
 use App\Models\Contacto;
-use Illuminate\Validation\Rule;
+use App\Models\UserContact;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -24,19 +24,19 @@ class ContactosImport implements ToModel, WithHeadingRow, WithValidation, WithBa
     public function model(array $row)
     {
         $user = $this->user;
+        $contacto = Contacto::where('telefono', $row['telefono'])->first();
 
-        /// Intentar encontrar un contacto existente con el mismo teléfono que aún no está asociado con este usuario
-        $contactoExistente = Contacto::where('telefono', $row['telefono'])
-            ->whereDoesntHave('users', function ($query) use ($user) {
-                $query->where('users.id', $user->id);
-            })->first();
-
-        if ($contactoExistente) {
-            // Aquí deberías asociar el contacto existente con el usuario actual
-            $user->contactos()->syncWithoutDetaching([$contactoExistente->id]);
-            $contacto = $contactoExistente; // Asegúrate de asignar el contacto existente a la variable $contacto para el manejo de tags
+        if ($contacto) {
+            // Si el contacto ya existe, verificar si el usuario actual ya lo tiene asociado
+            if (!$user->contactos->contains($contacto->id)) {
+                // Asociar el contacto existente con el usuario actual en user_contacts
+                $userContact = new UserContact();
+                $userContact->user_id = $user->id;
+                $userContact->contacto_id = $contacto->id;
+                $userContact->save();
+            }
         } else {
-            // Crear un nuevo contacto si no existe
+            // Si no existe, crear un nuevo contacto
             $contacto = Contacto::create([
                 'nombre' => $row['nombre'],
                 'apellido' => $row['apellido'],
@@ -44,6 +44,12 @@ class ContactosImport implements ToModel, WithHeadingRow, WithValidation, WithBa
                 'telefono' => $row['telefono'],
                 "notas" => $row['notas'],
             ]);
+
+            // Asociar el nuevo contacto con el usuario autenticado en user_contacts
+            $userContact = new UserContact();
+            $userContact->user_id = $user->id;
+            $userContact->contacto_id = $contacto->id;
+            $userContact->save();
         }
 
         // Si 'tags' está presente y no es nulo
@@ -61,15 +67,10 @@ class ContactosImport implements ToModel, WithHeadingRow, WithValidation, WithBa
                 $tagIds[] = $tag->id;
             }
 
-            // Asociar los tags al contacto sin eliminar relaciones previas de tags
+            // Asociar los tags al contacto
             $contacto->tags()->syncWithoutDetaching($tagIds);
-
-            // NOTA: Asegúrate de que esta parte del código es necesaria
-            // Asociar los tags al usuario sin eliminar previas relaciones de tags
-            if ($user) {
-                $user->tags()->syncWithoutDetaching($tagIds);
-            }
         }
+
     }
 
     public function batchSize(): int
@@ -91,40 +92,14 @@ class ContactosImport implements ToModel, WithHeadingRow, WithValidation, WithBa
                 'required'
             ],
             '*.telefono' => [
-                'required',
                 'integer',
                 'digits:12',
-                function ($attribute, $value, $fail) {
-                    if ($this->contactExistsForCurrentUser($value)) {
-                        $fail('El número de teléfono ya está registrado para este usuario.');
-                    }
-                },
+                'required'
             ],
             '*.tags' => [
-                'required',
-                function ($attribute, $value, $fail) {
-                    $tags = explode(',', $value);
-                    foreach ($tags as $tag) {
-                        $tag = trim($tag);
-                        if (!$this->tagExistsForCurrentUser($tag)) {
-                            $fail("El tag, $tag no existe o no está asociado con su cuenta.");
-                        }
-                    }
-                },
+                'required'
             ],
         ];
-    }
-
-    protected function contactExistsForCurrentUser($phone)
-    {
-        // Comprobar si el usuario actual ya tiene un contacto con este número de teléfono
-        return $this->user->contactos()->where('telefono', $phone)->exists();
-    }
-
-    protected function tagExistsForCurrentUser($tagName)
-    {
-
-        return $this->user->tags()->where('nombre', $tagName)->exists();
     }
 
     public function customValidationMessages()

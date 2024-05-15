@@ -70,7 +70,7 @@ Route::delete('permisos/{id}', [PermisoController::class, 'destroy'])->middlewar
 
 
 // importar contactos
-Route::post('upload-contactos', [ContactoController::class, 'uploadUsers'])->name('importar-contactos');
+Route::post('upload-contactos', [ContactoController::class, 'uploadUsers'])->middleware('can:importar-contactos')->name('importar-contactos');
 // exporta contactos
 Route::get('exportar-contactos', [ContactoController::class, 'exportar'])->name('exportar-contactos');
 
@@ -81,7 +81,7 @@ Route::get('plantillas', [MessageController::class, 'NumbersApps'])->middleware(
 Route::get('send-message', [MessageController::class, 'sendMessages']);
 Route::get('message-templates', [MessageController::class, 'loadMessageTemplates'])->name('message.templates');
 Route::post('send-message-templates', [MessageController::class, 'sendMessageTemplate'])->name('send.message.templates');
-Route::post('upload-pdf', [MessageController::class, 'upload'])->name('upload.pdf');
+Route::post('upload-pdf', [MessageController::class, 'upload'])->middleware('can:upload.pdf')->name('upload.pdf');
 
 //estadisticas
 Route::get('estadisticas', [EstadisticasController::class, 'index'])->middleware('can:estadisticas')->name('estadisticas'); //mostrar todos los registros
