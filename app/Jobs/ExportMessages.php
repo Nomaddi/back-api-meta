@@ -38,17 +38,17 @@ class ExportMessages implements ShouldQueue
 
                 $fileName = 'messages_export_' . now()->format('Y-m-d_His') . '.csv';  // Cambio de extensión a CSV
                 $filePath = storage_path('app/' . $fileName);
-                Log::info($filePath);
-                Log::info('Antes de crear CSV');
 
                 // Crear archivo CSV
                 $handle = fopen($filePath, 'w');
+
+                $headers = ['ID', 'Nombre', 'Numero', 'Estado', 'Distintivo', 'vacio', 'Fecha'];
+                fputcsv($handle, $headers);
+
                 foreach ($results as $row) {
                     fputcsv($handle, (array) $row);
                 }
                 fclose($handle);
-
-                Log::info('Después de crear CSV');
 
                 // Actualizar el registro del reporte con la ruta del archivo
                 $report = Reporte::find($this->reportId);

@@ -192,16 +192,17 @@
                                                     Crear
                                                 </a>
                                             </td>
-                                            @if ($reporte->archivo)
+                                            @if ($reporte->archivo && $reporte->archivoExiste())
                                                 <td>
                                                     <a href="{{ route('download', $reporte->id) }}"
                                                         class="btn btn-primary btn-sm mb-2">
-                                                        <i class="fa fa-download"></i></a>
+                                                        <i class="fa fa-download"></i> Descargar
+                                                    </a>
                                                 </td>
                                             @else
                                                 <td>
                                                     <span>
-                                                        <p>esparando..</p>
+                                                        <p>Clic en crear..</p>
                                                     </span>
                                                 </td>
                                             @endif
@@ -385,38 +386,42 @@
         function exportarMensaje(reporteId) {
             Swal.fire({
                 title: '¿Estás seguro?',
-                text: "¡Iniciarás la exportación de los mensajes!",
+                text: "¿Deseas iniciar la exportación de los mensajes? Este proceso puede tardar unos momentos.",
+                icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: '¡Sí, exportar ahora!',
-            }).then((result) => {
-                if (result.value) {
-                    console.log("Confirmación del usuario");
-                    $.ajax({
+                cancelButtonText: 'Cancelar',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return $.ajax({
                         url: 'exportar-mensajes/' + reporteId,
                         type: 'GET',
-                        success: function(response) {
-                            Swal.fire(
-                                '¡Iniciado!',
-                                'La exportación ha comenzado.',
-                                'success'
-                            );
-                        },
-                        error: function(xhr, status, error) {
-                            var errorMessage = 'No se pudo iniciar la exportación';
-                            if (xhr.responseJSON && xhr.responseJSON.error) {
-                                errorMessage += ': ' + xhr.responseJSON.error;
-                            }
-                            Swal.fire(
-                                'Error',
-                                errorMessage,
-                                'error'
-                            );
+                        beforeSend: function() {
+                            Swal.showLoading();
                         }
+                    }).fail(function(xhr, status, error) {
+                        // Manejo de errores
+                        var errorMessage = 'No se pudo iniciar la exportación';
+                        if (xhr.responseJSON && xhr.responseJSON.error) {
+                            errorMessage += ': ' + xhr.responseJSON.error;
+                        }
+                        Swal.fire('Error', errorMessage, 'error');
+                    });
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.value) {
+                    Swal.fire(
+                        '¡Exportación Finalizada!',
+                        'Ya la puedes descargar y recibirás el link de descarga a tu WhatsApp.',
+                        'success'
+                    ).then(() => {
+                        location
+                    .reload(); // También recarga en caso de que el usuario cierre el SweetAlert manualmente
                     });
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
-                    console.log("Cancelado por el usuario");
                     Swal.fire(
                         'Cancelado',
                         'No se inició la exportación.',
@@ -426,4 +431,5 @@
             });
         }
     </script>
+
 @stop
