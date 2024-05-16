@@ -23,6 +23,8 @@ class ExportMessages implements ShouldQueue
     protected $endDate;
     protected $reportId;
 
+    public $timeout = 120000;
+
     public function __construct($startDate, $endDate, $reportId)
     {
         $this->startDate = $startDate;
