@@ -404,9 +404,13 @@
                             );
                         },
                         error: function(xhr, status, error) {
+                            var errorMessage = 'No se pudo iniciar la exportación';
+                            if (xhr.responseJSON && xhr.responseJSON.error) {
+                                errorMessage += ': ' + xhr.responseJSON.error;
+                            }
                             Swal.fire(
                                 'Error',
-                                'No se pudo iniciar la exportación: ' + error,
+                                errorMessage,
                                 'error'
                             );
                         }
