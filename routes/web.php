@@ -32,7 +32,9 @@ Route::get('/whatsapp-webhook', [MessageController::class, 'verifyWebhook']);
 Route::post('/whatsapp-webhook', [MessageController::class, 'processWebhook']);
 Route::get('/send-message', [MessageController::class, 'sendMessages']);
 
-
+Route::get('/check-session', function () {
+    return response()->json(['is_logged_in' => auth()->check()]);
+});
 
 // Agrupando rutas y aplicando el middleware 'auth'
 Route::middleware(['auth'])->group(function () {

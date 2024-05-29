@@ -16,19 +16,19 @@
     <div class="wrapper">
 
         {{-- Preloader Animation (fullscreen mode) --}}
-        @if($preloaderHelper->isPreloaderEnabled())
+        @if ($preloaderHelper->isPreloaderEnabled())
             @include('adminlte::partials.common.preloader')
         @endif
 
         {{-- Top Navbar --}}
-        @if($layoutHelper->isLayoutTopnavEnabled())
+        @if ($layoutHelper->isLayoutTopnavEnabled())
             @include('adminlte::partials.navbar.navbar-layout-topnav')
         @else
             @include('adminlte::partials.navbar.navbar')
         @endif
 
         {{-- Left Main Sidebar --}}
-        @if(!$layoutHelper->isLayoutTopnavEnabled())
+        @if (!$layoutHelper->isLayoutTopnavEnabled())
             @include('adminlte::partials.sidebar.left-sidebar')
         @endif
 
@@ -45,7 +45,7 @@
         @endif
 
         {{-- Right Control Sidebar --}}
-        @if(config('adminlte.right_sidebar'))
+        @if (config('adminlte.right_sidebar'))
             @include('adminlte::partials.sidebar.right-sidebar')
         @endif
 
@@ -55,12 +55,11 @@
 @section('adminlte_js')
     @stack('js')
     @yield('js')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
             function checkSession() {
                 $.ajax({
-                    url: '{{ url('check-session') }}',
+                    url: '{{ url("/check-session") }}',
                     method: 'GET',
                     success: function(response) {
                         if (!response.is_logged_in) {
@@ -91,7 +90,7 @@
             }
 
             // Check session every 5 minutes (300000 milliseconds)
-            setInterval(checkSession, 300000);
+            setInterval(checkSession, 7200000);
         });
     </script>
 @stop

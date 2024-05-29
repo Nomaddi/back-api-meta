@@ -140,10 +140,8 @@ Route::post('log-client-error', [ErrorLogController::class, 'store'])->name('log
 
 //verificar si no esta inactiva la sesion del usuario
 
-Route::get('check-session', function () {
-    return response()->json(['is_logged_in' => auth()->check()]);
-});
+
 //actualizando el tocken si este vencio
-Route::get('refresh-csrf', function() {
+Route::get('refresh-csrf', function () {
     return response()->json(['csrf_token' => csrf_token()]);
-});
+})->middleware('can:refresh-csrf')->name('refresh-csrf');

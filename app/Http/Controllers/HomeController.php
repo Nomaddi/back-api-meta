@@ -7,6 +7,7 @@ use App\Models\Tag;
 use App\Models\Message;
 use App\Models\Contacto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -27,6 +28,16 @@ class HomeController extends Controller
      */
     public function index()
     {
+        // Obtener el usuario logueado
+        $user = Auth::user();
+
+        // Verificar si hay un usuario logueado
+        if (!$user) {
+            // Opcional: manejar el caso en que no haya usuario logueado
+            // Por ejemplo, redirigir al login o mostrar un mensaje
+            return redirect('login')->with('error', 'Debe estar logueado para ver las aplicaciones.');
+        }
+
         $hoy = Carbon::now();
         $diaActual = $hoy->day;
 

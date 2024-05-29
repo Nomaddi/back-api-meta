@@ -431,5 +431,44 @@
             });
         }
     </script>
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> --}}
+    {{-- <script>
+        $(document).ready(function() {
+            function checkSession() {
+                $.ajax({
+                    url: '{{ url("/check-session") }}',
+                    method: 'GET',
+                    success: function(response) {
+                        if (!response.is_logged_in) {
+                            Swal.fire({
+                                title: 'Sesión caducada',
+                                text: 'Su sesión ha caducado. Por favor, inicie sesión de nuevo.',
+                                icon: 'warning',
+                                confirmButtonText: 'Iniciar sesión',
+                                allowOutsideClick: false,
+                                allowEscapeKey: false
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    $.ajax({
+                                        url: '{{ url('/refresh-csrf') }}',
+                                        method: 'GET',
+                                        success: function(data) {
+                                            $('meta[name="csrf-token"]').attr(
+                                                'content', data.csrf_token);
+                                            window.location.href =
+                                                '{{ route('login') }}';
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+
+            // Check session every 5 minutes (300000 milliseconds)
+            setInterval(checkSession, 70000);
+        });
+    </script> --}}
 
 @stop
