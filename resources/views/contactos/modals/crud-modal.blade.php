@@ -29,7 +29,8 @@
                             <input type="number" name="telefono" id="telefono" class="form-control" />
                         </div>
                         <div class="form-group">
-                            <select id="etiqueta" name="etiqueta[]" class="form-select form-control mb-3" multiple required>
+                            <select id="etiqueta" name="etiqueta[]" class="form-select form-control mb-3" multiple
+                                required>
                                 <option value="">Selecciona una Etiqueta</option>
                                 @foreach ($tags as $tag)
                                     <option value="{{ $tag->id }}">{{ $tag->nombre }}</option>
@@ -39,6 +40,17 @@
                         <div class="form-group">
                             <label>Notas : </label>
                             <input type="text" name="notas" id="notas" class="form-control" />
+                        </div>
+                        <!-- Campos personalizados -->
+                        <div id="customFieldsContainer">
+                            @foreach ($customFields as $field)
+                                <div class="form-group">
+                                    <label for="custom_field_{{ $field->id }}">{{ $field->name }}</label>
+                                    <input type="{{ $field->type }}" name="custom_fields[{{ $field->id }}]"
+                                        id="custom_field_{{ $field->id }}" class="form-control"
+                                        placeholder="Sin valor definido">
+                                </div>
+                            @endforeach
                         </div>
                         <input type="hidden" name="action" id="action" value="Edit" />
                         <input type="hidden" name="hidden_id" id="hidden_id" />

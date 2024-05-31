@@ -64,4 +64,9 @@ class Contacto extends Model
     {
         return $this->belongsToMany(Tag::class, 'contacto_tag', 'contacto_id', 'tag_id');
     }
+
+    public function customFieldValues()
+    {
+        return $this->hasMany(CustomFieldValue::class, 'contacto_id');
+    }
 }

@@ -7,12 +7,15 @@ use Throwable;
 use DataTables;
 use App\Models\Tag;
 use App\Models\Contacto;
+use App\Models\CustomField;
 use App\Models\UserContact;
 use Illuminate\Http\Request;
 use App\Imports\ContactosImport;
+use App\Models\CustomFieldValue;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -21,6 +24,7 @@ class ContactoController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        $customFields = $user->customFields;
         if ($request->ajax()) {
 
             $data = $user->contactos()->with([
@@ -47,7 +51,7 @@ class ContactoController extends Controller
 
         // Solo tags asociados al usuario
         $tags = $user->tags()->get();
-        return view('contactos.index', compact('tags'));
+        return view('contactos.index', compact(['tags', 'customFields']));
     }
 
 
@@ -66,7 +70,8 @@ class ContactoController extends Controller
                 'telefono' => 'required|string',
                 'notas' => 'nullable|string',
                 'etiqueta' => 'sometimes|array',
-                'etiqueta.*' => 'integer|exists:tags,id,user_id,' . $user->id  // Asegura que los tags existen y pertenecen al usuario
+                'etiqueta.*' => 'integer|exists:tags,id,user_id,' . $user->id,  // Asegura que los tags existen y pertenecen al usuario
+                'custom_fields.*' => 'nullable|string'  // Validar los campos personalizados
             ]);
 
 
@@ -100,6 +105,15 @@ class ContactoController extends Controller
                 $contacto->tags()->syncWithoutDetaching($data['etiqueta']);
             }
 
+            // Guardar los valores de los campos personalizados
+            foreach ($request->custom_fields as $fieldId => $value) {
+                CustomFieldValue::create([
+                    'contacto_id' => $contacto->id,
+                    'custom_field_id' => $fieldId,
+                    'value' => $value,
+                ]);
+            }
+
             return response()->json([
                 'success' => true,
                 'data' => $contacto
@@ -118,9 +132,13 @@ class ContactoController extends Controller
         if (request()->ajax()) {
             try {
                 $user = Auth::user(); // Obtener el usuario autenticado
+                $customFields = $user->customFields;
+
 
                 // Cargar el contacto junto con sus tags asociados
-                $data = $user->contactos()->where('contactos.id', $id)->with('tags')->first();
+                $data = $user->contactos()->where('contactos.id', $id)
+                    ->with(['tags', 'customFieldValues.customField'])
+                    ->first();
 
                 if (!$data) {
                     return response()->json([
@@ -129,7 +147,15 @@ class ContactoController extends Controller
                     ], 404);
                 }
 
-                return response()->json(['result' => $data]);
+                // Preparar los valores de los campos personalizados
+                $customFieldValues = $data->customFieldValues->pluck('value', 'custom_field_id');
+
+
+                return response()->json([
+                    'result' => $data,
+                    'customFields' => $customFields,
+                    'customFieldValues' => $customFieldValues
+                ]);
             } catch (Exception $e) {
                 return response()->json([
                     'success' => false,
@@ -149,7 +175,8 @@ class ContactoController extends Controller
                 $contacto = $user->contactos()->where('contactos.id', $request->hidden_id)->with([
                     'tags' => function ($query) use ($user) {
                         $query->where('user_id', $user->id); // Cargar solo tags del usuario
-                    }
+                    },
+                    'customFieldValues'
                 ])->first();
 
                 if (!$contacto) {
@@ -167,7 +194,8 @@ class ContactoController extends Controller
                     'telefono' => 'sometimes|string|max:255|unique:contactos,telefono,' . $contacto->id,
                     'notas' => 'nullable|string',
                     'etiqueta' => 'sometimes|array',
-                    'etiqueta.*' => 'integer|exists:tags,id,user_id,' . $user->id
+                    'etiqueta.*' => 'integer|exists:tags,id,user_id,' . $user->id,
+                    'custom_fields.*' => 'nullable|string'  // Validar los campos personalizados
                 ]);
 
                 // Actualizar el contacto
@@ -185,6 +213,20 @@ class ContactoController extends Controller
                     // Sincronizar los cambios
                     $contacto->tags()->syncWithoutDetaching($tagsToAdd);    // Añadir nuevos tags
                     $contacto->tags()->detach($tagsToRemove);                // Eliminar tags no deseados
+                }
+
+                // Actualizar los valores de los campos personalizados
+                foreach ($request->custom_fields as $fieldId => $value) {
+                    $customFieldValue = $contacto->customFieldValues()->where('custom_field_id', $fieldId)->first();
+                    if ($customFieldValue) {
+                        $customFieldValue->update(['value' => $value]);
+                    } else {
+                        CustomFieldValue::create([
+                            'contacto_id' => $contacto->id,
+                            'custom_field_id' => $fieldId,
+                            'value' => $value,
+                        ]);
+                    }
                 }
 
                 return response()->json([
@@ -222,6 +264,9 @@ class ContactoController extends Controller
 
                 // Eliminar las relaciones de tags antes de eliminar el contacto
                 $contacto->tags()->detach();
+
+                // Eliminar las relaciones de campos personalizados antes de eliminar el contacto
+                $contacto->customFieldValues()->delete();
 
                 // Eliminar el contacto
                 $contacto->delete();
@@ -300,6 +345,36 @@ class ContactoController extends Controller
         };
 
         return response()->stream($callback, 200, $headers);
+    }
+
+    public function descargarPlantilla()
+    {
+        $user = Auth::user();
+        $customFields = $user->customFields;
+
+        // Definir los encabezados básicos
+        $headers = ['nombre', 'apellido', 'correo', 'telefono', 'notas', 'tags'];
+
+        // Agregar los campos personalizados a los encabezados
+        foreach ($customFields as $field) {
+            $headers[] = $field->name;
+        }
+
+        // Crear el contenido del CSV
+        $callback = function() use ($headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+            fclose($file);
+        };
+
+        // Enviar el CSV al cliente para su descarga
+        return Response::stream($callback, 200, [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=plantilla_contactos.csv",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ]);
     }
 
 }

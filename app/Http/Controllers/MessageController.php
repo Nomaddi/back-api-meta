@@ -14,7 +14,10 @@ use PhpParser\Node\Expr;
 use App\Jobs\SendMessage;
 use App\Models\Distintivo;
 use App\Libraries\Whatsapp;
+use App\Models\CustomField;
 use App\Models\UserContact;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use App\Models\Aplicaciones;
 use Illuminate\Http\Request;
 use App\Models\TareaProgramada;
@@ -35,10 +38,19 @@ class MessageController extends Controller
         $aplicaciones = $user->aplicaciones()->with('numeros')->get();
         $distintivos = Distintivo::all();
         $tags = $user->tags()->with('contactos')->get();
+
+        // Obtener los campos personalizados del usuario
+        $customFields = $user->customFields()->pluck('name')->toArray();
+        // Definir los campos predeterminados
+        $defaultFields = ['nombre', 'apellido', 'correo', 'telefono', 'notas'];
+        // Combinar los campos predeterminados y personalizados
+        $availableFields = array_merge($defaultFields, $customFields);
+
         return view('plantillas/index', [
             'numeros' => $aplicaciones->pluck('numeros')->flatten(),
             'tags' => $tags,
             'distintivos' => $distintivos,
+            'availableFields' => $availableFields,
         ]);
     }
     public function chat()
@@ -526,6 +538,7 @@ class MessageController extends Controller
             $distintivo = $input['distintivoSelect'];
             $tags = !empty($input['selectedTags']) ? $input['selectedTags'] : [22];
             $template = $wp->loadTemplateByName($templateName, $templateLang, $tokenApp, $waba_id_app);
+            $banderaArray = 0;
 
             if (!$template) {
                 throw new Exception("Invalid template or template not found.");
@@ -584,36 +597,13 @@ class MessageController extends Controller
                 ];
             }
 
-
-            $body = $templateBody;
-            if (!empty($input['body_placeholders'])) {
-                $bodyParams = [];
-                foreach ($input['body_placeholders'] as $key => $placeholder) {
-                    $bodyParams[] = ['type' => 'text', 'text' => $placeholder];
-                    $body = str_replace('{{' . ($key + 1) . '}}', $placeholder, $body);
-                }
-                $payload['template']['components'][] = [
-                    'type' => 'body',
-                    'parameters' => $bodyParams,
-                ];
-            }
-
-            if (!empty($input['buttons_url'])) {
-                $payload['template']['components'][] = [
-                    'type' => 'button',
-                    'index' => '0',
-                    'sub_type' => 'url',
-                    'parameters' => [
-                        [
-                            'type' => 'text',
-                            'text' => $input['buttons_url'],
-
-                        ]
-                    ],
-                ];
-            }
-
             $recipients = explode("\n", $input['recipients']);
+            $contacts = Contacto::with('customFieldValues')->whereIn('telefono', array_map(function ($recipient) {
+                return (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
+            }, $recipients))->get()->keyBy('telefono');
+
+            // Obtener los campos personalizados
+            $customFields = CustomField::pluck('id', 'name')->toArray();
 
             if ($fechaProgramada !== null) {
                 $fechaFormateada = Carbon::parse($fechaProgramada)->toDateTimeString();
@@ -627,7 +617,7 @@ class MessageController extends Controller
                 $tarea->phone_id = $phone_id;
                 $tarea->numeros = $rutaArchivo;
                 $tarea->payload = json_encode($payload);
-                $tarea->body = $body;
+                $tarea->body = $templateBody; // Guardar el cuerpo de la plantilla sin modificar
                 $tarea->messageData = json_encode($messageData);
                 $tarea->status = 'pendiente';
                 $tarea->fecha_programada = $fechaFormateada;
@@ -637,24 +627,30 @@ class MessageController extends Controller
 
                 $user->tareasProgramadas()->attach($tarea->id);
 
-                // Ejecutar el comando SendTask con la opción --scheduled
                 Artisan::call('send:task', ['--scheduled' => true]);
 
                 return response()->json([
                     'success' => true,
                     'data' => ' Mensajes agregado al cron correctamente.',
                 ], 200);
-
             } else {
                 foreach ($recipients as $recipient) {
-                    $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
-                    $payload['to'] = $phone;
-                    //aqui se crea el usuario si no existe
-                    // Verifica si el contacto existe en la base de datos
-                    // $contacto = Contacto::where('telefono', $phone)->first();
-                    $contacto = Contacto::where('telefono', $phone)->first();
+                    // Limpiar $payload["template"]["components"][0"]
+                    $components = $payload['template']['components'];
+                    foreach ($components as $index => $component) {
+                        if (Arr::get($component, 'type') === 'header') {
+                            // Limpiar el componente
+                            $banderaArray = 1;
+                            $payload["template"]["components"][1] = [];
+                        }else{
+                            $payload["template"]["components"][0] = [];
+                        }
+                    }
+                    $payload['template']['components'] = $components;
 
-                    // Si el contacto no existe, créalo
+                    $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
+                    $contacto = $contacts->get($phone);
+
                     if (!$contacto) {
                         $contacto = new Contacto();
                         $contacto->nombre = $phone;
@@ -672,15 +668,43 @@ class MessageController extends Controller
                         }
                     }
 
+                    // Obtener los valores de los campos personalizados del contacto
+                    $customFieldValues = $contacto->customFieldValues->pluck('value', 'custom_field_id')->toArray();
 
+                    // Reemplazar placeholders {{}} con los valores proporcionados
+                    $personalizedBody = $templateBody;
 
-                    SendMessage::dispatch($tokenApp, $phone_id, $payload, $body, $messageData, $distintivo);
+                    if (!empty($input['body_placeholders'])) {
+                        $bodyParams = [];
+                        foreach ($input['body_placeholders'] as $key => $placeholder) {
+
+                            if (Str::startsWith($placeholder, '--') && Str::endsWith($placeholder, '--')) {
+                                $fieldName = substr($placeholder, 2, -2);
+                                $fieldId = $customFields[$fieldName] ?? null;
+                                $placeholder = $contacto->$fieldName ?? ($customFieldValues[$fieldId] ?? 'sin valor definido');
+                            }
+                            $bodyParams[] = ['type' => 'text', 'text' => $placeholder];
+
+                            $personalizedBody = str_replace('{{' . ($key + 1) . '}}', $placeholder, $personalizedBody);
+                        }
+
+                        // Llenar la parte que limpiaste
+                        $payload['template']['components'][$banderaArray] = [
+                            'type' => 'body',
+                            'parameters' => $bodyParams,
+                        ];
+                    }
+
+                    $payload['to'] = $phone;
+
+                    SendMessage::dispatch($tokenApp, $phone_id, $payload, $personalizedBody, $messageData, $distintivo);
                 }
+
                 $envio = new Envio();
                 $envio->nombrePlantilla = $templateName;
                 $envio->numeroDestinatarios = count($recipients);
                 $envio->status = 'Completado';
-                $envio->body = $body;
+                $envio->body = $templateBody;
                 $envio->tag = $tags;
                 $envio->save();
 
@@ -689,14 +713,9 @@ class MessageController extends Controller
                 Log::info('envio encolado' . count($recipients));
             }
 
-            //Cambiar status de pendiente a enviado en contratacion local
             if (!empty($input['status_send'])) {
-                // Crear una instancia de ClocalController
                 $clocalController = new ClocalController();
-
-                // Llamar al método update de ClocalController
                 $clocalController->update($input['solicitudId'], $input['status_send']);
-
             }
 
             return response()->json([
@@ -706,7 +725,7 @@ class MessageController extends Controller
         } catch (Exception $e) {
             Log::error('Error en sendMessageTemplate: ' . $e->getMessage(), [
                 'input' => $input,
-                'trace' => $e->getTraceAsString() // esto puede ser muy largo, considera loguear solo si es necesario
+                'trace' => $e->getTraceAsString()
             ]);
             return response()->json([
                 'success' => false,

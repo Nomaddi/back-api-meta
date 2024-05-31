@@ -51,18 +51,23 @@ class HomeController extends Controller
             $fechaFin = $hoy->copy()->addMonth()->startOfMonth()->addDays(8); // El 9 del mes siguiente
         }
 
+        $usernumero = $user->numeros()->first();
+        //id_telefono
+
         // Realizar la consulta
         $totalMensajes = Message::whereBetween('created_at', [$fechaInicio, $fechaFin])
+            ->where('phone_id', $usernumero->id_telefono)
             ->where('outgoing', 1)
             ->count();
 
         $totalMensajesEnviadosHoy = Message::whereDate('created_at', $hoy->toDateString())
+            ->where('phone_id', $usernumero->id_telefono)
             ->where('outgoing', 1)
             ->count();
 
-        $cantidadUsuarios = Contacto::count();
+        $cantidadUsuarios = $user->contactos_count;
 
-        $cantidadTags = Tag::count();
+        $cantidadTags = $user->tags_count;
 
         return view('home', [
             'totalMensajes' => $totalMensajes,

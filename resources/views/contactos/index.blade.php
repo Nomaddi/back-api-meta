@@ -114,6 +114,12 @@
 
                     $('#etiqueta').val(selectedTags);
 
+                    // Rellenar los campos personalizados
+                    data.customFields.forEach(function(field) {
+                        var value = data.customFieldValues[field.id] || ''; // Valor o vacío
+                        $('#custom_field_' + field.id).val(value);
+                    });
+
                     $('#formModal').modal('show');
                 },
                 error: function(data) {
@@ -184,6 +190,9 @@
 
             $.ajax({
                 url: "contactos/delete/" + user_id,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 success: function(data) {
                     setTimeout(function() {
                         $('#confirmModal').modal('hide');
@@ -269,74 +278,4 @@
             @endif
         });
     </script>
-
-    {{-- <script>
-        $(document).ready(function() {
-            $('#uploadBtn').click(function(e) {
-                e.preventDefault(); // Evitar la recarga de la página
-
-                var fileInput = $('#fileUpload')[0];
-                if (fileInput.files.length === 0) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Archivo no seleccionado',
-                        text: 'Por favor, selecciona un archivo.',
-                        timer: 2000,
-                        timerProgressBar: true,
-                    });
-                    return;
-                }
-
-                // Muestra una alerta de carga con animación y sin botón de aceptar
-                Swal.fire({
-                    title: 'Cargando...',
-                    text: 'El archivo se está subiendo, por favor espera.',
-                    allowOutsideClick: false,
-                    onBeforeOpen: () => {
-                        Swal.showLoading(); // Muestra solo la animación de carga
-                    }
-                });
-
-                var formData = new FormData();
-                formData.append('file', fileInput.files[0]);
-
-                $.ajax({
-                    url: 'upload-contactos',
-                    type: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    data: formData,
-                    processData: false, // Evitar que jQuery procese los datos
-                    contentType: false, // Evitar que jQuery establezca el tipo de contenido
-                    success: function(response) {
-                        Swal.close(); // Cierra la alerta de carga
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Subido',
-                            text: 'El archivo se ha subido correctamente.',
-                            showConfirmButton: false,
-                            timer: 1500,
-                            timerProgressBar: true,
-                        }).then((result) => {
-                            if (result.dismiss === Swal.DismissReason.timer) {
-                                location.reload();
-                            }
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        Swal.close(); // Cierra la alerta de carga
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'No se pudo subir el archivo.',
-                        });
-                        console.error('Error al subir archivo:', error);
-                    }
-                });
-            });
-        });
-    </script> --}}
-
-
 @stop

@@ -62,9 +62,19 @@ class User extends Authenticatable
         return $this->hasMany(Tag::class, 'user_id');
     }
 
+    public function getTagsCountAttribute()
+    {
+        return $this->tags()->count();
+    }
+
     public function contactos()
     {
         return $this->belongsToMany(Contacto::class, 'user_contacts', 'user_id', 'contacto_id');
+    }
+
+    public function getContactosCountAttribute()
+    {
+        return $this->contactos()->count();
     }
 
     public function envios()
@@ -77,5 +87,9 @@ class User extends Authenticatable
         return $this->belongsToMany(TareaProgramada::class, 'user_tarea_programada', 'user_id', 'tarea_programada_id');
     }
 
+    public function customFields()
+    {
+        return $this->hasMany(CustomField::class, 'user_id');
+    }
 
 }

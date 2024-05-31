@@ -7,7 +7,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <h4 align="center" style="margin:0;">¿Seguro que desea eliminar este ususario?</h4>
+            <h4 align="center" style="margin:0;">¿Seguro que desea eliminar este usuario?</h4>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>

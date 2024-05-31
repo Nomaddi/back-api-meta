@@ -144,6 +144,8 @@
         var templateType = null;
 
         $(document).ready(function() {
+            var availableFields = @json($availableFields); // JSON con los nombres de los campos disponibles
+
             $('#selectPlantilla').change(function() {
                 var selectedOption = $(this).find('option:selected');
                 var idCBusiness = selectedOption.data('id_c_business'); //id_telefono
@@ -154,7 +156,7 @@
                         title: 'Cargando plantillas...',
                         text: 'Por favor espera',
                         allowOutsideClick: false,
-                        onBeforeOpen: () => {
+                        didOpen: () => {
                             Swal.showLoading();
                         },
                     });
@@ -215,7 +217,7 @@
                         title: 'Cargando plantilla...',
                         text: 'Por favor espera.',
                         allowOutsideClick: false,
-                        onBeforeOpen: () => {
+                        didOpen: () => {
                             Swal.showLoading();
                         },
                     });
@@ -293,7 +295,21 @@
 
                         // Genera HTML para los inputs de cada placeholder encontrado
                         var inputsHtml = placeholders.map(function(placeholder, index) {
-                            return `<div class="form-group"><label for="${index}">${placeholder.text}</label><input type="text" class="form-control format" id="${index}" name="${index}" value="" required/></div>`;
+                            var selectOptions = availableFields.map(function(field) {
+                                return `<option value="${field}">${field}</option>`;
+                            }).join('');
+
+                            return `
+                                    <div class="form-group">
+                                        <label for="${index}">${placeholder.text}</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control format" id="${index}" name="${index}" value="" required/>
+                                            <select class="form-select form-control mb-3" id="select-${index}" onchange="updateInput(${index}, this.value)">
+                                                <option value="">Selecciona un campo</option>
+                                                ${selectOptions}
+                                            </select>
+                                        </div>
+                                    </div>`;
                         }).join('');
 
                         detailsHtml +=
@@ -406,6 +422,16 @@
                 inicializarEventListenersDeImagen();
             });
         });
+
+        function updateInput(index, value) {
+            var input = document.getElementById(index);
+            if (value) {
+                input.value = `--${value}--`;
+            } else {
+                input.value = '';
+            }
+        }
+
         $(document).ready(function() {
             $('#createSend').submit(function(e) {
                 var fileInput = document.getElementById('input-file');
@@ -413,7 +439,7 @@
                 Swal.fire({
                     title: 'Enviando...',
                     allowOutsideClick: false,
-                    onBeforeOpen: () => {
+                    didOpen: () => {
                         Swal.showLoading();
                     },
                 });

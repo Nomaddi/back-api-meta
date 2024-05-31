@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomFieldController;
 use App\Models\Reporte;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -133,6 +134,8 @@ Route::resource(
     MessageController::class
 );
 
+Route::resource('custom_fields', CustomFieldController::class);
+
 Route::get('messages-index', [MessageController::class, 'chat'])->name('admin.chat'); //mostrar todos los registroscl
 
 //envios de errores
@@ -145,3 +148,6 @@ Route::post('log-client-error', [ErrorLogController::class, 'store'])->name('log
 Route::get('refresh-csrf', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 })->middleware('can:refresh-csrf')->name('refresh-csrf');
+
+Route::get('descargar-plantilla', [ContactoController::class, 'descargarPlantilla'])->name('descargar-plantilla');
+

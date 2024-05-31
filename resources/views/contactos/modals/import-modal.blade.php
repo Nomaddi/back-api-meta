@@ -15,7 +15,7 @@
                     <div class="row">
                         <div class="col-12 mb-3 mt-3">
                             <p>Cargue CSV en el formato indicado
-                                <a href="{{ asset('files/importar.csv') }}" target="_blank">Formato CSV de muestra</a>
+                                <a href="{{ route('descargar-plantilla') }}" target="_blank">Formato CSV de muestra</a>
                             </p>
                         </div>
 

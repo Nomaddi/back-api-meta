@@ -356,6 +356,12 @@ return [
                     'icon'  => 'fas fa-fw fa-users',
                 ],
                 [
+                    'text'   => 'Campos personalizados',
+                    'route'  => 'custom_fields.index',
+                    'can'    => 'custom_fields.index',
+                    'icon'   => 'fas fa-fw fa-tags',
+                ],
+                [
                     'text'   => 'Etiquetas',
                     'route'  => 'tags.index',
                     'can'    => 'tags.index',

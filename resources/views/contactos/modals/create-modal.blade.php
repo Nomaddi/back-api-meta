@@ -26,11 +26,13 @@
                     </div>
                     <div class="form-group">
                         <label for="telefono">Telefono</label>
-                        <input type="tel" class="form-control" id="telefono" name="telefono" pattern="[0-9]{12}" title="Digita el prefijo del país seguido del numero celular" required>
+                        <input type="tel" class="form-control" id="telefono" name="telefono" pattern="[0-9]{12}"
+                            title="Digita el prefijo del país seguido del numero celular" required>
                         <small id="telefonoHelp" class="form-text text-muted">Ejemplo: 571234567890</small>
                     </div>
                     <div>
-                        <select id="etiqueta" name="etiqueta[]" class="form-select form-control mb-3" multiple required>
+                        <select id="etiqueta" name="etiqueta[]" class="form-select form-control mb-3" multiple
+                            required>
                             <option value="">Selecciona una Etiqueta</option>
                             @foreach ($tags as $tag)
                                 <option value="{{ $tag->id }}">{{ $tag->nombre }}</option>
@@ -41,6 +43,14 @@
                         <label for="notas">Notas</label>
                         <input type="text" class="form-control" id="notas" name="notas">
                     </div>
+                    <!-- Campos personalizados -->
+                    @foreach ($customFields as $field)
+                        <div class="form-group">
+                            <label for="custom_field_{{ $field->id }}">{{ $field->name }}</label>
+                            <input type="{{ $field->type }}" name="custom_fields[{{ $field->id }}]"
+                                id="custom_field_{{ $field->id }}" class="form-control">
+                        </div>
+                    @endforeach
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
