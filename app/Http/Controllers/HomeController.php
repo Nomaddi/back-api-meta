@@ -54,16 +54,24 @@ class HomeController extends Controller
         $usernumero = $user->numeros()->first();
         //id_telefono
 
-        // Realizar la consulta
-        $totalMensajes = Message::whereBetween('created_at', [$fechaInicio, $fechaFin])
-            ->where('phone_id', $usernumero->id_telefono)
-            ->where('outgoing', 1)
-            ->count();
+        // Verificar si $usernumero es null
+        if ($usernumero !== null) {
+            $idTelefono = $usernumero->id_telefono;
 
-        $totalMensajesEnviadosHoy = Message::whereDate('created_at', $hoy->toDateString())
-            ->where('phone_id', $usernumero->id_telefono)
-            ->where('outgoing', 1)
-            ->count();
+            $totalMensajes = Message::whereBetween('created_at', [$fechaInicio, $fechaFin])
+                ->where('phone_id', $idTelefono)
+                ->where('outgoing', 1)
+                ->count();
+
+            $totalMensajesEnviadosHoy = Message::whereDate('created_at', $hoy->toDateString())
+                ->where('phone_id', $idTelefono)
+                ->where('outgoing', 1)
+                ->count();
+        } else {
+            // Si $usernumero es null, establecer los resultados a 0
+            $totalMensajes = 0;
+            $totalMensajesEnviadosHoy = 0;
+        }
 
         $cantidadUsuarios = $user->contactos_count;
 

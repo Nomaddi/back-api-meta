@@ -635,18 +635,17 @@ class MessageController extends Controller
                 ], 200);
             } else {
                 foreach ($recipients as $recipient) {
-                    // Limpiar $payload["template"]["components"][0"]
-                    $components = $payload['template']['components'];
-                    foreach ($components as $index => $component) {
-                        if (Arr::get($component, 'type') === 'header') {
-                            // Limpiar el componente
-                            $banderaArray = 1;
-                            $payload["template"]["components"][1] = [];
-                        }else{
-                            $payload["template"]["components"][0] = [];
+                    if (isset($payload['template']['components'])) {
+                        $components = $payload['template']['components'];
+
+                        foreach ($components as $index => $component) {
+                            if (Arr::get($component, 'type') === 'header') {
+                                // conocer ubicacion del body
+                                $banderaArray = 1;
+                            }
                         }
                     }
-                    $payload['template']['components'] = $components;
+
 
                     $phone = (int) filter_var($recipient, FILTER_SANITIZE_NUMBER_INT);
                     $contacto = $contacts->get($phone);
