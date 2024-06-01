@@ -696,6 +696,21 @@ class MessageController extends Controller
 
                     $payload['to'] = $phone;
 
+                    if (!empty($input['buttons_url'])) {
+                        $payload['template']['components'][] = [
+                            'type' => 'button',
+                            'index' => '0',
+                            'sub_type' => 'url',
+                            'parameters' => [
+                                [
+                                    'type' => 'text',
+                                    'text' => $input['buttons_url'],
+
+                                ]
+                            ],
+                        ];
+                    }
+
                     SendMessage::dispatch($tokenApp, $phone_id, $payload, $personalizedBody, $messageData, $distintivo);
                 }
 
