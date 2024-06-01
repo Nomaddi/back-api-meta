@@ -538,7 +538,6 @@ class MessageController extends Controller
             $distintivo = $input['distintivoSelect'];
             $tags = !empty($input['selectedTags']) ? $input['selectedTags'] : [22];
             $template = $wp->loadTemplateByName($templateName, $templateLang, $tokenApp, $waba_id_app);
-            $banderaArray = 0;
 
             if (!$template) {
                 throw new Exception("Invalid template or template not found.");
@@ -555,9 +554,9 @@ class MessageController extends Controller
                 'messaging_product' => 'whatsapp',
                 'type' => 'template',
                 "template" => [
-                    "name" => $input['template_name'],
+                    "name" => $templateName,
                     "language" => [
-                        "code" => $input['template_language']
+                        "code" => $templateLang
                     ]
                 ]
             ];
@@ -641,7 +640,7 @@ class MessageController extends Controller
                         foreach ($components as $index => $component) {
                             if (Arr::get($component, 'type') === 'header') {
                                 // conocer ubicacion del body
-                                $banderaArray = 1;
+                                $banderaArrayBody = 1;
                             }
                         }
                     }
@@ -688,7 +687,7 @@ class MessageController extends Controller
                         }
 
                         // Llenar la parte que limpiaste
-                        $payload['template']['components'][$banderaArray] = [
+                        $payload['template']['components'][$banderaArrayBody] = [
                             'type' => 'body',
                             'parameters' => $bodyParams,
                         ];
@@ -696,8 +695,9 @@ class MessageController extends Controller
 
                     $payload['to'] = $phone;
 
+                    // Limpiar y llenar la parte del button si existe
                     if (!empty($input['buttons_url'])) {
-                        $payload['template']['components'][] = [
+                        $payload['template']['components'][2] = [
                             'type' => 'button',
                             'index' => '0',
                             'sub_type' => 'url',
@@ -705,7 +705,6 @@ class MessageController extends Controller
                                 [
                                     'type' => 'text',
                                     'text' => $input['buttons_url'],
-
                                 ]
                             ],
                         ];
@@ -718,7 +717,7 @@ class MessageController extends Controller
                 $envio->nombrePlantilla = $templateName;
                 $envio->numeroDestinatarios = count($recipients);
                 $envio->status = 'Completado';
-                $envio->body = $templateBody;
+                $envio->body = $personalizedBody;
                 $envio->tag = $tags;
                 $envio->save();
 

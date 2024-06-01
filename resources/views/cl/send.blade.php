@@ -328,7 +328,7 @@
                         title: 'Cargando plantillas...',
                         text: 'Por favor espera',
                         allowOutsideClick: false,
-                        onBeforeOpen: () => {
+                        didOpen: () => {
                             Swal.showLoading();
                         },
                     });
@@ -390,7 +390,7 @@
                         title: 'Cargando plantilla...',
                         text: 'Por favor espera.',
                         allowOutsideClick: false,
-                        onBeforeOpen: () => {
+                        didOpen: () => {
                             Swal.showLoading();
                         },
                     });
@@ -590,7 +590,7 @@
                 Swal.fire({
                     title: 'Enviando...',
                     allowOutsideClick: false,
-                    onBeforeOpen: () => {
+                    didOpen: () => {
                         Swal.showLoading();
                     },
                 });
