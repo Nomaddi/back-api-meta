@@ -617,15 +617,46 @@
                             // Puedes continuar aquí con el envío de los demás datos de tu formulario
                             enviarDatos(response.url);
                         },
-                        error: function(err) {
-                            console.log(err);
-                            // Ocultar el mensaje de carga
+                        error: function(xhr, status, error) {
                             Swal.close();
+                            Swal.fire({
+                                title: 'Error en el envío',
+                                text: 'Error al subir pdf. Inténtalo de nuevo. Error: ' +
+                                    xhr.responseText,
+                                icon: 'error'
+                            });
+                            console.log('Error:', error);
+                            console.log('Status:', status);
+                            console.log('Response:', xhr.responseText);
 
-                            // Mostrar SweetAlert con el mensaje de error
-                            Swal.fire('Error en el envío',
-                                'No se pudo enviar el mensaje. Inténtalo de nuevo.', 'error'
-                            );
+                            // Datos del error
+                            var errorData = {
+                                message: error,
+                                status: status,
+                                response: xhr.responseText,
+                                url: imageUrl
+                            };
+
+                            // Enviar el error al servidor
+                            $.ajax({
+                                type: "POST",
+                                url: "/log-client-error", // Asegúrate de que esta ruta sea correcta
+                                data: errorData,
+                                headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                                        'content')
+                                },
+                                success: function(response) {
+                                    console.log(
+                                        "Datos del error enviadosa al administrador"
+                                    );
+                                },
+                                error: function(xhr) {
+                                    console.log(
+                                        "No se pudieron enviar datos del error enviadosa al administrador"
+                                    );
+                                }
+                            });
                         }
                     });
                 } else {
@@ -732,13 +763,44 @@
                         window.location.reload();
                     });
                 },
-                error: function(error) {
-                    // Ocultar el mensaje de carga
+                error: function(xhr, status, error) {
                     Swal.close();
+                    Swal.fire({
+                        title: 'Error en el envío',
+                        text: 'No se pudo hacer el envio masivo. Inténtalo de nuevo. Error: ' +
+                            xhr.responseText,
+                        icon: 'error'
+                    });
+                    console.log('Error:', error);
+                    console.log('Status:', status);
+                    console.log('Response:', xhr.responseText);
 
-                    // Mostrar SweetAlert con el mensaje de error
-                    Swal.fire('Error en el envío',
-                        'No se pudo enviar el mensaje. Inténtalo de nuevo.', 'error');
+                    // Datos del error
+                    var errorData = {
+                        message: error,
+                        status: status,
+                        response: xhr.responseText,
+                        url: messageTemplatesUrl
+                    };
+
+                    // Enviar el error al servidor
+                    $.ajax({
+                        type: "POST",
+                        url: "/log-client-error", // Asegúrate de que esta ruta sea correcta
+                        data: errorData,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
+                                'content')
+                        },
+                        success: function(response) {
+                            console.log("Datos del error enviadosa al administrador");
+                        },
+                        error: function(xhr) {
+                            console.log(
+                                "No se pudieron enviar datos del error enviadosa al administrador"
+                            );
+                        }
+                    });
                 }
             });
         }
@@ -750,88 +812,103 @@
                     toggleImageInput(e.target.value);
                 });
             });
+
+            inicializarEventosDeSubida();
         }
 
         function toggleImageInput(value) {
             if (value === 'PDFlink') {
                 document.querySelector('.linkInput').style.display = '';
                 document.querySelector('.uploadInput').style.display = 'none';
-                // Hace el campo de enlace requerido y quita el atributo requerido del campo de subida de archivo
                 document.querySelector('.linkInput input[type="text"]').required = true;
                 document.querySelector('.uploadInput input[type="file"]').required = false;
-                // Limpia el valor del input de archivo ya que no se está usando
                 limpiarFormularioDeSubida();
             } else {
                 document.querySelector('.linkInput').style.display = 'none';
                 document.querySelector('.uploadInput').style.display = '';
-                // Limpia el valor del input de texto ya que no se está usando
-                document.querySelector('.linkInput input[type="text"]').value = '';
-                // Hace el campo de subida de archivo requerido y quita el atributo requerido del campo de enlace
                 document.querySelector('.uploadInput input[type="file"]').required = true;
                 document.querySelector('.linkInput input[type="text"]').required = false;
+                document.querySelector('.linkInput input[type="text"]').value = '';
+            }
 
-                //selecting all required elements
-                const dropArea = document.querySelector(".drag-area");
-                const dragText = dropArea.querySelector("h2");
-                const button = dropArea.querySelector("button");
-                const input = dropArea.querySelector("#input-file");
+            inicializarEventosDeSubida();
+        }
 
-                button.addEventListener("click", (e) => {
-                    input.click(); //if user click on the button then the input also clicked
-                });
-                input.addEventListener("change", function(e) {
-                    e.preventDefault();
-                    files = input.files;
-                    dropArea.classList.add("active");
-                    showFiles(files); //calling function
-                    dropArea.classList.remove("active");
-                });
+        function inicializarEventosDeSubida() {
+            const dropArea = document.querySelector(".drag-area");
 
-                //If user Drag File Over DropArea
-                dropArea.addEventListener("dragover", (e) => {
-                    e.preventDefault();
-                    dropArea.classList.add("active");
-                    dragText.textContent = "Suelta para cargar el PDF";
-                });
+            if (!dropArea) return;
 
-                //If user leave dragged File from DropArea
-                dropArea.addEventListener("dragleave", (e) => {
-                    e.preventDefault();
-                    dropArea.classList.remove("active");
-                    dragText.textContent = "Arrastre y suelta el PDF";
-                });
+            const input = dropArea.querySelector("#input-file");
+            const button = dropArea.querySelector("button");
 
-                //If user drop File on DropArea
-                dropArea.addEventListener("drop", (e) => {
-                    e.preventDefault();
-                    files = e.dataTransfer.files;
-                    showFiles(files);
-                    dropArea.classList.remove("active");
-                    dragText.textContent = "Arrastre y suelta el PDF";
-                });
+            // Remover event listeners previos
+            button.removeEventListener("click", handleButtonClick);
+            input.removeEventListener("change", handleFileInputChange);
+            dropArea.removeEventListener("dragover", handleDragOver);
+            dropArea.removeEventListener("dragleave", handleDragLeave);
+            dropArea.removeEventListener("drop", handleDrop);
 
-                function showFiles(files) {
-                    if (files.length === undefined) {
-                        proccessFile(files);
-                    } else {
-                        for (const file of files) {
-                            proccessFile(file);
-                        }
-                    }
+            // Añadir event listeners
+            button.addEventListener("click", handleButtonClick);
+            input.addEventListener("change", handleFileInputChange);
+            dropArea.addEventListener("dragover", handleDragOver);
+            dropArea.addEventListener("dragleave", handleDragLeave);
+            dropArea.addEventListener("drop", handleDrop);
+        }
+
+        function handleButtonClick(e) {
+            e.preventDefault();
+            const input = document.querySelector(".drag-area #input-file");
+            input.click();
+        }
+
+        function handleFileInputChange(e) {
+            e.preventDefault();
+            const files = e.target.files;
+            mostrarArchivos(files);
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const dropArea = document.querySelector(".drag-area");
+            dropArea.classList.add("active");
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            const dropArea = document.querySelector(".drag-area");
+            dropArea.classList.remove("active");
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const files = e.dataTransfer.files;
+            mostrarArchivos(files);
+            const dropArea = document.querySelector(".drag-area");
+            dropArea.classList.remove("active");
+        }
+
+        function mostrarArchivos(files) {
+            if (files.length === undefined) {
+                procesarArchivo(files);
+            } else {
+                for (const file of files) {
+                    procesarArchivo(file);
                 }
+            }
+        }
 
+        function procesarArchivo(file) {
+            const docType = file.type;
+            const validExtensions = ["application/pdf"];
 
-                function proccessFile(file) {
-                    const docType = file.type; //getting selected file type
-                    const validExtensions = ["application/pdf"];
+            if (validExtensions.includes(docType)) {
+                const fileReader = new FileReader();
+                const id = `file-${Math.random().toString(32).substring(7)}`;
 
-                    if (validExtensions.includes(docType)) {
-                        const fileReader = new FileReader();
-                        const id = `file-${Math.random().toString(32).substring(7)}`;
-
-                        fileReader.addEventListener("load", (e) => {
-                            const fileUrl = fileReader.result;
-                            const pdfPreview = `
+                fileReader.addEventListener("load", (e) => {
+                    const pdfPreview = `
                         <div id="${id}" class="file-container">
                             <div class="status">
                                 <span><i class="fa fa-file-pdf"></i></span>
@@ -839,38 +916,32 @@
                             </div>
                         </div>
                     `;
+                    document.querySelector("#preview").innerHTML = pdfPreview;
+                });
 
-                            // Limpia la vista previa existente antes de añadir la nueva
-                            document.querySelector("#preview").innerHTML =
-                                pdfPreview; // Sustituyendo la vista previa del PDF
-                        });
-                        fileReader.readAsDataURL(file);
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Archivo no válido',
-                            text: 'Por favor, selecciona un archivo PDF.',
-                        });
-                        dropArea.classList.remove("active");
-                        dragText.textContent = "Drag & Drop to Upload File";
-                    }
-                }
+                fileReader.readAsDataURL(file);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Archivo no válido',
+                    text: 'Por favor, selecciona un archivo PDF.',
+                });
             }
         }
-    </script>
-    <script>
-        function limpiarFormularioDeSubida() {
-            // Limpiar el campo de subida de archivos
-            var inputArchivo = document.getElementById('input-file');
-            // Reemplaza el input por uno nuevo para evitar problemas de seguridad en algunos navegadores
-            var nuevoInputArchivo = inputArchivo.cloneNode(true);
-            inputArchivo.parentNode.replaceChild(nuevoInputArchivo, inputArchivo);
 
-            // Limpiar la vista previa del archivo PDF
+        function limpiarFormularioDeSubida() {
+            const inputArchivo = document.getElementById('input-file');
+            if (inputArchivo) {
+                const nuevoInputArchivo = inputArchivo.cloneNode(true);
+                inputArchivo.parentNode.replaceChild(nuevoInputArchivo, inputArchivo);
+            }
             document.getElementById('preview').innerHTML = '';
         }
-    </script>
 
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarEventListenersDeImagen();
+        });
+    </script>
 
 
 

@@ -2,10 +2,16 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use App\Models\Envio;
+use App\Models\Contacto;
 use App\Jobs\SendMessage;
+use App\Models\CustomField;
 use App\Models\TareaProgramada;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 
 class SendTask extends Command
@@ -42,57 +48,51 @@ class SendTask extends Command
      */
     public function handle()
     {
-
         $this->info('Ejecutando tarea programada...');
+
         if ($this->option('scheduled')) {
-            // Obtener tareas programadas pendientes para enviar
             $tareasPendientes = TareaProgramada::where('fecha_programada', '<=', now())
                 ->where('status', 'pendiente')
                 ->get();
-            // \Log::info($tareasPendientes);
-
 
             foreach ($tareasPendientes as $tarea) {
-                $nombreArchivo = basename($tarea->numeros);  // Extrae el nombre del archivo de la ruta completa
-                $rutaArchivo = storage_path("app/tareas/$nombreArchivo");  // Construye la ruta completa
+                $nombreArchivo = basename($tarea->numeros);
+                $rutaArchivo = storage_path("app/tareas/$nombreArchivo");
                 $payload = json_decode($tarea->payload, true);
 
-
                 try {
-                    // Normaliza la ruta para manejar diferencias entre sistemas operativos
                     $rutaArchivo = realpath($rutaArchivo);
 
                     if ($rutaArchivo !== false && file_exists($rutaArchivo)) {
                         $lineas = file($rutaArchivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-
                         foreach ($lineas as $linea) {
-                            // $linea contiene el contenido de cada línea
-                            // Puedes realizar las operaciones necesarias con cada línea aquí
-                            $payload['to'] = $linea;
-                            SendMessage::dispatch($tarea->token_app, $tarea->phone_id, $payload, $tarea->body, $tarea->messageData, $tarea->distintivo);
+                            $userId = $this->obtenerUserIdDesdePhoneId($tarea->phone_id);
+                            if ($userId) {
+                                $contacto = $this->obtenerContacto($linea, $userId);
 
+                                if ($contacto) {
+                                    $personalizedBody = $this->reemplazarPlaceholders($tarea->body, $contacto);
+                                    $payload['to'] = $linea;
+                                    SendMessage::dispatch($tarea->token_app, $tarea->phone_id, $payload, $personalizedBody, $tarea->messageData, $tarea->distintivo);
+                                } else {
+                                    Log::warning("Contacto no encontrado para el número: $linea");
+                                }
+                            } else {
+                                Log::error("No se encontró un user_id para el phone_id: {$tarea->phone_id}");
+                            }
                         }
-                        $contacto = new Envio();
-                        $contacto->nombrePlantilla = $payload['template']['name'];
-                        $contacto->numeroDestinatarios = count($lineas);
-                        $contacto->status = 'Completado';
-                        $contacto->body = $tarea->body;
-                        $contacto->tag = $tarea->tag;
-                        $contacto->save();
+
+                        $this->registrarEnvio($payload['template']['name'], count($lineas), $tarea->body, $tarea->tag);
                     } else {
-                        \Log::error("El archivo no existe en la ruta: $rutaArchivo");
+                        Log::error("El archivo no existe en la ruta: $rutaArchivo");
                     }
-                    // Resto de tu lógica aquí...
                 } catch (\Exception $e) {
-                    \Log::error("Error al abrir el archivo: " . $e->getMessage());
+                    Log::error("Error al procesar la tarea programada: " . $e->getMessage());
                 }
 
-
-                // Actualizar el estado de la tarea a "enviada" o algo similar
                 $tarea->status = 'enviada';
                 $tarea->save();
-
             }
         } else {
             $this->info('El comando debe ejecutarse solo cuando hay tareas programadas.');
@@ -101,4 +101,80 @@ class SendTask extends Command
         $this->info('Tarea programada completada.');
     }
 
+    /**
+     * Obtener el user_id desde el phone_id.
+     *
+     * @param int $phoneId
+     * @return int|null
+     */
+    protected function obtenerUserIdDesdePhoneId($phoneId)
+    {
+        $numero = DB::table('numeros')->where('id_telefono', $phoneId)->first();
+        if ($numero) {
+            $userNumero = DB::table('user_numeros')->where('numero_id', $numero->id)->first();
+            return $userNumero ? $userNumero->user_id : null;
+        }
+        return null;
+    }
+
+    /**
+     * Obtener el contacto por número de teléfono y usuario.
+     *
+     * @param string $telefono
+     * @param int $userId
+     * @return Contacto|null
+     */
+    protected function obtenerContacto($telefono, $userId)
+    {
+        Log::warning("obtenerContacto para el usuario: $userId");
+        $user = User::find($userId);
+        if (!$user) {
+            Log::error("User not found for ID: $userId");
+            return null;
+        }
+
+        return $user->contactos()
+            ->where('telefono', (int) filter_var($telefono, FILTER_SANITIZE_NUMBER_INT))
+            ->first();
+    }
+
+    /**
+     * Reemplazar los placeholders en el cuerpo del mensaje.
+     *
+     * @param string $body
+     * @param Contacto $contacto
+     * @return string
+     */
+    protected function reemplazarPlaceholders($body, $contacto)
+    {
+        $customFieldValues = $contacto->customFieldValues->pluck('value', 'custom_field_id')->toArray();
+        $customFields = CustomField::pluck('id', 'name')->toArray();
+
+        foreach ($customFields as $fieldName => $fieldId) {
+            $placeholder = '--' . $fieldName . '--';
+            $value = $customFieldValues[$fieldId] ?? 'sin valor definido';
+            $body = str_replace($placeholder, $value, $body);
+        }
+
+        return $body;
+    }
+
+    /**
+     * Registrar el envío en la base de datos.
+     *
+     * @param string $nombrePlantilla
+     * @param int $numeroDestinatarios
+     * @param string $body
+     * @param array $tags
+     */
+    protected function registrarEnvio($nombrePlantilla, $numeroDestinatarios, $body, $tags)
+    {
+        $envio = new Envio();
+        $envio->nombrePlantilla = $nombrePlantilla;
+        $envio->numeroDestinatarios = $numeroDestinatarios;
+        $envio->status = 'Completado';
+        $envio->body = $body;
+        $envio->tag = $tags;
+        $envio->save();
+    }
 }

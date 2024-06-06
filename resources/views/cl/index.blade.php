@@ -33,13 +33,23 @@
                     <td>{{ $app->contrato }} {{ $app->created_at }}</td>
                     <td>{{ $app->fecha_inicio }}</td>
                     <td>
-                        <a href="{{ $app->contrato == 'MO' ? env('PROJECT2_URL_MANO') : env('PROJECT2_URL_SERVICIO') }}/{{ $app->id_pdf }}" target="_blank" rel="noopener noreferrer" style="text-decoration: none">
+                        <a href="{{ $app->contrato == 'MO' ? env('PROJECT2_URL_MANO') : env('PROJECT2_URL_SERVICIO') }}/{{ $app->id_pdf }}"
+                            target="_blank" rel="noopener noreferrer" style="text-decoration: none">
                             {{ $app->codigo_contrato }}
                         </a>
-                        <span class="badge {{ $app->estado == 'publicado' ? 'badge-primary' : 'badge-danger' }} badge-pill">{{ $app->estado }}</span>
+                        <span
+                            class="badge {{ $app->estado == 'publicado' ? 'badge-primary' : 'badge-danger' }} badge-pill">{{ $app->estado }}</span>
                     </td>
                     <td>
-                        <span class="badge {{ $app->status == 'enviado' ? 'badge-success' : 'badge-warning' }} badge-pill">{{ $app->status }}</span>
+                        <select class="form-select status-select" data-id="{{ $app->id }}">
+                            <option value="pendiente" {{ $app->status == 'pendiente' ? 'selected' : '' }}>Pendiente
+                            </option>
+                            <option value="enviado" {{ $app->status == 'enviado' ? 'selected' : '' }}>Enviado</option>
+                            <option value="cancelado" {{ $app->status == 'cancelado' ? 'selected' : '' }}>Cancelado
+                            </option>
+                        </select>
+                        <span
+                            class="badge {{ $app->status == 'enviado' ? 'badge-success' : ($app->status == 'cancelado' ? 'badge-danger' : 'badge-warning') }} badge-pill">{{ $app->status }}</span>
                     </td>
                     <td>
                         <a data-toggle="modal" data-target="#modal-show-{{ $app->id }}"
@@ -73,6 +83,60 @@
             ] // Ordenar por la primera columna (created_at) de manera descendente
         });
     </script>
+    <script>
+        $(document).ready(function() {
+            $('.status-select').change(function() {
+                var status = $(this).val();
+                var id = $(this).data('id');
+                var statusUrl = "{{ route('update.status') }}";
+                var badge = $(this).closest('td').find('.badge');
 
+                $.ajax({
+                    url: statusUrl,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        id: id,
+                        status: status
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            var badgeClass = '';
+                            if (status === 'enviado') {
+                                badgeClass = 'badge-success';
+                            } else if (status === 'cancelado') {
+                                badgeClass = 'badge-danger';
+                            } else {
+                                badgeClass = 'badge-warning';
+                            }
+
+                            badge.attr('class', 'badge ' + badgeClass + ' badge-pill').text(
+                                status);
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Estado actualizado',
+                                text: response.message,
+                                timer: 1500
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Ocurrió un error al actualizar el estado.'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
 
 @stop

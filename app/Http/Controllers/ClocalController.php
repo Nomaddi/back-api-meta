@@ -96,4 +96,17 @@ class ClocalController extends Controller
             ], 500);
         }
     }
+
+    public function updateStatus(Request $request)
+    {
+        $app = Clocal::find($request->id);
+        if ($app) {
+            $app->status = $request->status;
+            $app->save();
+
+            return response()->json(['success' => true, 'message' => 'Estado actualizado correctamente.']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'No se encontró la aplicación.']);
+    }
 }

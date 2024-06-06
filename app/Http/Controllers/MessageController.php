@@ -509,18 +509,25 @@ class MessageController extends Controller
             'pdf' => 'required|file|mimes:pdf|max:10240', // 10MB
         ]);
 
-        if ($request->hasFile('pdf')) {
-            $pdf = $request->file('pdf');
-            $filename = 'pdfs/' . uniqid() . '.' . $pdf->getClientOriginalExtension();
+        try {
+            if ($request->hasFile('pdf')) {
+                $pdf = $request->file('pdf');
+                $filename = 'pdfs/' . uniqid() . '.' . $pdf->getClientOriginalExtension();
 
-            // Guardar en el disco público
-            $path = $pdf->storeAs('', $filename, 'public');
+                // Guardar en el disco público
+                $path = $pdf->storeAs('', $filename, 'public');
 
-            // Retorna URL del archivo
-            return response()->json(['url' => Storage::disk('public')->url($filename)], 200);
+                // Retorna URL del archivo
+                return response()->json(['url' => Storage::disk('public')->url($filename)], 200);
+            } else {
+                return response()->json(['error' => 'No se encontró el archivo PDF en la solicitud.'], 400);
+            }
+        } catch (Exception $e) {
+            // Log the exception for debugging purposes
+            Log::error('Error uploading file: ' . $e->getMessage());
+
+            return response()->json(['error' => 'Ocurrió un error al subir el archivo. Por favor, inténtelo de nuevo.'], 500);
         }
-
-        return response()->json(['error' => 'No se pudo subir el archivo.'], 500);
     }
 
     public function sendMessageTemplate(Request $request)
@@ -611,12 +618,31 @@ class MessageController extends Controller
                 $rutaArchivo = "tareas/tarea_{$fechaHoraActual}.txt";
                 Storage::put($rutaArchivo, $numeros);
 
+
+                // Reemplazar placeholders {{}} con los valores proporcionados
+                $personalizedBody = $templateBody;
+
+                if (!empty($input['body_placeholders'])) {
+                    $bodyParams = [];
+                    foreach ($input['body_placeholders'] as $key => $placeholder) {
+
+                        $bodyParams[] = ['type' => 'text', 'text' => $placeholder];
+
+                        $personalizedBody = str_replace('{{' . ($key + 1) . '}}', $placeholder, $personalizedBody);
+                    }
+                }
+
+                $payload['template']['components'][1] = [
+                    'type' => 'body',
+                    'parameters' => $bodyParams,
+                ];
+
                 $tarea = new TareaProgramada();
                 $tarea->token_app = $tokenApp;
                 $tarea->phone_id = $phone_id;
                 $tarea->numeros = $rutaArchivo;
                 $tarea->payload = json_encode($payload);
-                $tarea->body = $templateBody; // Guardar el cuerpo de la plantilla sin modificar
+                $tarea->body = $personalizedBody; // Guardar el cuerpo de la plantilla sin modificar
                 $tarea->messageData = json_encode($messageData);
                 $tarea->status = 'pendiente';
                 $tarea->fecha_programada = $fechaFormateada;

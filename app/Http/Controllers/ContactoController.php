@@ -71,7 +71,6 @@ class ContactoController extends Controller
                 'notas' => 'nullable|string',
                 'etiqueta' => 'sometimes|array',
                 'etiqueta.*' => 'integer|exists:tags,id,user_id,' . $user->id,  // Asegura que los tags existen y pertenecen al usuario
-                'custom_fields.*' => 'nullable|string'  // Validar los campos personalizados
             ]);
 
 
@@ -105,14 +104,18 @@ class ContactoController extends Controller
                 $contacto->tags()->syncWithoutDetaching($data['etiqueta']);
             }
 
-            // Guardar los valores de los campos personalizados
-            foreach ($request->custom_fields as $fieldId => $value) {
-                CustomFieldValue::create([
-                    'contacto_id' => $contacto->id,
-                    'custom_field_id' => $fieldId,
-                    'value' => $value,
-                ]);
+            if (isset($data['custom_fields'])) {
+                // Guardar los valores de los campos personalizados
+                foreach ($request->custom_fields as $fieldId => $value) {
+                    CustomFieldValue::create([
+                        'contacto_id' => $contacto->id,
+                        'custom_field_id' => $fieldId,
+                        'value' => $value,
+                    ]);
+                }
             }
+
+
 
             return response()->json([
                 'success' => true,
@@ -195,7 +198,6 @@ class ContactoController extends Controller
                     'notas' => 'nullable|string',
                     'etiqueta' => 'sometimes|array',
                     'etiqueta.*' => 'integer|exists:tags,id,user_id,' . $user->id,
-                    'custom_fields.*' => 'nullable|string'  // Validar los campos personalizados
                 ]);
 
                 // Actualizar el contacto
@@ -216,16 +218,19 @@ class ContactoController extends Controller
                 }
 
                 // Actualizar los valores de los campos personalizados
-                foreach ($request->custom_fields as $fieldId => $value) {
-                    $customFieldValue = $contacto->customFieldValues()->where('custom_field_id', $fieldId)->first();
-                    if ($customFieldValue) {
-                        $customFieldValue->update(['value' => $value]);
-                    } else {
-                        CustomFieldValue::create([
-                            'contacto_id' => $contacto->id,
-                            'custom_field_id' => $fieldId,
-                            'value' => $value,
-                        ]);
+                if (isset($data['custom_fields'])) {
+
+                    foreach ($request->custom_fields as $fieldId => $value) {
+                        $customFieldValue = $contacto->customFieldValues()->where('custom_field_id', $fieldId)->first();
+                        if ($customFieldValue) {
+                            $customFieldValue->update(['value' => $value]);
+                        } else {
+                            CustomFieldValue::create([
+                                'contacto_id' => $contacto->id,
+                                'custom_field_id' => $fieldId,
+                                'value' => $value,
+                            ]);
+                        }
                     }
                 }
 
@@ -361,7 +366,7 @@ class ContactoController extends Controller
         }
 
         // Crear el contenido del CSV
-        $callback = function() use ($headers) {
+        $callback = function () use ($headers) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $headers);
             fclose($file);

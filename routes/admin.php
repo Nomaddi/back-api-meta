@@ -99,6 +99,9 @@ Route::put('/actualizar-estado/{id}', [ProgramadosControllers::class, 'actualiza
 //contratacion local
 Route::get('solicitudes', [ClocalController::class, 'index'])->middleware('can:solicitudes')->name('solicitudes'); //mostrar todos los registroscl
 Route::get('solicitudes/send/{id}', [ClocalController::class, 'send'])->name('enviar.solicitud'); //mostrar todos los registroscl
+//Cambiar los estados de la tabla de contratacion local
+Route::post('update-status', [ClocalController::class, 'updateStatus'])->name('update.status');
+
 
 //descargar informe
 Route::get('download/{id}', function ($id) {
