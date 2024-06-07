@@ -659,6 +659,7 @@ class MessageController extends Controller
                     'data' => ' Mensajes agregado al cron correctamente.',
                 ], 200);
             } else {
+                $banderaArrayBody = null; // Inicializar la variable
                 foreach ($recipients as $recipient) {
                     if (isset($payload['template']['components'])) {
                         $components = $payload['template']['components'];
@@ -669,6 +670,11 @@ class MessageController extends Controller
                                 $banderaArrayBody = 1;
                             }
                         }
+                    }
+
+                    // Verificar que $banderaArrayBody esté definida
+                    if ($banderaArrayBody === null) {
+                        $banderaArrayBody = 0; // Asignar un valor predeterminado si no se encontró un header
                     }
 
 
