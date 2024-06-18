@@ -92,4 +92,9 @@ class User extends Authenticatable
         return $this->hasMany(CustomField::class, 'user_id');
     }
 
+    public function reportes()
+    {
+        return $this->belongsToMany(Reporte::class, 'user_reportes', 'user_id', 'reporte_id');
+    }
+
 }

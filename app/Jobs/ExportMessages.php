@@ -22,20 +22,22 @@ class ExportMessages implements ShouldQueue
     protected $startDate;
     protected $endDate;
     protected $reportId;
+    protected $id_telefono;
 
     public $timeout = 120000;
 
-    public function __construct($startDate, $endDate, $reportId)
+    public function __construct($startDate, $endDate, $reportId, $id_telefono)
     {
         $this->startDate = $startDate;
         $this->endDate = $endDate;
         $this->reportId = $reportId;
+        $this->id_telefono = $id_telefono;
     }
 
     public function handle()
     {
         try {
-            $results = DB::select('CALL GetMessagesReport(?, ?)', [$this->startDate, $this->endDate]);
+            $results = DB::select('CALL GetMessagesReport(?, ?, ?)', [$this->startDate, $this->endDate, $this->id_telefono]);
             if (!empty($results)) {
 
                 $fileName = 'messages_export_' . now()->format('Y-m-d_His') . '.csv';  // Cambio de extensión a CSV

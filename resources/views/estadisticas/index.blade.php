@@ -9,23 +9,32 @@
 @stop
 
 @section('content')
-    <form id="statisticsForm">
-        @csrf
-        <div class="row">
-            <div class="col-lg-5">
-                <label for="fechaInicio" class="form-label">Fecha y hora inicial</label>
-                <input type="datetime-local" class="form-control" id="fechaInicio" name="fechaInicio" required>
-            </div>
-            <div class="col-lg-5">
-                <label for="fechaFin" class="form-label">Fecha y hora final</label>
-                <input type="datetime-local" class="form-control" id="fechaFin" name="fechaFin" required>
-            </div>
-            <div class="col-lg-2">
-                <br>
-                <button type="submit" class="btn btn-primary">Enviar</button>
-            </div>
+<form id="statisticsForm">
+    @csrf
+    <div class="row">
+        <div class="col-lg-5">
+            <label for="fechaInicio" class="form-label">Fecha y hora inicial</label>
+            <input type="datetime-local" class="form-control" id="fechaInicio" name="fechaInicio" required>
         </div>
-    </form>
+        <div class="col-lg-5">
+            <label for="fechaFin" class="form-label">Fecha y hora final</label>
+            <input type="datetime-local" class="form-control" id="fechaFin" name="fechaFin" required>
+        </div>
+        <div class="col-lg-5">
+            <label for="selectPlantilla">Seleccione un número disponible</label>
+            <select id="selectPlantilla" name="selectPlantilla" class="form-select form-control mb-3" required>
+                <option value="">Selecciona un Número</option>
+                @foreach ($numeros as $numero)
+                    <option value="{{ $numero->id_telefono }}">{{ $numero->nombre }} - {{ $numero->numero }} - {{ $numero->aplicacion->nombre }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-lg-2">
+            <br>
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </div>
+    </div>
+</form>
     <br>
     <section class="content">
         <div class="container-fluid">
@@ -48,7 +57,7 @@
                         </div>
 
                         <div class="card-body">
-                            <table class="table table-bordered">
+                            <table id="resporteTableStatus" class="display nowrap">
                                 <thead>
                                     <tr>
                                         <th>Estado</th>
@@ -154,7 +163,7 @@
             </div>
             <div class="row">
 
-                <section class="col-lg-6 connectedSortable ui-sortable">
+                <section class="col-lg-12 connectedSortable ui-sortable">
                     <div class="card card-primary">
                         <div class="card-header">
                             <h3 class="card-title">Exportación de reporte</h3>
@@ -169,47 +178,49 @@
                         </div>
 
                         <div class="card-body">
-                            <table id="resporteTable" class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th>Id</th>
-                                        <th>Fecha Inicio</th>
-                                        <th>Fecha Fin</th>
-                                        <th>generar</th>
-                                        <th>descargar</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($reportes as $reporte)
-                                        <tr> <!-- Agregamos esta línea para definir una fila de la tabla -->
-                                            <td>{{ $reporte->id }}</td>
-                                            <td>{{ $reporte->fechaInicio }}</td>
-                                            <td>{{ $reporte->fechaFin }}</td>
-                                            <td>
-                                                <a href="#"
-                                                    onclick="exportarMensaje({{ $reporte->id }}); return false;"
-                                                    class="btn btn-success btn-sm mb-2">
-                                                    Crear
-                                                </a>
-                                            </td>
-                                            @if ($reporte->archivo && $reporte->archivoExiste())
+                            <div class="table-responsive">
+                                <table id="resporteTable" class="display nowrap" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Fecha Inicio</th>
+                                            <th>Fecha Fin</th>
+                                            <th>generar</th>
+                                            <th>descargar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($reportes as $reporte)
+                                            <tr> <!-- Agregamos esta línea para definir una fila de la tabla -->
+                                                <td>{{ $reporte->id }}</td>
+                                                <td>{{ $reporte->fechaInicio }}</td>
+                                                <td>{{ $reporte->fechaFin }}</td>
                                                 <td>
-                                                    <a href="{{ route('download', $reporte->id) }}"
-                                                        class="btn btn-primary btn-sm mb-2">
-                                                        <i class="fa fa-download"></i> Descargar
+                                                    <a href="#"
+                                                        onclick="exportarMensaje({{ $reporte->id }}); return false;"
+                                                        class="btn btn-success btn-sm mb-2">
+                                                        Crear
                                                     </a>
                                                 </td>
-                                            @else
-                                                <td>
-                                                    <span>
-                                                        <p>Clic en crear..</p>
-                                                    </span>
-                                                </td>
-                                            @endif
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                                @if ($reporte->archivo && $reporte->archivoExiste())
+                                                    <td>
+                                                        <a href="{{ route('download', $reporte->id) }}"
+                                                            class="btn btn-primary btn-sm mb-2">
+                                                            <i class="fa fa-download"></i> Descargar
+                                                        </a>
+                                                    </td>
+                                                @else
+                                                    <td>
+                                                        <span>
+                                                            <p>Clic en crear..</p>
+                                                        </span>
+                                                    </td>
+                                                @endif
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
 
                         </div>
                     </div>
@@ -220,37 +231,6 @@
                 </section>
 
 
-                <section class="col-lg-6 connectedSortable ui-sortable">
-                    <div class="card card-success">
-                        <div class="card-header">
-                            <h3 class="card-title">Confirmación mensaje: [<span id="startDate2"></span> - <span
-                                    id="endDate2"></span>]</h3>
-                            <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <h4>Total de eventos: <span id="totalEventos"></span></h4>
-                            <div class="chartjs-size-monitor">
-                                <div class="chartjs-size-monitor-expand">
-                                    <div class=""></div>
-                                </div>
-                                <div class="chartjs-size-monitor-shrink">
-                                    <div class=""></div>
-                                </div>
-                            </div>
-                            <canvas id="donutChart"
-                                style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%; display: block; width: 389px;"
-                                width="486" height="312" class="chartjs-render-monitor"></canvas>
-                        </div>
-
-                    </div>
-                </section>
 
             </div>
         </div>
@@ -258,12 +238,14 @@
 @stop
 
 @section('css')
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.2/css/responsive.dataTables.css">
 @stop
 
 @section('js')
-    <script src="https://code.jquery.com/jquery-3.7.0.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.8/js/dataTables.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.2/js/responsive.dataTables.js"></script>
     <script>
         var baseUrl = "{{ url('/') }}";
         var exportUrl = "{{ route('exportar-mensajes', '_id_') }}";
@@ -274,12 +256,29 @@
 
                 var formData = $(this).serialize(); // Obtener los datos del formulario
 
+                // Mostrar SweetAlert de cargando
+                Swal.fire({
+                    title: 'Cargando...',
+                    text: 'Por favor, espera mientras obtenemos los datos.',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
                 // Enviar una solicitud AJAX al controlador para obtener las estadísticas
                 $.ajax({
                     url: '{{ route('get-statistics') }}',
                     type: 'POST',
                     data: formData,
                     success: function(response) {
+                        // Cerrar el SweetAlert de cargando
+                        Swal.close();
+
+                        // Destruir la DataTable antes de actualizar los datos
+                        dataTable.destroy();
+
                         // Actualizar el contenido de la tabla con los nuevos datos de los reportes
                         var tableBody = $('#resporteTable tbody');
                         tableBody.empty(); // Limpiar el contenido actual de la tabla
@@ -298,74 +297,73 @@
                                     '<td><span><p>esperando...</p></span></td>') +
                                 '</tr>';
                             tableBody.append(newRow);
-
                         });
+
+                        // Reinicializar la DataTable con los nuevos datos
+                        dataTable = $('#resporteTable').DataTable({
+                            responsive: true,
+                            autoWidth: false,
+                            "order": [
+                                [0, "desc"]
+                            ]
+                        });
+
                         // Asignar los valores recibidos a las variables de la vista
-                        var sentCount = response.sentCount;
-                        var deliveredCount = response.deliveredCount;
-                        var readCount = response.readCount;
-                        var failedCount = response.failedCount;
-                        var totalMessages = response.totalMessages;
-                        var sentPercentage = response.sentPercentage;
-                        var deliveredPercentage = response.deliveredPercentage;
-                        var readPercentage = response.readPercentage;
-                        var failedPercentage = response.failedPercentage;
-                        var startDate = response.startDate;
-                        var endDate = response.endDate;
+                        $('#sentCount').text(response.sentCount);
+                        $('#deliveredCount').text(response.deliveredCount);
+                        $('#readCount').text(response.readCount);
+                        $('#failedCount').text(response.failedCount);
+                        $('#totalMessages').text(response.totalMessages);
+                        $('#totalEventos').text(response.totalMessages);
 
-                        $('#sentCount').text(sentCount);
-                        $('#deliveredCount').text(deliveredCount);
-                        $('#readCount').text(readCount);
-                        $('#failedCount').text(failedCount);
-                        $('#totalMessages').text(totalMessages);
-                        $('#totalEventos').text(totalMessages);
+                        $('#startDate').text(response.startDate);
+                        $('#endDate').text(response.endDate);
+                        $('#startDate2').text(response.startDate);
+                        $('#endDate2').text(response.endDate);
 
-                        $('#startDate').text(startDate);
-                        $('#endDate').text(endDate);
-                        $('#startDate2').text(startDate);
-                        $('#endDate2').text(endDate);
+                        $('#sentPercentage').text(response.sentPercentage + "%");
+                        $('#deliveredPercentage').text(response.deliveredPercentage + "%");
+                        $('#readPercentage').text(response.readPercentage + "%");
+                        $('#failedPercentage').text(response.failedPercentage + "%");
 
+                        $('#sentProgressBar').css('width', response.sentPercentage + "%");
+                        $('#deliveredProgressBar').css('width', response.deliveredPercentage +
+                            "%");
+                        $('#readProgressBar').css('width', response.readPercentage + "%");
+                        $('#failedProgressBar').css('width', response.failedPercentage + "%");
 
-                        $('#sentPercentage').text(sentPercentage + "%");
-                        $('#deliveredPercentage').text(deliveredPercentage + "%");
-                        $('#readPercentage').text(readPercentage + "%");
-                        $('#failedPercentage').text(failedPercentage + "%");
-
-                        $('#sentProgressBar').css('width', sentPercentage + "%");
-                        $('#deliveredProgressBar').css('width', deliveredPercentage + "%");
-                        $('#readProgressBar').css('width', readPercentage + "%");
-                        $('#failedProgressBar').css('width', failedPercentage + "%");
-
-                        var donutChartCanvas = $('#donutChart').get(0).getContext('2d')
+                        var donutChartCanvas = $('#donutChart').get(0).getContext('2d');
                         var donutData = {
                             labels: [
                                 'Enviados',
                                 'Entregados',
-                                'Leidos',
+                                'Leídos',
                                 'Fallidos',
                             ],
                             datasets: [{
-                                data: [sentCount, deliveredCount, readCount,
-                                    failedCount
+                                data: [response.sentCount, response.deliveredCount,
+                                    response.readCount, response.failedCount
                                 ],
                                 backgroundColor: ['#00c0ef', '#f39c12', '#008b46',
                                     '#f50854'
                                 ],
                             }]
-                        }
+                        };
                         var donutOptions = {
                             maintainAspectRatio: false,
                             responsive: true,
-                        }
-                        //Create pie or douhnut chart
-                        // You can switch between pie and douhnut using the method below.
+                        };
+                        // Crear gráfico de dona
                         new Chart(donutChartCanvas, {
                             type: 'doughnut',
                             data: donutData,
                             options: donutOptions
-                        })
+                        });
                     },
                     error: function(xhr, status, error) {
+                        // Cerrar el SweetAlert de cargando
+                        Swal.close();
+
                         // Mostrar el error con SweetAlert2
                         Swal.fire({
                             icon: 'error',
@@ -380,7 +378,17 @@
         });
     </script>
     <script>
-        new DataTable('#resporteTable');
+        var dataTable = $('#resporteTable').DataTable({
+            responsive: true,
+            autoWidth: false,
+            "order": [
+                [0, "desc"]
+            ]
+        });
+
+        new DataTable('#resporteTableStatus', {
+            responsive: true,
+        });
     </script>
     <script>
         function exportarMensaje(reporteId) {
@@ -419,7 +427,7 @@
                         'success'
                     ).then(() => {
                         location
-                    .reload(); // También recarga en caso de que el usuario cierre el SweetAlert manualmente
+                            .reload(); // También recarga en caso de que el usuario cierre el SweetAlert manualmente
                     });
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
                     Swal.fire(
@@ -431,44 +439,4 @@
             });
         }
     </script>
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script> --}}
-    {{-- <script>
-        $(document).ready(function() {
-            function checkSession() {
-                $.ajax({
-                    url: '{{ url("/check-session") }}',
-                    method: 'GET',
-                    success: function(response) {
-                        if (!response.is_logged_in) {
-                            Swal.fire({
-                                title: 'Sesión caducada',
-                                text: 'Su sesión ha caducado. Por favor, inicie sesión de nuevo.',
-                                icon: 'warning',
-                                confirmButtonText: 'Iniciar sesión',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    $.ajax({
-                                        url: '{{ url('/refresh-csrf') }}',
-                                        method: 'GET',
-                                        success: function(data) {
-                                            $('meta[name="csrf-token"]').attr(
-                                                'content', data.csrf_token);
-                                            window.location.href =
-                                                '{{ route('login') }}';
-                                        }
-                                    });
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-
-            // Check session every 5 minutes (300000 milliseconds)
-            setInterval(checkSession, 70000);
-        });
-    </script> --}}
-
 @stop

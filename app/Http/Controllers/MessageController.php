@@ -682,21 +682,32 @@ class MessageController extends Controller
                     $contacto = $contacts->get($phone);
 
                     if (!$contacto) {
-                        $contacto = new Contacto();
-                        $contacto->nombre = $phone;
-                        $contacto->telefono = $phone;
-                        $contacto->notas = "Contacto creado automáticamente por colas";
-                        $contacto->save();
+                        // Si el contacto no existe en el mapa, buscar en la base de datos
+                        $contacto = Contacto::where('telefono', $phone)->first();
 
-                        $userContact = new UserContact();
-                        $userContact->user_id = $user->id;
-                        $userContact->contacto_id = $contacto->id;
-                        $userContact->save();
+                        if (!$contacto) {
+                            // Si el contacto no existe en la base de datos, crear uno nuevo
+                            $contacto = new Contacto();
+                            $contacto->nombre = $phone;
+                            $contacto->telefono = $phone;
+                            $contacto->notas = "Contacto creado automáticamente por colas";
+                            $contacto->save();
+                        }
 
+                        // Asociar el contacto con el usuario actual en user_contacts
+                        if (!$user->contactos->contains($contacto->id)) {
+                            $userContact = new UserContact();
+                            $userContact->user_id = $user->id;
+                            $userContact->contacto_id = $contacto->id;
+                            $userContact->save();
+                        }
+
+                        // Asociar tags si existen
                         if ($tags) {
                             $contacto->tags()->syncWithoutDetaching($tags);
                         }
                     }
+
 
                     // Obtener los valores de los campos personalizados del contacto
                     $customFieldValues = $contacto->customFieldValues->pluck('value', 'custom_field_id')->toArray();

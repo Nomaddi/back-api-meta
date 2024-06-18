@@ -24,7 +24,7 @@
                             <option value="{{ $numero->id }}" data-id_telefono="{{ $numero->id_telefono }}"
                                 data-id_c_business="{{ $numero->aplicacion->id_c_business }}"
                                 data-token_api="{{ $numero->aplicacion->token_api }}">
-                                {{ $numero->nombre }}
+                                {{ $numero->nombre }} - {{ $numero->numero }} - {{ $numero->aplicacion->nombre }}
                             </option>
                         @endforeach
                     </select>
@@ -58,7 +58,7 @@
                             @foreach ($tags as $tag)
                                 <option value="{{ $tag->id }}"
                                     data-numeros="{{ implode("\n", $tag->contactos->pluck('telefono')->toArray()) }}">
-                                    {{ $tag->nombre }}
+                                    {{ $tag->nombre }} - {{ $tag->contactos->count() }}
                                 </option>
                             @endforeach
                         </select>

@@ -6,10 +6,11 @@ use Exception;
 use App\Models\Envio;
 use App\Models\Message;
 use App\Models\Reporte;
-use Illuminate\Http\Request;
 use App\Jobs\ExportMessages;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -18,33 +19,44 @@ class EstadisticasController extends Controller
 {
     public function index()
     {
-        $reportes = Reporte::all();
+        $user = Auth::user();
+        $reportes = $user->reportes()->get();
+        $aplicaciones = $user->aplicaciones()->with('numeros')->get();
         return view('estadisticas.index', [
-            'reportes' => $reportes
+            'reportes' => $reportes,
+            'numeros' => $aplicaciones->pluck('numeros')->flatten(),
         ]);
     }
 
     public function getStatistics(Request $request)
     {
+        $datos = $request->all();
         $validatedData = $request->validate([
             'fechaInicio' => 'required|date',
             'fechaFin' => 'required|date|after_or_equal:fechaInicio',
+            'selectPlantilla' => 'required|integer'
         ]);
 
+        $user = Auth::user();
         try {
             $startDate = $validatedData['fechaInicio'];
             $endDate = $validatedData['fechaFin'];
+            $selectPlantilla = $validatedData['selectPlantilla'];
 
             $respote = new Reporte();
             $respote->fechaInicio = $startDate;
             $respote->fechaFin = $endDate;
+            $respote->id_telefono = $selectPlantilla;
             $respote->save();
 
-            $reportes = Reporte::all();
+            $user->reportes()->attach($respote->id);
+
+            $reportes = $user->reportes()->get();
 
             // Obtener el conteo de mensajes por estado en un solo query
             $statusCounts = Message::whereBetween('created_at', [$startDate, $endDate])
                 ->where('outgoing', 1)
+                ->where('phone_id', $selectPlantilla)
                 ->select('status', \DB::raw('count(*) as count'))
                 ->groupBy('status')
                 ->get()
@@ -85,8 +97,9 @@ class EstadisticasController extends Controller
     public function exportar($id)
     {
         try {
+
             $report = Reporte::findOrFail($id);
-            ExportMessages::dispatch($report->fechaInicio, $report->fechaFin, $id);
+            ExportMessages::dispatch($report->fechaInicio, $report->fechaFin, $id, $report->id_telefono);
 
             return response()->json(['status' => 'Exportación iniciada']);
         } catch (ModelNotFoundException $e) {

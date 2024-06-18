@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateReportesTable extends Migration
+class CreateUserReportesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateReportesTable extends Migration
      */
     public function up()
     {
-        Schema::create('reportes', function (Blueprint $table) {
+        Schema::create('user_reportes', function (Blueprint $table) {
             $table->id();
-            $table->date('fechaInicio');
-            $table->date('fechaFin');
-            $table->string('id_telefono');
-            $table->text('archivo');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('reporte_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ class CreateReportesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('reportes');
+        Schema::dropIfExists('user_reportes');
     }
 }
