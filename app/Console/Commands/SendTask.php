@@ -126,7 +126,6 @@ class SendTask extends Command
      */
     protected function obtenerContacto($telefono, $userId)
     {
-        Log::warning("obtenerContacto para el usuario: $userId");
         $user = User::find($userId);
         if (!$user) {
             Log::error("User not found for ID: $userId");

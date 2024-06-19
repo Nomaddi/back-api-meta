@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Imports\ContactosImport;
 use App\Models\CustomFieldValue;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Response;
@@ -304,6 +305,8 @@ class ContactoController extends Controller
             // Redireccionar de vuelta con los errores
             return redirect()->back()->withErrors($errors)->withInput();
         } catch (Exception $e) {
+            // Registrar el error general en el log
+            Log::error('Ha ocurrido un error al importar los contactos: ' . $e->getMessage(), ['exception' => $e]);
             // Otro tipo de errores
             return redirect()->back()->withErrors(['error' => 'Ha ocurrido un error al importar los contactos.'])->withInput();
         }
