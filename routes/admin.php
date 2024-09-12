@@ -1,12 +1,12 @@
 <?php
 
-use App\Http\Controllers\CustomFieldController;
 use App\Models\Reporte;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-// use Illuminate\Support\Facades\Redis;
 use App\Http\Controllers\TagController;
+// use Illuminate\Support\Facades\Redis;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EnvioController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\ClocalController;
@@ -16,6 +16,7 @@ use App\Http\Controllers\PermisoController;
 
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\ErrorLogController;
+use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
@@ -118,7 +119,7 @@ Route::get('download/{id}', function ($id) {
 Route::get('data', function () {
     try {
         $results = DB::select('CALL GetMessagesReport(?, ?)', ['2024-03-29', '2024-04-15']);
-        if (!empty ($results)) {
+        if (!empty($results)) {
             // foreach ($results as $result) {
             //     echo "Nombre: " . $result->contacto_nombre . ", Teléfono: " . $result->contacto_telefono . ", Estado: " . $result->estado . ", enviado: " . $result->distintivo_nombre . ", fecha: " . $result->created_at . "\n";
             // }
@@ -154,3 +155,9 @@ Route::get('refresh-csrf', function () {
 
 Route::get('descargar-plantilla', [ContactoController::class, 'descargarPlantilla'])->name('descargar-plantilla');
 
+// enviar correo
+Route::get('/send-email', function () {
+    return view('emails.send-email');
+})->name('send.email.form');
+
+Route::post('/send-email', [EmailController::class, 'sendEmail'])->name('send.email');
