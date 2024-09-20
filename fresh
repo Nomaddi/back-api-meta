@@ -1,0 +1,24 @@
+Migrating: 2022_11_03_024752_create_messages_table
+
+   Illuminate\Database\QueryException 
+
+  SQLSTATE[42S01]: Base table or view already exists: 1050 Table 'messages' already exists (SQL: create table `messages` (`id` bigint unsigned not null auto_increment primary key, `wa_id` varchar(255) null, `wam_id` varchar(255) not null, `phone_id` varchar(255) not null, `type` varchar(15) not null, `outgoing` tinyint(1) not null, `body` longtext not null, `status` varchar(15) not null, `caption` longtext null, `data` blob not null, `distintivo` varchar(255) not null, `code` varchar(255) not null, `created_at` timestamp null, `updated_at` timestamp null) default character set utf8mb4 collate 'utf8mb4_unicode_ci')
+
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:712
+    708▕         // If an exception occurs when attempting to run a query, we'll format the error
+    709▕         // message to include the bindings with SQL, which will make this exception a
+    710▕         // lot more helpful to the developer instead of just the database's errors.
+    711▕         catch (Exception $e) {
+  ➜ 712▕             throw new QueryException(
+    713▕                 $query, $this->prepareBindings($bindings), $e
+    714▕             );
+    715▕         }
+    716▕     }
+
+      [2m+9 vendor frames [22m
+  10  database/migrations/2022_11_03_024752_create_messages_table.php:33
+      Illuminate\Support\Facades\Facade::__callStatic("create")
+
+      [2m+22 vendor frames [22m
+  33  artisan:37
+      Illuminate\Foundation\Console\Kernel::handle(Object(Symfony\Component\Console\Input\ArgvInput), Object(Symfony\Component\Console\Output\ConsoleOutput))
