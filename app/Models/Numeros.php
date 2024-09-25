@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Ai;
+
 
 class Numeros extends Model
 {
@@ -29,5 +31,12 @@ class Numeros extends Model
     {
         return $this->belongsToMany(User::class, 'user_numeros', 'numero_id', 'user_id');
     }
+    
+    public function ai()
+    {
+        
+    return $this->belongsTo(Ai::class, 'ai_id');
+    }
+
 
 }

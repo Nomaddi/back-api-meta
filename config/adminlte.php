@@ -406,6 +406,17 @@ return [
             ],
         ],
         [
+            'text' => 'AI',
+            'icon' => 'fas fa-fw fa-robot',
+            'submenu' => [
+                [
+                    'text'  => 'listar ais',
+                    'route' => 'ais.index',
+                    'icon'  => 'fas fa-fw fa-window-restore',
+                ],
+            ],
+        ],
+        [
             'text' => 'Administración',
             'icon' => 'fas fa-fw fa-cogs',
             'submenu' => [

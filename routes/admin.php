@@ -19,6 +19,7 @@ use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
+use App\Http\Controllers\AIController;
 
 Route::resource(
     'aplicaciones',
@@ -36,12 +37,12 @@ Route::resource(
 
 //Contactos
 Route::get('contactos', [ContactoController::class, 'index'])->middleware('can:contactos.index')->name('contactos.index');
-; //mostrar todos los registros
+//mostrar todos los registros
 Route::get('contactos/getData', [ContactoController::class, 'getData'])->name('contactos.getData');
 Route::post('contactos', [ContactoController::class, 'store'])->name('contactos.store'); //crear un registro
 Route::get('contactos/edit/{id}', [ContactoController::class, 'edit']); //obtener datos para editar un registro
-Route::post('contactos/update', [ContactoController::class, 'update'])->name('contactos.update'); //actualizare un registro
-Route::get('contactos/delete/{id}', [ContactoController::class, 'destroy'])->name('contactos.delete'); //actualizare un registro
+Route::put('contactos/update', [ContactoController::class, 'update'])->name('contactos.update'); //actualizare un registro
+Route::delete('contactos/{id}', [ContactoController::class, 'destroy'])->name('contactos.destroy'); //borra un registro
 
 // Tags
 Route::get('tags', [TagController::class, 'index'])->middleware('can:tags.index')->name('tags.index'); //mostrar todos los registros
@@ -147,10 +148,15 @@ Route::post('log-client-error', [ErrorLogController::class, 'store'])->middlewar
 //verificar si no esta inactiva la sesion del usuario
 
 
-//actualizando el tocken si este vencio
+//actualizando el token si este vencio
 Route::get('refresh-csrf', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 })->middleware('can:refresh-csrf')->name('refresh-csrf');
 
 Route::get('descargar-plantilla', [ContactoController::class, 'descargarPlantilla'])->name('descargar-plantilla');
+
+
+// cargar los archivos
+//numeros
+Route::resource('ais', AIController::class,)->names('ais');
 

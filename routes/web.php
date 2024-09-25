@@ -1,3 +1,9 @@
+/*
+routes/web.php
+|
+*/
+
+
 <?php
 
 use App\Events\Webhook;
@@ -43,15 +49,3 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-// cargar los archivos
-
-Route::get('/upload-pdf', [AIController::class, 'showUploadForm'])->name('pdf.upload');
-Route::post('/upload-pdf', [AIController::class, 'uploadPDF'])->name('pdf.upload.post');
-
-// pausar y reanudar la AI
-Route::post('/pause-ia', [AIController::class, 'pauseIA'])->name('ia.pause');
-Route::post('/resume-ia', [AIController::class, 'resumeIA'])->name('ia.resume');
-
-//Rutas (web.php):
-Route::get('/config-horarios', [AIController::class, 'showScheduleForm'])->name('ia.schedule');
-Route::post('/config-horarios', [AIController::class, 'storeSchedule'])->name('ia.schedule.store');

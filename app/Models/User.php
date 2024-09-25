@@ -20,7 +20,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
+    protected $fillable = [ // Atributos que pueden ser asignados masivamente al crear o actualizar un usuario
         'name',
         'email',
         'password',
@@ -97,4 +97,16 @@ class User extends Authenticatable
         return $this->belongsToMany(Reporte::class, 'user_reportes', 'user_id', 'reporte_id');
     }
 
+    public function ais()
+    {
+        return $this->belongsToMany(Ai::class, 'user_ai', 'user_id', 'ai_id');
+    }
+
+    public function threads()
+    {
+        return $this->belongsToMany(Threads::class, 'user_thread', 'user_id', 'thread_id');
+    }
+
 }
+
+
