@@ -3,7 +3,7 @@
         <div class="modal-content">
             <form id="createForm">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">Crear Nuevo numero</h5>
+                    <h5 class="modal-title">Crear Nuevo Ai</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -12,7 +12,7 @@
                     @csrf
                     {{-- estos son los datos que se deben llenar automaticamente --}}
                     <div class="form-group">
-                        <label for="nombre">Nombre de la ai</label>
+                        <label for="nombre">Nombre de la Ais</label>
                         <input type="text" class="form-control" id="nombre" name="nombre" required>
                     </div>
                     <div class="form-group">

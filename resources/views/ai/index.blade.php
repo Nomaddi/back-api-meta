@@ -17,9 +17,9 @@
         <div class="alert alert-success">
             <p>{{ $message }}</p>
         </div>
-
     @endif
-    <table id="numerosTable" class="table table-striped table-bordered shadow-lg mt-4 display compact" style="width:100%">
+
+    <table id="aisTable" class="table table-striped table-bordered shadow-lg mt-4 display compact" style="width:100%">
         <thead class="bg-primary text-white">
             <tr>
                 <th>id</th>
@@ -80,31 +80,38 @@
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     <script>
-        new DataTable('#numerosTable');
+        new DataTable('#aisTable');
     </script>
+    <!-- Scripts AJAX para AIS -->
     <script>
         $(document).ready(function() {
+            // Configuración de AJAX con CSRF
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            // Manejo de Edición                
             $('form[id^="editForm-"]').on('submit', function(e) {
                 e.preventDefault(); // Evitar la recarga de la página
                 var appId = this.id.split('-')[1]; // Obtener el ID de la aplicación
                 var formData = $(this).serialize(); // Serializar los datos del formulario
 
                 $.ajax({
-                    type: "PUT",
-                    url: url: baseUrl + '/ais/' + appId, // Ajusta esta URL según tu enrutamiento
+                    type: "POST",
+                    url: '/ais/' + appId, // Ajusta esta URL según tu enrutamiento
                     data: formData,
                     success: function(response) {
                         // $('#modal-show-' + appId).modal('hide'); // Ocultar el modal
-                        alert("Aplicación actualizada con éxito"); // Mostrar mensaje de éxito
+                        alert("AIS actualizada con éxito"); // Mostrar mensaje de éxito
                         location.reload(); // Opcional: recargar la página o actualizar la vista de alguna otra manera
                     },
                     error: function(error) {
                         console.log(error);
-                        alert("Error al actualizar la aplicación");
+                        alert("Error al actualizar la AIS");
                     }
                 });
             });
-        });
     </script>
     <script>
         $(document).ready(function() {
@@ -121,8 +128,9 @@
 
                 $.ajax({
                     url: "ais/" + appId, // Asegúrate de ajustar la URL a tu ruta de eliminación
-                    type: 'DELETE',
+                    type: 'POST',
                     data: {
+                        _method: 'DELETE',
                         _token: $('meta[name="csrf-token"]').attr('content') // Asegúrate de tener un meta tag con el CSRF token
                     },
                     success: function(result) {

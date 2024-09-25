@@ -46,11 +46,13 @@ class AIController extends Controller
 
     }
 
-    public function destroy(Ai $ai)
-    {
-        $ai->delete();
-        return response()->json(['success' => 'Registro eliminado con éxito.']);
+    public function destroy($id) {
+        $ai = Ai::findOrFail($id);
+        $ai->users()->detach(); // Elimina las relaciones con los usuarios
+        $ai->delete(); // Luego elimina la AI
+        return redirect()->route('ais.index')->with('success', 'AI eliminada exitosamente');
     }
+    
 
 
     public function update(Request $request, $id)

@@ -1,6 +1,5 @@
-
-<div class="modal fade" id="modal-show-{{ $app->id }}" tabindex="-1" role="dialog"
-    aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+{{-- resources/views/ai/modals/show-modal.blade.php --}}
+<div class="modal fade" id="modal-show-{{ $app->id }}" tabindex="-1" role="dialog"aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
