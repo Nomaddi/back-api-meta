@@ -18,6 +18,9 @@ class UserAi extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('ai_id')->constrained()->onDelete('cascade');
             $table->timestamps();
+            
+            // Índice único para evitar duplicados
+            $table->unique(['ai_id', 'user_id']);
         });
     }
 
@@ -32,4 +35,4 @@ class UserAi extends Migration
     }
 }
 
-//<!--database/migrations/2024_09_23_094612_user_ai.php
+//database/migrations/2024_09_23_094612_user_ai.php

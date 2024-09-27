@@ -116,30 +116,26 @@ Route::get('download/{id}', function ($id) {
     }
 })->name('download');
 
+// Obtener datos para reportes
 Route::get('data', function () {
     try {
         $results = DB::select('CALL GetMessagesReport(?, ?)', ['2024-03-29', '2024-04-15']);
-        if (!empty ($results)) {
-            // foreach ($results as $result) {
-            //     echo "Nombre: " . $result->contacto_nombre . ", Teléfono: " . $result->contacto_telefono . ", Estado: " . $result->estado . ", enviado: " . $result->distintivo_nombre . ", fecha: " . $result->created_at . "\n";
-            // }
-            dd($results);
+        if (!empty($results)) {
+            // Puedes personalizar la salida según tus necesidades
+            return response()->json($results);
         } else {
-            echo "No se encontraron resultados.";
+            return response()->json(['message' => 'No se encontraron resultados.'], 404);
         }
     } catch (\Exception $e) {
-        echo 'Error: ' . $e->getMessage();
+        return response()->json(['error' => 'Error: ' . $e->getMessage()], 500);
     }
-});
+})->name('data');
 
-
-Route::resource(
-    'messages',
-    MessageController::class
-);
-
+// Recursos adicionales
+Route::resource('messages', MessageController::class);
 Route::resource('custom_fields', CustomFieldController::class);
 
+// Chat de mensajes
 Route::get('messages-index', [MessageController::class, 'chat'])->name('admin.chat'); //mostrar todos los registroscl
 
 //envios de errores
@@ -153,10 +149,9 @@ Route::get('refresh-csrf', function () {
     return response()->json(['csrf_token' => csrf_token()]);
 })->middleware('can:refresh-csrf')->name('refresh-csrf');
 
+// Descargar plantilla
 Route::get('descargar-plantilla', [ContactoController::class, 'descargarPlantilla'])->name('descargar-plantilla');
 
-
 // cargar los archivos
-//numeros
-Route::resource('ais', AIController::class,)->names('ais');
+Route::resource('/ais', AIController::class)->names('ais');
 

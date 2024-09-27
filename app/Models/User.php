@@ -99,7 +99,7 @@ class User extends Authenticatable
 
     public function ais()
     {
-        return $this->belongsToMany(Ai::class, 'user_ai', 'user_id', 'ai_id');
+        return $this->belongsToMany(Ai::class, 'user_ai', 'user_id', 'ai_id')->withTimestamps();
     }
 
     public function threads()

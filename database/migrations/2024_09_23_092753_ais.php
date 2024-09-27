@@ -24,7 +24,7 @@ class Ais extends Migration
         });
     }
 
-    /**
+    /**exikt
      * Reverse the migrations.
      *
      * @return void
@@ -34,3 +34,4 @@ class Ais extends Migration
         Schema::dropIfExists('ais');
     }
 }
+//database\migration\ais.php

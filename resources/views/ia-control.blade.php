@@ -7,3 +7,5 @@
     @csrf
     <button type="submit">Reanudar IA</button>
 </form>
+
+<!--resources\views\ai-control-blade.php -->

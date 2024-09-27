@@ -21,7 +21,7 @@ class Ai extends Model
     // Esto indica que una IA puede estar asociada a varios usuarios y un usuario puede estar asociado a varias IA.
     public function users()
     {
-        return $this->belongsToMany(User::class, 'user_ai', 'ai_id', 'user_id');
+        return $this->belongsToMany(User::class, 'user_ai', 'ai_id', 'user_id')->withTimestamps();
     }
 }
 

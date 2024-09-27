@@ -1,9 +1,3 @@
-/*
-routes/web.php
-|
-*/
-
-
 <?php
 
 use App\Events\Webhook;
