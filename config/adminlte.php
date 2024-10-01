@@ -388,6 +388,17 @@ return [
             ],
         ],
         [
+            'text' => 'Bots',
+            'icon' => 'fas fa-fw fa-robot',
+            'submenu' => [
+                [
+                    'text'  => 'Bots',
+                    'route' => 'bots.index',
+                    'icon'  => 'fas fa-fw fa-robot',
+                ],
+            ],
+        ],
+        [
             'text' => 'Configuración',
             'icon' => 'fas fa-fw fa-wrench',
             'submenu' => [

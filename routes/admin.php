@@ -1,9 +1,9 @@
 <?php
 
-use App\Http\Controllers\CustomFieldController;
 use App\Models\Reporte;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BotController;
 // use Illuminate\Support\Facades\Redis;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
@@ -16,6 +16,7 @@ use App\Http\Controllers\PermisoController;
 
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\ErrorLogController;
+use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
@@ -154,3 +155,8 @@ Route::get('refresh-csrf', function () {
 
 Route::get('descargar-plantilla', [ContactoController::class, 'descargarPlantilla'])->name('descargar-plantilla');
 
+// bot
+Route::resource(
+    'bots',
+    BotController::class,
+)->names('bots');

@@ -97,4 +97,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Reporte::class, 'user_reportes', 'user_id', 'reporte_id');
     }
 
+    public function bots()
+    {
+        return $this->hasMany(Bot::class);
+    }
+
 }

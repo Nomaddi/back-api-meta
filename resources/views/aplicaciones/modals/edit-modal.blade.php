@@ -37,6 +37,20 @@
                             <input type="text" class="form-control" id="nombre-{{ $app->id }}" name="token_api"
                                 value="{{ $app->token_api }}" required>
                         </div>
+
+                        {{-- Lista desplegable para seleccionar el bot --}}
+                        <div class="form-group">
+                            <label for="bot_id-{{ $app->id }}">Bot Asociado</label>
+                            <select class="form-control" id="bot_id-{{ $app->id }}" name="bot_id" required>
+                                <option value="">Selecciona un bot</option>
+                                @foreach ($bots as $bot)
+                                    <option value="{{ $bot->id }}"
+                                        {{ $app->bot->first()->id == $bot->id ? 'selected' : '' }}>
+                                        {{ $bot->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                 </div>

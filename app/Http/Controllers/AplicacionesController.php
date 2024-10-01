@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Exception;
 use DataTables;
+use App\Models\Bot;
 use App\Libraries\Whatsapp;
 use App\Models\Aplicaciones;
 use Illuminate\Http\Request;
@@ -27,6 +28,9 @@ class AplicacionesController extends Controller
         if ($user) {
             // Obtener las aplicaciones asociadas al usuario logueado
             $aplicaciones = $user->aplicaciones;
+
+            // Obtener todos los bots para que el usuario pueda seleccionar en el formulario de edición
+            $bots = Bot::all();
         } else {
             // Opcional: manejar el caso en que no haya usuario logueado
             // Por ejemplo, redirigir al login o mostrar un mensaje
@@ -35,6 +39,7 @@ class AplicacionesController extends Controller
 
         return view('aplicaciones/index', [
             'aplicaciones' => $aplicaciones,
+            'bots' => $bots, // Pasar los bots a la vista
         ]);
     }
 
@@ -71,6 +76,7 @@ class AplicacionesController extends Controller
             'id_app' => 'required',
             'id_c_business' => 'required',
             'token_api' => 'required',
+            'bot_id' => 'required|exists:bots,id', // Validar que el bot seleccionado exista
         ]);
 
         $aplicacion = Aplicaciones::findOrFail($id);
@@ -81,6 +87,9 @@ class AplicacionesController extends Controller
             'id_c_business' => $request->id_c_business,
             'token_api' => $request->token_api,
         ]);
+
+        // Actualizar la relación de la aplicación con el bot seleccionado en la tabla pivote
+        $aplicacion->bot()->sync([$request->bot_id]);
 
         return response()->json([
             'success' => 'Aplicación actualizada con éxito.',
