@@ -38,15 +38,6 @@
                         <a class="nav-link" href="#services">Servicios</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#portfolio">Portafolio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#reviews">Reseñas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#team">Equipo</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="#contact">Contacto</a>
                     </li>
                 </ul>
@@ -77,7 +68,7 @@
                     </h1>
                     <h5 class="text-white mt-3 mb-4" data-aos="fade-right">IMPULSA TU NEGOCIO CON WHATSAPP</h5>
                     <div data-aos="fade-up" data-aos-delay="50">
-                        <a href="#portfolio" class="btn btn-brand me-2">Portafolio</a>
+                        <a href="#services" class="btn btn-brand me-2">Servicios</a>
                         <a href="#contact" class="btn btn-light ms-2">Contactanos</a>
                     </div>
                 </div>
@@ -85,524 +76,201 @@
         </div>
     </section>
 
-    <!-- ABOUT -->
-    <section id="about" class="section-padding">
+  <!-- SOBRE NOSOTROS -->
+<section id="about" class="section-padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-down" data-aos-delay="50">
+                <div class="section-title">
+                    <h1 class="display-4 fw-semibold">Sobre nosotros</h1>
+                    <div class="line"></div>
+                    <p>En Maddi Go nos especializamos en ofrecer soluciones de envíos masivos de WhatsApp a través de la API Cloud de Meta, complementado con inteligencia artificial para una integración fluida con chatbots, mejorando la experiencia de conversación automatizada.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-between align-items-center">
+            <div class="col-lg-6" data-aos="fade-down" data-aos-delay="50">
+                <img src="images/about.jpg" alt="">
+            </div>
+            <div data-aos="fade-down" data-aos-delay="150" class="col-lg-5">
+                <h1>Sobre Maddi Go</h1>
+                <p class="mt-3 mb-4">Somos expertos en crear soluciones innovadoras que permiten a las empresas gestionar mejor su comunicación con clientes a través de WhatsApp, optimizando el flujo de conversaciones gracias a la inteligencia artificial.</p>
+                <div class="d-flex pt-4 mb-3">
+                    <div class="iconbox me-4">
+                        <i class="ri-mail-send-fill"></i>
+                    </div>
+                    <div>
+                        <h5>Automatización efectiva</h5>
+                        <p>Implementamos inteligencia artificial para crear chatbots capaces de tener conversaciones más naturales y eficientes.</p>
+                    </div>
+                </div>
+                <div class="d-flex mb-3">
+                    <div class="iconbox me-4">
+                        <i class="ri-user-5-fill"></i>
+                    </div>
+                    <div>
+                        <h5>Envíos masivos con precisión</h5>
+                        <p>Gestionamos envíos masivos de WhatsApp con alta precisión y personalización para cada cliente.</p>
+                    </div>
+                </div>
+                <div class="d-flex">
+                    <div class="iconbox me-4">
+                        <i class="ri-rocket-2-fill"></i>
+                    </div>
+                    <div>
+                        <h5>Soluciones personalizadas</h5>
+                        <p>Ofrecemos soluciones adaptadas a las necesidades específicas de tu negocio para mejorar la comunicación con tus clientes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICIOS -->
+<section id="services" class="section-padding border-top">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-down" data-aos-delay="150">
+                <div class="section-title">
+                    <h1 class="display-4 fw-semibold">Nuestros Servicios</h1>
+                    <div class="line"></div>
+                    <p>En Maddi Go ofrecemos soluciones tecnológicas que optimizan la gestión de la comunicación de tu empresa.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row g-4 text-center">
+            <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="150">
+                <div class="service theme-shadow p-lg-5 p-4">
+                    <div class="iconbox">
+                        <i class="ri-mail-send-fill"></i>
+                    </div>
+                    <h5 class="mt-4 mb-3">Envíos Masivos</h5>
+                    <p>Enviamos mensajes a gran escala a través de la API Cloud de WhatsApp para optimizar tu comunicación.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="250">
+                <div class="service theme-shadow p-lg-5 p-4">
+                    <div class="iconbox">
+                        <i class="ri-chat-3-fill"></i>
+                    </div>
+                    <h5 class="mt-4 mb-3">Chatbots Inteligentes</h5>
+                    <p>Implementamos inteligencia artificial para integrar chatbots capaces de conversaciones fluidas y naturales.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="350">
+                <div class="service theme-shadow p-lg-5 p-4">
+                    <div class="iconbox">
+                        <i class="ri-dashboard-fill"></i>
+                    </div>
+                    <h5 class="mt-4 mb-3">Integración y Gestión</h5>
+                    <p>Ofrecemos plataformas de gestión para administrar tus envíos y automatizaciones de manera sencilla.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTÁCTANOS -->
+<section class="section-padding bg-light" id="contact">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center" data-aos="fade-down" data-aos-delay="150">
+                <div class="section-title">
+                    <h1 class="display-4 text-white fw-semibold">Contáctanos</h1>
+                    <div class="line bg-white"></div>
+                    <p class="text-white">Si quieres saber más sobre nuestros servicios, no dudes en contactarnos.</p>
+                </div>
+            </div>
+        </div>
+        <div class="row justify-content-center" data-aos="fade-down" data-aos-delay="250">
+            <div class="col-lg-8">
+                <form action="#" class="row g-3 p-lg-5 p-4 bg-white theme-shadow">
+                    <div class="form-group col-lg-6">
+                        <input type="text" class="form-control" placeholder="Ingresa tu nombre">
+                    </div>
+                    <div class="form-group col-lg-6">
+                        <input type="text" class="form-control" placeholder="Ingresa tu apellido">
+                    </div>
+                    <div class="form-group col-lg-12">
+                        <input type="email" class="form-control" placeholder="Ingresa tu correo">
+                    </div>
+                    <div class="form-group col-lg-12">
+                        <input type="text" class="form-control" placeholder="Asunto">
+                    </div>
+                    <div class="form-group col-lg-12">
+                        <textarea name="message" rows="5" class="form-control" placeholder="Mensaje"></textarea>
+                    </div>
+                    <div class="form-group col-lg-12 d-grid">
+                        <button class="btn btn-brand">Enviar Mensaje</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PIE DE PÁGINA -->
+<footer class="bg-dark">
+    <div class="footer-top">
         <div class="container">
-            <div class="row">
-                <div class="col-12 text-center" data-aos="fade-down" data-aos-delay="50">
-                    <div class="section-title">
-                        <h1 class="display-4 fw-semibold">About us</h1>
-                        <div class="line"></div>
-                        <p>We love to craft digital experiances for brands rather than crap and more lorem ipsums and do
-                            crazy skills</p>
+            <div class="row gy-5">
+                <div class="col-lg-3 col-sm-6">
+                    <a href="#"><img src="images/logo-letras-maddigo.png" width="150" alt=""></a>
+                    <div class="line"></div>
+                    <p>En Maddi Go ofrecemos soluciones para que tu empresa mejore su comunicación con clientes a través de WhatsApp e inteligencia artificial.</p>
+                    <div class="social-icons">
+                        <a href="#"><i class="ri-twitter-fill"></i></a>
+                        <a href="#"><i class="ri-instagram-fill"></i></a>
+                        <a href="#"><i class="ri-linkedin-fill"></i></a>
                     </div>
                 </div>
-            </div>
-            <div class="row justify-content-between align-items-center">
-                <div class="col-lg-6" data-aos="fade-down" data-aos-delay="50">
-                    <img src="images/about.jpg" alt="">
+                <div class="col-lg-3 col-sm-6">
+                    <h5 class="mb-0 text-white">SERVICIOS</h5>
+                    <div class="line"></div>
+                    <ul>
+                        <li><a href="#">Envíos Masivos</a></li>
+                        <li><a href="#">Chatbots</a></li>
+                        <li><a href="#">Automatización</a></li>
+                        <li><a href="#">Gestión de Mensajes</a></li>
+                    </ul>
                 </div>
-                <div data-aos="fade-down" data-aos-delay="150" class="col-lg-5">
-                    <h1>About Elixir</h1>
-                    <p class="mt-3 mb-4">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sit quo reiciendis
-                        ad.</p>
-                    <div class="d-flex pt-4 mb-3">
-                        <div class="iconbox me-4">
-                            <i class="ri-mail-send-fill"></i>
-                        </div>
-                        <div>
-                            <h5>We are Awesome</h5>
-                            <p>Consectetur adipisicing elit. Corporis nesciunt aut temporibus!</p>
-                        </div>
-                    </div>
-                    <div class="d-flex mb-3">
-                        <div class="iconbox me-4">
-                            <i class="ri-user-5-fill"></i>
-                        </div>
-                        <div>
-                            <h5>We are Awesome</h5>
-                            <p>Consectetur adipisicing elit. Corporis nesciunt aut temporibus!</p>
-                        </div>
-                    </div>
-                    <div class="d-flex">
-                        <div class="iconbox me-4">
-                            <i class="ri-rocket-2-fill"></i>
-                        </div>
-                        <div>
-                            <h5>We are Awesome</h5>
-                            <p>Consectetur adipisicing elit. Corporis nesciunt aut temporibus!</p>
-                        </div>
-                    </div>
+                <div class="col-lg-3 col-sm-6">
+                    <h5 class="mb-0 text-white">ACERCA DE</h5>
+                    <div class="line"></div>
+                    <ul>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Nosotros</a></li>
+                        <li><a href="#">Carreras</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-sm-6">
+                    <h5 class="mb-0 text-white">CONTACTO</h5>
+                    <div class="line"></div>
+                    <ul>
+                        <li>Cl. 26 #36-49, Villavicencio, Colombia</li>
+                        <li>+57 320 4956302</li>
+                        <li>javier@nomaddi.com</li>
+                    </ul>
                 </div>
             </div>
         </div>
-    </section>
-
-    <!-- SERVICES -->
-    <section id="services" class="section-padding border-top">
+    </div>
+    <div class="footer-bottom">
         <div class="container">
-            <div class="row">
-                <div class="col-12 text-center" data-aos="fade-down" data-aos-delay="150">
-                    <div class="section-title">
-                        <h1 class="display-4 fw-semibold">Awesome Services</h1>
-                        <div class="line"></div>
-                        <p>We love to craft digital experiances for brands rather than crap and more lorem ipsums and do
-                            crazy skills</p>
-                    </div>
+            <div class="row g-4 justify-content-between">
+                <div class="col-auto">
+                    <p class="mb-0">© Copyright Maddi Go. Todos los derechos reservados</p>
                 </div>
-            </div>
-            <div class="row g-4 text-center">
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="150">
-                    <div class="service theme-shadow p-lg-5 p-4">
-                        <div class="iconbox">
-                            <i class="ri-pen-nib-fill"></i>
-                        </div>
-                        <h5 class="mt-4 mb-3">UX Design</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet fugiat sunt distinctio?</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="250">
-                    <div class="service theme-shadow p-lg-5 p-4">
-                        <div class="iconbox">
-                            <i class="ri-stack-fill"></i>
-                        </div>
-                        <h5 class="mt-4 mb-3">UI Design</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet fugiat sunt distinctio?</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="350">
-                    <div class="service theme-shadow p-lg-5 p-4">
-                        <div class="iconbox">
-                            <i class="ri-ruler-2-fill"></i>
-                        </div>
-                        <h5 class="mt-4 mb-3">Logo Design</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet fugiat sunt distinctio?</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="450">
-                    <div class="service theme-shadow p-lg-5 p-4">
-                        <div class="iconbox">
-                            <i class="ri-pie-chart-2-fill"></i>
-                        </div>
-                        <h5 class="mt-4 mb-3">Digital Marketing</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet fugiat sunt distinctio?</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="550">
-                    <div class="service theme-shadow p-lg-5 p-4">
-                        <div class="iconbox">
-                            <i class="ri-code-box-line"></i>
-                        </div>
-                        <h5 class="mt-4 mb-3">Machine Learning</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet fugiat sunt distinctio?</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="650">
-                    <div class="service theme-shadow p-lg-5 p-4">
-                        <div class="iconbox">
-                            <i class="ri-user-2-fill"></i>
-                        </div>
-                        <h5 class="mt-4 mb-3">UX Design</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet fugiat sunt distinctio?</p>
-                    </div>
+                <div class="col-auto">
+                    <p class="mb-0">Diseñado con 💜 por Maddi Go</p>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</footer>
 
-    <!-- COUNTER -->
-    <section id="counter" class="section-padding">
-        <div class="container text-center">
-            <div class="row g-4">
-                <div class="col-lg-3 col-sm-6" data-aos="fade-down" data-aos-delay="150">
-                    <h1 class="text-white display-4">90,00+</h1>
-                    <h6 class="text-uppercase mb-0 text-white mt-3">Total Downloads</h6>
-                </div>
-                <div class="col-lg-3 col-sm-6" data-aos="fade-down" data-aos-delay="250">
-                    <h1 class="text-white display-4">58K+</h1>
-                    <h6 class="text-uppercase mb-0 text-white mt-3">Trusted Clients</h6>
-                </div>
-                <div class="col-lg-3 col-sm-6" data-aos="fade-down" data-aos-delay="350">
-                    <h1 class="text-white display-4">5M+</h1>
-                    <h6 class="text-uppercase mb-0 text-white mt-3">THemes Designed</h6>
-                </div>
-                <div class="col-lg-3 col-sm-6" data-aos="fade-down" data-aos-delay="450">
-                    <h1 class="text-white display-4">100+</h1>
-                    <h6 class="text-uppercase mb-0 text-white mt-3">Team Members</h6>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- PORTFOLIO -->
-    <section id="portfolio" class="section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center" data-aos="fade-down" data-aos-delay="150">
-                    <div class="section-title">
-                        <h1 class="display-4 fw-semibold">Our Portfolio</h1>
-                        <div class="line"></div>
-                        <p>We love to craft digital experiances for brands rather than crap and more lorem ipsums and do
-                            crazy skills</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-4" data-aos="fade-down" data-aos-delay="150">
-                    <div class="portfolio-item image-zoom">
-                        <div class="image-zoom-wrapper">
-                            <img src="images/project-1.jpg" alt="">
-                        </div>
-                        <a href="images/project-1.jpg" data-fancybox="gallery" class="iconbox"><i
-                                class="ri-search-2-line"></i></a>
-                    </div>
-                    <div class="portfolio-item image-zoom mt-4">
-                        <div class="image-zoom-wrapper">
-                            <img src="images/project-2.jpg" alt="">
-                        </div>
-                        <a href="images/project-2.jpg" data-fancybox="gallery" class="iconbox"><i
-                                class="ri-search-2-line"></i></a>
-                    </div>
-                </div>
-                <div class="col-md-4" data-aos="fade-down" data-aos-delay="250">
-                    <div class="portfolio-item image-zoom">
-                        <div class="image-zoom-wrapper">
-                            <img src="images/project-3.jpg" alt="">
-                        </div>
-                        <a href="images/project-3.jpg" data-fancybox="gallery" class="iconbox"><i
-                                class="ri-search-2-line"></i></a>
-                    </div>
-                    <div class="portfolio-item image-zoom mt-4">
-                        <div class="image-zoom-wrapper">
-                            <img src="images/project-4.jpg" alt="">
-                        </div>
-                        <a href="images/project-4.jpg" data-fancybox="gallery" class="iconbox"><i
-                                class="ri-search-2-line"></i></a>
-                    </div>
-                </div>
-                <div class="col-md-4" data-aos="fade-down" data-aos-delay="350">
-                    <div class="portfolio-item image-zoom">
-                        <div class="image-zoom-wrapper">
-                            <img src="images/project-5.jpg" alt="">
-                        </div>
-                        <a href="images/project-5.jpg" data-fancybox="gallery" class="iconbox"><i
-                                class="ri-search-2-line"></i></a>
-                    </div>
-                    <div class="portfolio-item image-zoom mt-4">
-                        <div class="image-zoom-wrapper">
-                            <img src="images/project-6.jpg" alt="">
-                        </div>
-                        <a href="images/project-6.jpg" data-fancybox="gallery" class="iconbox"><i
-                                class="ri-search-2-line"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- REVIEW -->
-    <section id="reviews" class="section-padding bg-light">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center" data-aos="fade-down" data-aos-delay="150">
-                    <div class="section-title">
-                        <h1 class="display-4 fw-semibold">Testimonials</h1>
-                        <div class="line"></div>
-                        <p>We love to craft digital experiances for brands rather than crap and more lorem ipsums and do
-                            crazy skills</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row gy-5 gx-4">
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="150">
-                    <div class="review">
-                        <div class="review-head p-4 bg-white theme-shadow">
-                            <div class="text-warning">
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                            </div>
-                            <p>Amazing theme ipsum dolor sit amet consectetur adipisicing elit. Assumenda eum animi
-                                rerum ipsam impedit dicta voluptatem.</p>
-                        </div>
-                        <div class="review-person mt-4 d-flex align-items-center">
-                            <img class="rounded-circle" src="images/avatar-1.jpg" alt="">
-                            <div class="ms-3">
-                                <h5>Dianne Russell</h5>
-                                <small>UX Architect</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="250">
-                    <div class="review">
-                        <div class="review-head p-4 bg-white theme-shadow">
-                            <div class="text-warning">
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                            </div>
-                            <p>Amazing theme ipsum dolor sit amet consectetur adipisicing elit. Assumenda eum animi
-                                rerum ipsam impedit dicta voluptatem.</p>
-                        </div>
-                        <div class="review-person mt-4 d-flex align-items-center">
-                            <img class="rounded-circle" src="images/avatar-2.jpg" alt="">
-                            <div class="ms-3">
-                                <h5>Dianne Russell</h5>
-                                <small>UX Architect</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="350">
-                    <div class="review">
-                        <div class="review-head p-4 bg-white theme-shadow">
-                            <div class="text-warning">
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                            </div>
-                            <p>Amazing theme ipsum dolor sit amet consectetur adipisicing elit. Assumenda eum animi
-                                rerum ipsam impedit dicta voluptatem.</p>
-                        </div>
-                        <div class="review-person mt-4 d-flex align-items-center">
-                            <img class="rounded-circle" src="images/avatar-3.jpg" alt="">
-                            <div class="ms-3">
-                                <h5>Dianne Russell</h5>
-                                <small>UX Architect</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="450">
-                    <div class="review">
-                        <div class="review-head p-4 bg-white theme-shadow">
-                            <div class="text-warning">
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                            </div>
-                            <p>Amazing theme ipsum dolor sit amet consectetur adipisicing elit. Assumenda eum animi
-                                rerum ipsam impedit dicta voluptatem.</p>
-                        </div>
-                        <div class="review-person mt-4 d-flex align-items-center">
-                            <img class="rounded-circle" src="images/avatar-4.jpg" alt="">
-                            <div class="ms-3">
-                                <h5>Dianne Russell</h5>
-                                <small>UX Architect</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="550">
-                    <div class="review">
-                        <div class="review-head p-4 bg-white theme-shadow">
-                            <div class="text-warning">
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                            </div>
-                            <p>Amazing theme ipsum dolor sit amet consectetur adipisicing elit. Assumenda eum animi
-                                rerum ipsam impedit dicta voluptatem.</p>
-                        </div>
-                        <div class="review-person mt-4 d-flex align-items-center">
-                            <img class="rounded-circle" src="images/avatar-5.jpg" alt="">
-                            <div class="ms-3">
-                                <h5>Dianne Russell</h5>
-                                <small>UX Architect</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6" data-aos="fade-down" data-aos-delay="650">
-                    <div class="review">
-                        <div class="review-head p-4 bg-white theme-shadow">
-                            <div class="text-warning">
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                                <i class="ri-star-fill"></i>
-                            </div>
-                            <p>Amazing theme ipsum dolor sit amet consectetur adipisicing elit. Assumenda eum animi
-                                rerum ipsam impedit dicta voluptatem.</p>
-                        </div>
-                        <div class="review-person mt-4 d-flex align-items-center">
-                            <img class="rounded-circle" src="images/avatar-6.jpg" alt="">
-                            <div class="ms-3">
-                                <h5>Dianne Russell</h5>
-                                <small>UX Architect</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- TEAM -->
-    <section id="team" class="section-padding">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center" data-aos="fade-down" data-aos-delay="150">
-                    <div class="section-title">
-                        <h1 class="display-4 fw-semibold">Team Members</h1>
-                        <div class="line"></div>
-                        <p>We love to craft digital experiances for brands rather than crap and more lorem ipsums and do
-                            crazy skills</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row g-4 text-center ">
-                <div class="col-md-4" data-aos="fade-down" data-aos-delay="150">
-                    <div class="team-member image-zoom">
-                        <div class="image-zoom-wrapper">
-                            <img src="images/person-1.jpg" alt="">
-                        </div>
-                        <div class="team-member-content">
-                            <h4 class="text-white">Jon Doe</h4>
-                            <p class="mb-0 text-white">Webflow Artist</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4" data-aos="fade-down" data-aos-delay="250">
-                    <div class="team-member image-zoom">
-                        <div class="image-zoom-wrapper">
-                            <img src="images/person-2.jpg" alt="">
-                        </div>
-                        <div class="team-member-content">
-                            <h4 class="text-white">Jon Doe</h4>
-                            <p class="mb-0 text-white">Webflow Artist</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4" data-aos="fade-down" data-aos-delay="350">
-                    <div class="team-member image-zoom">
-                        <div class="image-zoom-wrapper">
-                            <img src="images/person-3.jpg" alt="">
-                        </div>
-                        <div class="team-member-content">
-                            <h4 class="text-white">Jon Doe</h4>
-                            <p class="mb-0 text-white">Webflow Artist</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CONTACT -->
-    <section class="section-padding bg-light" id="contact">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center" data-aos="fade-down" data-aos-delay="150">
-                    <div class="section-title">
-                        <h1 class="display-4 text-white fw-semibold">Gete in touch</h1>
-                        <div class="line bg-white"></div>
-                        <p class="text-white">We love to craft digital experiances for brands rather than crap and more
-                            lorem ipsums and do crazy skills</p>
-                    </div>
-                </div>
-            </div>
-            <div class="row justify-content-center" data-aos="fade-down" data-aos-delay="250">
-                <div class="col-lg-8">
-                    <form action="#" class="row g-3 p-lg-5 p-4 bg-white theme-shadow">
-                        <div class="form-group col-lg-6">
-                            <input type="text" class="form-control" placeholder="Enter first name">
-                        </div>
-                        <div class="form-group col-lg-6">
-                            <input type="text" class="form-control" placeholder="Enter last name">
-                        </div>
-                        <div class="form-group col-lg-12">
-                            <input type="email" class="form-control" placeholder="Enter Email address">
-                        </div>
-                        <div class="form-group col-lg-12">
-                            <input type="text" class="form-control" placeholder="Enter subject">
-                        </div>
-                        <div class="form-group col-lg-12">
-                            <textarea name="message" rows="5" class="form-control" placeholder="Enter Message"></textarea>
-                        </div>
-                        <div class="form-group col-lg-12 d-grid">
-                            <button class="btn btn-brand">Send Message</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="bg-dark">
-        <div class="footer-top">
-            <div class="container">
-                <div class="row gy-5">
-                    <div class="col-lg-3 col-sm-6">
-                        <a href="#"><img src="images/logo-white.svg" alt=""></a>
-                        <div class="line"></div>
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Exercitationem, hic!</p>
-                        <div class="social-icons">
-                            <a href="#"><i class="ri-twitter-fill"></i></a>
-                            <a href="#"><i class="ri-instagram-fill"></i></a>
-                            <a href="#"><i class="ri-github-fill"></i></a>
-                            <a href="#"><i class="ri-dribbble-fill"></i></a>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <h5 class="mb-0 text-white">SERVICES</h5>
-                        <div class="line"></div>
-                        <ul>
-                            <li><a href="#">UI Design</a></li>
-                            <li><a href="#">UX Design</a></li>
-                            <li><a href="#">Branding</a></li>
-                            <li><a href="#">Logo Designing</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <h5 class="mb-0 text-white">ABOUT</h5>
-                        <div class="line"></div>
-                        <ul>
-                            <li><a href="#">Blog</a></li>
-                            <li><a href="#">Services</a></li>
-                            <li><a href="#">Company</a></li>
-                            <li><a href="#">Career</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-3 col-sm-6">
-                        <h5 class="mb-0 text-white">CONTACT</h5>
-                        <div class="line"></div>
-                        <ul>
-                            <li>New York, NY 3300</li>
-                            <li>(414) 586 - 3017</li>
-                            <li>www.example.com</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="container">
-                <div class="row g-4 justify-content-between">
-                    <div class="col-auto">
-                        <p class="mb-0">© Copyright Elixir. All Rights Reserved</p>
-                    </div>
-                    <div class="col-auto">
-                        <p class="mb-0">Designed with 💜 By <a
-                                href="https://www.youtube.com/channel/UCYMEEnLzGGGIpQQ3Nu_sBsQ">SALMAN</a></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
 
 
 
