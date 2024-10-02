@@ -17,7 +17,9 @@
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
         "maatwebsite/excel": "^3.1",
+        "openai-php/client": "^0.10.1",
         "pusher/pusher-php-server": "^7.2",
+        "smalot/pdfparser": "^2.11",
         "spatie/laravel-permission": "^6.7",
         "symfony/css-selector": "^5.0",
         "tijsverkoyen/css-to-inline-styles": "^2.2.7",
@@ -66,7 +68,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true

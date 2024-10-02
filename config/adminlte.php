@@ -416,7 +416,31 @@ return [
                 ],
             ],
         ],
+
         [
+            'text' => 'OpenAI',
+            'icon' => "fas fa-fw fa-microchip",
+            'submenu' => [
+                [
+                    'text'  => 'Hablar con la AI',
+                    'route' => 'openai.chat',
+                    'icon'  => 'fas fa-fw fa-comments',
+                ],
+                [
+                    'text'  => 'Subir CSV',
+                    'route' => 'openai.csv',
+                    'icon'  => 'fas fa-fw fa-file-csv',
+                ],
+                [
+                    'text'  => 'Subir PDF',
+                    'route' => 'openai.pdf',
+                    'icon'  => 'fas fa-fw fa-file-pdf',
+                ],
+            ],
+        ],
+
+        
+                [
             'text' => 'Administración',
             'icon' => 'fas fa-fw fa-cogs',
             'submenu' => [

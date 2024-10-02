@@ -20,6 +20,7 @@ use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
 use App\Http\Controllers\AIController;
+use App\Http\Controllers\OpenAIController;
 
 Route::resource(
     'aplicaciones',
@@ -154,4 +155,18 @@ Route::get('descargar-plantilla', [ContactoController::class, 'descargarPlantill
 
 // cargar los archivos
 Route::resource('/ais', AIController::class)->names('ais');
+
+
+//openai
+Route::get('/openai', [OpenAIController::class, 'index'])->name('openai.index');
+Route::post('/openai-response', [OpenAIController::class, 'getResponse'])->name('openai.response');
+
+Route::get('/openai/csv', [OpenAIController::class, 'uploadCsv'])->name('openai.csv');
+Route::post('/openai/csv', [OpenAIController::class, 'uploadCsv']);
+
+Route::get('/openai/pdf', [OpenAIController::class, 'uploadPdf'])->name('openai.pdf');
+Route::post('/openai/pdf', [OpenAIController::class, 'uploadPdf']);
+
+Route::get('/openai/chat', [OpenAIController::class, 'chat'])->name('openai.chat');
+Route::post('/openai/chat', [OpenAIController::class, 'chat']);
 

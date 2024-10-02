@@ -10,6 +10,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\AIController;
+use App\Http\Controllers\OpenAIController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,4 +43,4 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/statistics', [MessageController::class, 'getStatistics']);
 });
 
-
+//ROUTES/WEB.PHP
