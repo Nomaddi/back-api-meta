@@ -45,10 +45,11 @@
                                 <option value="">Selecciona un bot</option>
                                 @foreach ($bots as $bot)
                                     <option value="{{ $bot->id }}"
-                                        {{ $app->bot->first()->id == $bot->id ? 'selected' : '' }}>
+                                        {{ $app->bot->first() && $app->bot->first()->id == $bot->id ? 'selected' : '' }}>
                                         {{ $bot->nombre }}
                                     </option>
                                 @endforeach
+
                             </select>
                         </div>
                     </div>

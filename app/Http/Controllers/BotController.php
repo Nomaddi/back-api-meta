@@ -19,7 +19,7 @@ class BotController extends Controller
             // Obtener todas las aplicaciones del usuario con sus bots asociados
             $aplicaciones = $user->aplicaciones()->with('bot')->get();
             // Obtener todos los bots (independientemente de si están asociados a una aplicación)
-            $todosLosBots = Bot::all();
+            $todosLosBots = $user->bots;
             // obtener todas las aplicaciones
             $aplicaciones2 = Aplicaciones::all();
         } else {

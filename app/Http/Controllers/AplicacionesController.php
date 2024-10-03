@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Exception;
 use DataTables;
 use App\Models\Bot;
+use App\Models\User;
 use App\Libraries\Whatsapp;
 use App\Models\Aplicaciones;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class AplicacionesController extends Controller
             $aplicaciones = $user->aplicaciones;
 
             // Obtener todos los bots para que el usuario pueda seleccionar en el formulario de edición
-            $bots = Bot::all();
+            $bots = $user->bots;
         } else {
             // Opcional: manejar el caso en que no haya usuario logueado
             // Por ejemplo, redirigir al login o mostrar un mensaje
