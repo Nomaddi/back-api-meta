@@ -189,6 +189,7 @@ class BotController extends Controller
 
                 }
             }
+            //creacion de vector store
             $vector = OPENAI::vectorStores()->create([
                 'file_ids' => $fileIds,
                 'name' => 'My first Vector Store',
