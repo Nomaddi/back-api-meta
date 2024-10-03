@@ -395,7 +395,7 @@ return [
                     'text'  => 'Bots',
                     'route' => 'bots.index',
                     'icon'  => 'fas fa-fw fa-robot',
-                ],
+                ]
             ],
         ],
         [

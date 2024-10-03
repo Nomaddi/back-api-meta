@@ -160,3 +160,6 @@ Route::resource(
     'bots',
     BotController::class,
 )->names('bots');
+
+// crear ruta para crear bot bots.crear.index
+Route::post('bots/crear', [BotController::class, 'createBot'])->name('bots.store.asistente');

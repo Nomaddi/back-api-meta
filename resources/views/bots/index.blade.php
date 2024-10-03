@@ -10,6 +10,12 @@
                     <i class="fa fa-plus-circle"></i>
                 </a>
             </div>
+            <div class="d-flex justify-content-end">
+                <a data-toggle="modal" data-target="#createAsistenteModal" class="btn btn-primary btn-sm mb-2" title="Crear Asistente">
+                    <i class="fa fa-plus-circle"></i>
+                    agregar nuevo asistente
+                </a>
+            </div>
         </div>
     </div>
 
@@ -61,6 +67,7 @@
         </tbody>
     </table>
     @include('bots.modals.create-modal')
+    @include('bots.modals.create-modal-asistente')
 @endsection
 @section('css')
     <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.bootstrap4.css">
@@ -166,6 +173,54 @@
                 type: "POST",
                 url: "{{ route('bots.store') }}",
                 data: formData,
+                success: function(response) {
+                    if (response.data) {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Creado!',
+                            text: 'bot creada con éxito',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Recarga la página para reflejar los cambios
+                                location.reload();
+                            }
+                        });
+
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo obtener la información de la bot.',
+                        });
+                    }
+                },
+                error: function(error) {
+                    // Captura el mensaje de error devuelto por el servidor
+                    var errorMessage = error.responseJSON ? error.responseJSON.error :
+                        'Error al crear la bot';
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage, // Muestra el mensaje detallado
+                    });
+                }
+            });
+        });
+
+        // crear asistente
+        $('#createFormAsistente').submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
+
+            $.ajax({
+                type: "POST",
+                url: "{{ route('bots.store.asistente') }}",
+                data: formData,
+                contentType: false,
+                processData: false,
                 success: function(response) {
                     if (response.data) {
 
