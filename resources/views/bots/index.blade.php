@@ -66,6 +66,8 @@
             @endforeach
         </tbody>
     </table>
+
+    </div>
     @include('bots.modals.create-modal')
     @include('bots.modals.create-modal-asistente')
 @endsection
@@ -210,6 +212,43 @@
             });
         });
 
+        // consultar asistende por id
+        function getAssistantInfo(botId) {
+            $.ajax({
+                type: "GET",
+                url: "bots/" + botId + "/assistant",
+                success: function(response) {
+                    if (response.data) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Éxito!',
+                            text: 'Información del asistente recuperada con éxito',
+                            confirmButtonText: 'OK'
+                        });
+
+                        alert(response.data);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo obtener la información del asistente.',
+                        });
+                    }
+                },
+                error: function(error) {
+                    // Captura el mensaje de error devuelto por el servidor
+                    var errorMessage = error.responseJSON ? error.responseJSON.error :
+                        'Error al recuperar la información del asistente';
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage, // Muestra el mensaje detallado
+                    });
+                }
+            });
+        }
+
         // crear asistente
         $('#createFormAsistente').submit(function(e) {
             e.preventDefault();
@@ -258,4 +297,5 @@
             });
         });
     </script>
+
 @stop

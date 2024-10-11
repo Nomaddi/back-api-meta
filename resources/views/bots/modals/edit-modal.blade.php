@@ -51,6 +51,10 @@
                     <button type="submit" class="btn btn-primary">Guardar cambios</button>
                 </div>
             </form>
+            {{-- boton consuatr metodo de recuperar informacion de asistente --}}
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="getAssistantInfo('{{ $bot->openai_assistant }}')">Recuperar información del asistente</button>
+            </div>
         </div>
     </div>
 </div>

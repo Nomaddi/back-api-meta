@@ -160,9 +160,9 @@ class BotController extends Controller
                 'openai_org' => 'required',
                 'aplicacion_id' => 'required|exists:aplicaciones,id',
             ]);
-            // $data = OpenAI::assistants()->list([
-            //     'limit' => 10,
-            // ]);
+            $data = OpenAI::assistants()->list([
+                'limit' => 10,
+            ]);
 
             $nombreCarpeta = $request->nombre;
 
@@ -246,6 +246,18 @@ class BotController extends Controller
             ], 500);
         }
 
+    }
+
+
+    // consultar asistente de openai
+    public function BotOpenai($id)
+    {
+        $data = OpenAI::assistants()->retrieve($id);
+
+        return response()->json([
+            'success' => 'Asistente recuperado con éxito.',
+            'data' => $data
+        ]);
     }
 
 }

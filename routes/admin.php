@@ -20,6 +20,7 @@ use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
+use OpenAI\Laravel\Facades\OpenAI;
 
 Route::resource(
     'aplicaciones',
@@ -163,3 +164,21 @@ Route::resource(
 
 // crear ruta para crear bot bots.crear.index
 Route::post('bots/crear', [BotController::class, 'createBot'])->name('bots.store.asistente');
+
+//ruta json de ejemplo
+Route::get('json', function () {
+
+    // $data = OpenAI::assistants()->list([
+    //     'limit' => 10,
+    // ]);
+    $data = OpenAI::assistants()->retrieve('asst_sZVPfGo5sWWvNYNxFuNnsQaz');
+
+    // $response = OpenAI::assistants()->delete('asst_CeEU6f2CekLAK9QWgXJpw32N');
+    return response()->json([
+        'success' => 'Bot actualizado con éxito.',
+        'data' => $data
+    ]);
+})->middleware('can:json')->name('json');
+
+// ruta para consultar asistente de openai BotOpenai
+Route::get('bots/{botId}/assistant', [BotController::class, 'BotOpenai'])->name('bot-openai');
