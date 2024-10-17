@@ -1,6 +1,6 @@
 <div class="modal fade" id="modal-edit-{{ $bot->id }}" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
+        <div class="modal-content"> resource/views/bot/modals/edit-modal.blade.php
             <form id="editForm-{{ $bot->id }}">
                 @csrf
                 @method('PUT')
@@ -55,6 +55,13 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="getAssistantInfo('{{ $bot->openai_assistant }}')">Recuperar información del asistente</button>
             </div>
+
+            <!-- Contenedor para mostrar la información del asistente -->
+<div class="modal-body">
+    <div id="assistant-info-container-{{ $bot->id }}">
+        <!-- Aquí se insertará la tabla con la información del asistente -->
+    </div>
+</div>
         </div>
     </div>
 </div>

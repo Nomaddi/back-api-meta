@@ -182,3 +182,7 @@ Route::get('json', function () {
 
 // ruta para consultar asistente de openai BotOpenai
 Route::get('bots/{botId}/assistant', [BotController::class, 'BotOpenai'])->name('bot-openai');
+
+
+Route::get('/assistant-info/{assistantId}', [BotController::class, 'getAssistantInfo']);
+

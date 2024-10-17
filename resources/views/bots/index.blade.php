@@ -212,42 +212,80 @@
             });
         });
 
-        // consultar asistende por id
         function getAssistantInfo(botId) {
-            $.ajax({
-                type: "GET",
-                url: "bots/" + botId + "/assistant",
-                success: function(response) {
-                    if (response.data) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Éxito!',
-                            text: 'Información del asistente recuperada con éxito',
-                            confirmButtonText: 'OK'
-                        });
+    $.ajax({
+        type: "GET",
+        url: "bots/" + botId + "/assistant",
+        success: function(response) {
+            console.log(response.data); // Verifica la estructura de los datos recibidos
 
-                        alert(response.data);
+            if (response.data) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Información del asistente recuperada con éxito',
+                    confirmButtonText: 'OK'
+                });
+
+                // Asegúrate de que response.data contiene los campos esperados antes de construir la tabla
+                if (typeof response.data === 'object') {
+                    let infoTable = `
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Object</th>
+                                    <th>Bytes</th>
+                                    <th>Creado</th>
+                                    <th>Filename</th>
+                                    <th>Purpose</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>${response.data.id}</td>
+                                    <td>${response.data.object}</td>
+                                    <td>${response.data.bytes}</td>
+                                    <td>${new Date(response.data.createdAt * 1000).toLocaleString()}</td>
+                                    <td>${response.data.filename}</td>
+                                    <td>${response.data.purpose}</td>
+                                    <td>${response.data.status}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    `;
+
+                    // Verificar si el contenedor existe
+                    let container = document.getElementById('assistant-info-container-' + botId);
+                    if (container) {
+                        container.innerHTML = infoTable;
                     } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'No se pudo obtener la información del asistente.',
-                        });
+                        console.error('El contenedor para el asistente con ID ' + botId + ' no existe.');
                     }
-                },
-                error: function(error) {
-                    // Captura el mensaje de error devuelto por el servidor
-                    var errorMessage = error.responseJSON ? error.responseJSON.error :
-                        'Error al recuperar la información del asistente';
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: errorMessage, // Muestra el mensaje detallado
-                    });
+                } else {
+                    console.error('El formato de response.data no es el esperado.');
                 }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo obtener la información del asistente.',
+                });
+            }
+        },
+        error: function(error) {
+            var errorMessage = error.responseJSON ? error.responseJSON.error : 'Error al recuperar la información del asistente';
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
             });
         }
+    });
+}
+
 
         // crear asistente
         $('#createFormAsistente').submit(function(e) {

@@ -19,7 +19,10 @@
         "openai-php/laravel": "^0.10.1",
         "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-permission": "^6.9",
-        "symfony/css-selector": "^7.1",
+        "symfony/css-selector": "^6.0",
+        "symfony/event-dispatcher": "^6.0",
+        "symfony/string": "^6.0",
+        "symfony/yaml": "^6.0",
         "tijsverkoyen/css-to-inline-styles": "^2.2",
         "yajra/laravel-datatables-oracle": "^10.11"
     },

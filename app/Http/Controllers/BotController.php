@@ -249,15 +249,52 @@ class BotController extends Controller
     }
 
 
-    // consultar asistente de openai
     public function BotOpenai($id)
     {
-        $data = OpenAI::assistants()->retrieve($id);
-
-        return response()->json([
-            'success' => 'Asistente recuperado con éxito.',
-            'data' => $data
-        ]);
+        try {
+            // Intenta hacer la solicitud a OpenAI
+            $data = OpenAI::assistants()->retrieve($id);
+    
+            return response()->json([
+                'success' => 'Asistente recuperado con éxito.',
+                'data' => $data
+            ]);
+    
+        } catch (\Exception $e) {
+            // Captura cualquier error y lo registra en los logs de Laravel
+            \Log::error('Error al recuperar la información del asistente: ' . $e->getMessage());
+            
+            // Retorna una respuesta con el error
+            return response()->json([
+                'error' => 'No se pudo recuperar la información del asistente.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
+    
+
+
+public function getAssistantInfo($assistantId)
+{
+    // Crea una instancia del cliente OpenAI
+    $client = new Client(env('OPENAI_API_KEY'));
+
+    try {
+        // Recupera la información del asistente usando la API de OpenAI
+        $response = $client->models()->retrieve($assistantId);
+
+        // Retorna la información en formato JSON
+        return response()->json([
+            'id' => $response->id,
+            'object' => $response->object,
+            'created' => $response->created,
+            'ownedBy' => $response->ownedBy,
+        ]);
+    } catch (\Exception $e) {
+        // Maneja cualquier error
+        return response()->json(['error' => 'No se pudo recuperar la información del asistente.'], 500);
+    }
+}
+
 
 }
