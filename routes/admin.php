@@ -160,7 +160,7 @@ Route::get('descargar-plantilla', [ContactoController::class, 'descargarPlantill
 Route::resource(
     'bots',
     BotController::class,
-)->names('bots');
+)->middleware('auth')->names('bots');
 
 // crear ruta para crear bot bots.crear.index
 Route::post('bots/crear', [BotController::class, 'createBot'])->name('bots.store.asistente');
@@ -185,4 +185,5 @@ Route::get('bots/{botId}/assistant', [BotController::class, 'BotOpenai'])->name(
 
 
 Route::get('/assistant-info/{assistantId}', [BotController::class, 'getAssistantInfo']);
+
 

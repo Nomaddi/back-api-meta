@@ -116,30 +116,62 @@ class BotController extends Controller
         ]);
     }
 
-
+//Si el usuario autenticado es el propietario del bot (es decir, el user_id del bot coincide con el id del usuario autenticado), 
+// el bot puede ser eliminado, incluso si no tiene aplicaciones asociadas.
 
     public function destroy($id)
     {
-        // Buscar el bot por ID
-        $bot = Bot::findOrFail($id);
+    // Buscar el bot por ID
+    $bot = Bot::findOrFail($id);
+    
+    // Registro para verificar que el bot fue encontrado
+    \Log::info('Bot encontrado: ' . $bot->id);
 
-        // Verificar si el bot pertenece a una de las aplicaciones del usuario autenticado
-        if (
-            $bot->aplicaciones()->whereHas('users', function ($query) {
-                $query->where('user_id', Auth::id());
-            })->exists()
-        ) {
+    // Obtener el usuario autenticado
+    $userId = Auth::id();
+    \Log::info('Usuario autenticado: ' . $userId);
+
+    // Ver todas las aplicaciones asociadas con el bot
+    $aplicacionesBot = $bot->aplicaciones;
+    \Log::info('Aplicaciones asociadas al bot: ' . $aplicacionesBot->pluck('id'));
+
+    // Verificar si el usuario es el propietario del bot (independientemente de las aplicaciones)
+    if ($bot->user_id === $userId) {
+        // Eliminar el bot
+        $bot->delete();
+
+        \Log::info('Bot eliminado con éxito: ' . $bot->id);
+
+        return response()->json(['success' => 'Bot eliminado con éxito.']);
+    }
+
+    // Verificar si el bot pertenece a una de las aplicaciones del usuario autenticado
+    $aplicacionesRelacionadas = $bot->aplicaciones()->whereHas('users', function ($query) use ($userId) {
+        $query->where('user_id', $userId);
+        })->get();
+
+        // Registro de aplicaciones relacionadas
+        \Log::info('Aplicaciones relacionadas con el usuario autenticado: ' . $aplicacionesRelacionadas->pluck('id'));
+
+        // Verificar si hay aplicaciones relacionadas con el usuario
+        if ($aplicacionesRelacionadas->isNotEmpty()) {
             // Eliminar el bot
             $bot->delete();
 
+            \Log::info('Bot eliminado con éxito: ' . $bot->id);
             return response()->json(['success' => 'Bot eliminado con éxito.']);
-        } else {
-            return response()->json([
-                'error' => 'No tienes permiso para eliminar este bot.'
-            ], 403);
-        }
-    }
+            } else {
+                // Registro para depurar la falta de permiso
+                \Log::warning('No tienes permiso para eliminar este bot. Bot ID: ' . $bot->id . ' | User ID: ' . $userId);
 
+            return response()->json([
+            'error' => 'No tienes permiso para eliminar este bot.'
+        ], 403);
+    }
+}
+
+    
+    
 
     // moetodo para crear bot con asistente openai
     public function createBot(Request $request)

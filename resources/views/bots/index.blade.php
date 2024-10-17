@@ -126,46 +126,52 @@
         });
         // Eliminar bot
         $('#botsTable').on('click', '.deleteBot', function() {
-            var botId = $(this).data('botid');
-            var row = $(this).parents('tr');
+    var botId = $(this).data('botid');
+    var row = $(this).parents('tr');
+    
+    console.log("Intentando eliminar el bot con ID: " + botId); // Añade esta línea para verificar el ID en consola
 
-            Swal.fire({
-                title: '¿Estás seguro?',
-                text: "No podrás revertir esto!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, eliminar!',
-                cancelButtonText: 'No, cancelar!',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: 'bots/' + botId,
-                        type: 'POST',
-                        data: {
-                            _method: 'DELETE',
-                            _token: $('meta[name="csrf-token"]').attr('content')
-                        },
-                        success: function(result) {
-                            row.remove();
-                            Swal.fire(
-                                'Eliminado!',
-                                'El bot ha sido eliminado.',
-                                'success'
-                            );
-                        },
-                        error: function(request, status, error) {
-                            Swal.fire(
-                                'Error!',
-                                'No se pudo eliminar el bot.',
-                                'error'
-                            );
-                        }
-                    });
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "No podrás revertir esto!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar!',
+        cancelButtonText: 'No, cancelar!',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: 'bots/' + botId,
+                type: 'POST',
+                data: {
+                    _method: 'DELETE',
+                    _token: $('meta[name="csrf-token"]').attr('content') // Verifica que este token se esté enviando correctamente
+                },
+                success: function(result) {
+                    row.remove();
+                    console.log("El bot ha sido eliminado con éxito"); // Verifica en consola si llega aquí
+                    Swal.fire(
+                        'Eliminado!',
+                        'El bot ha sido eliminado.',
+                        'success'
+                    );
+                },
+                error: function(request, status, error) {
+                    console.log("Error al intentar eliminar el bot", error); // Verifica el error
+                    Swal.fire(
+                        'Error!',
+                        'No se pudo eliminar el bot.',
+                        'error'
+                    );
                 }
             });
-        });
+        }
+    });
+});
+
+        
         // crear bot
         $('#createForm').submit(function(e) {
             e.preventDefault();
@@ -211,81 +217,6 @@
                 }
             });
         });
-
-        function getAssistantInfo(botId) {
-    $.ajax({
-        type: "GET",
-        url: "bots/" + botId + "/assistant",
-        success: function(response) {
-            console.log(response.data); // Verifica la estructura de los datos recibidos
-
-            if (response.data) {
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Éxito!',
-                    text: 'Información del asistente recuperada con éxito',
-                    confirmButtonText: 'OK'
-                });
-
-                // Asegúrate de que response.data contiene los campos esperados antes de construir la tabla
-                if (typeof response.data === 'object') {
-                    let infoTable = `
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Object</th>
-                                    <th>Bytes</th>
-                                    <th>Creado</th>
-                                    <th>Filename</th>
-                                    <th>Purpose</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>${response.data.id}</td>
-                                    <td>${response.data.object}</td>
-                                    <td>${response.data.bytes}</td>
-                                    <td>${new Date(response.data.createdAt * 1000).toLocaleString()}</td>
-                                    <td>${response.data.filename}</td>
-                                    <td>${response.data.purpose}</td>
-                                    <td>${response.data.status}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    `;
-
-                    // Verificar si el contenedor existe
-                    let container = document.getElementById('assistant-info-container-' + botId);
-                    if (container) {
-                        container.innerHTML = infoTable;
-                    } else {
-                        console.error('El contenedor para el asistente con ID ' + botId + ' no existe.');
-                    }
-                } else {
-                    console.error('El formato de response.data no es el esperado.');
-                }
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'No se pudo obtener la información del asistente.',
-                });
-            }
-        },
-        error: function(error) {
-            var errorMessage = error.responseJSON ? error.responseJSON.error : 'Error al recuperar la información del asistente';
-
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: errorMessage,
-            });
-        }
-    });
-}
-
 
         // crear asistente
         $('#createFormAsistente').submit(function(e) {
