@@ -172,10 +172,8 @@ class BotController extends Controller
     }
 }
 
-    
-    
 
-    // moetodo para crear bot con asistente openai
+    // metodo para crear bot con asistente openai
     public function createBot(Request $request)
     {
 
@@ -308,28 +306,30 @@ class BotController extends Controller
     
 
 
-public function getAssistantInfo($assistantId)
-{
-    // Crea una instancia del cliente OpenAI
-    $client = new Client(env('OPENAI_API_KEY'));
-
-    try {
-        // Recupera la información del asistente usando la API de OpenAI
-        $response = $client->models()->retrieve($assistantId);
-
-        // Retorna la información en formato JSON
-        return response()->json([
-            'id' => $response->id,
-            'object' => $response->object,
-            'created' => $response->created,
-            'ownedBy' => $response->ownedBy,
-        ]);
-    } catch (\Exception $e) {
-        // Maneja cualquier error
-        return response()->json(['error' => 'No se pudo recuperar la información del asistente.'], 500);
+    public function getAssistantInfo($assistantId)
+    {
+        $client = new Client(env('OPENAI_API_KEY'));
+    
+        try {
+            // Recupera la información del asistente usando la API de OpenAI
+            $response = $client->models()->retrieve($assistantId);
+    
+            // Convierte la respuesta en array
+            $responseArray = $response->toArray();
+    
+            // Pasar la información a una vista
+            return view('bots.assistant-info', [
+                'modelDetails' => $responseArray
+            ]);
+            
+        } catch (\Exception $e) {
+            // Maneja cualquier error y redirige a la vista con un error
+            return redirect()->back()->with('error', 'No se pudo recuperar la información del asistente.');
+        }
     }
-}
-public function showAssistant($botId)
+    
+
+    public function showAssistant($botId)
 {
     // Encuentra el bot por su ID
     $bot = Bot::find($botId);
@@ -339,9 +339,22 @@ public function showAssistant($botId)
         return redirect()->back()->with('error', 'Bot no encontrado.');
     }
 
-    // Pasar la información del bot a la vista assistant-info.blade.php
-    return view('bots.assistant-info', compact('bot'));
-}
+    // Llamada a la API de OpenAI para obtener detalles relacionados con OPENAI_API_KEY
+    try {
+        // Recuperar el asistente usando el ID del asistente que ya está asociado al bot
+        $assistantResponse = OpenAI::assistants()->retrieve($bot->openai_assistant);
 
+        // Convertir la respuesta en un array para pasarlo a la vista
+        $assistantData = $assistantResponse->toArray();
+
+        return view('bots.assistant-info', [
+            'bot' => $bot,
+            'assistantData' => $assistantData, // Pasar los detalles del asistente
+        ]);
+
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'No se pudo obtener la información de OpenAI.');
+    }
+}    
 
 }

@@ -51,11 +51,10 @@
                     <button type="submit" class="btn btn-primary">Guardar cambios</button>
                 </div>
             </form>
-            {{-- boton consultar metodo de recuperar informacion de asistente --}}
             {{-- Botón para redirigir a la vista que muestra la información del asistente --}}
-<div class="modal-footer">
-    <a href="{{ route('bot.assistant-info', $bot->id) }}" class="btn btn-primary">Recuperar información del asistente</a>
-</div>
+            <div class="modal-footer">
+                <a href="{{ route('bot.assistant-info', $bot->id) }}" class="btn btn-primary">Recuperar información del asistente</a>
+            </div>
 
             </div>
         </div>
