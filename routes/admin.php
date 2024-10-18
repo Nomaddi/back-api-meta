@@ -187,3 +187,6 @@ Route::get('bots/{botId}/assistant', [BotController::class, 'BotOpenai'])->name(
 Route::get('/assistant-info/{assistantId}', [BotController::class, 'getAssistantInfo']);
 
 
+Route::get('/bots/{botId}/assistant-info', [BotController::class, 'showAssistant'])->name('bot.assistant-info');
+
+

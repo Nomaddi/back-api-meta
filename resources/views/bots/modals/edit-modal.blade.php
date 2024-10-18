@@ -1,6 +1,6 @@
 <div class="modal fade" id="modal-edit-{{ $bot->id }}" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content"> resource/views/bot/modals/edit-modal.blade.php
+        <div class="modal-content"> 
             <form id="editForm-{{ $bot->id }}">
                 @csrf
                 @method('PUT')
@@ -51,17 +51,14 @@
                     <button type="submit" class="btn btn-primary">Guardar cambios</button>
                 </div>
             </form>
-            {{-- boton consuatr metodo de recuperar informacion de asistente --}}
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="getAssistantInfo('{{ $bot->openai_assistant }}')">Recuperar información del asistente</button>
-            </div>
-
-            <!-- Contenedor para mostrar la información del asistente -->
-<div class="modal-body">
-    <div id="assistant-info-container-{{ $bot->id }}">
-        <!-- Aquí se insertará la tabla con la información del asistente -->
-    </div>
+            {{-- boton consultar metodo de recuperar informacion de asistente --}}
+            {{-- Botón para redirigir a la vista que muestra la información del asistente --}}
+<div class="modal-footer">
+    <a href="{{ route('bot.assistant-info', $bot->id) }}" class="btn btn-primary">Recuperar información del asistente</a>
 </div>
+
+            </div>
         </div>
     </div>
 </div>
+

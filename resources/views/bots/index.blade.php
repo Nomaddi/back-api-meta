@@ -73,11 +73,14 @@
 @endsection
 @section('css')
     <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.bootstrap4.css">
+
 @stop
 
 @section('js')
     <script src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script>
     <script src="//cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
     <script>
         var table = $('#botsTable').DataTable({
             responsive: true
@@ -124,6 +127,7 @@
                 });
             });
         });
+        
         // Eliminar bot
         $('#botsTable').on('click', '.deleteBot', function() {
     var botId = $(this).data('botid');
@@ -217,6 +221,66 @@
                 }
             });
         });
+
+        
+
+
+        function getAssistantInfo(botId) {
+    console.log("Bot ID:", botId); // Verifica el botId
+
+    $.ajax({
+        type: "GET",
+        url: "bots/" + botId + "/assistant",
+        success: function(response) {
+            console.log("Response completa:", response); // Ver toda la respuesta
+
+            if (response.data) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: 'Información del asistente recuperada con éxito',
+                    confirmButtonText: 'OK'
+                });
+
+                // Insertar los datos en los campos de la tabla
+                $('#assistant-id').text(response.data.file_id || 'N/A');
+                $('#assistant-obj').text(response.data.object || 'N/A');
+                $('#assistant-bytes').text(response.data.bytes || 'N/A');
+                $('#assistant-createdAt').text(response.data.createdAt || 'N/A');
+                $('#assistant-filename').text(response.data.filename || 'N/A');
+                $('#assistant-purpose').text(response.data.purpose || 'N/A');
+                $('#assistant-status').text(response.data.status || 'N/A');
+                $('#assistant-status-details').text(response.data.status_details || 'N/A');
+
+                // Abrir el modal o mostrar los datos
+                $('#infoAssistantModal-' + botId).modal('show');
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'No se pudo obtener la información del asistente.',
+                });
+            }
+        },
+        error: function(error) {
+            var errorMessage = error.responseJSON ? error.responseJSON.error : 'Error al recuperar la información del asistente';
+            console.log("Error:", errorMessage); // Log del error
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: errorMessage,
+            });
+        }
+    });
+}
+
+
+
+
+
+
+
 
         // crear asistente
         $('#createFormAsistente').submit(function(e) {

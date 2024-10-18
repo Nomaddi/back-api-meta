@@ -86,6 +86,8 @@ class BotController extends Controller
             'aplicacion_id' => 'required|exists:aplicaciones,id' // Validar que la aplicación existe
         ]);
 
+        
+
         $bot = Bot::findOrFail($id);
 
         // Desasociar la aplicación seleccionada de cualquier otro bot
@@ -326,6 +328,19 @@ public function getAssistantInfo($assistantId)
         // Maneja cualquier error
         return response()->json(['error' => 'No se pudo recuperar la información del asistente.'], 500);
     }
+}
+public function showAssistant($botId)
+{
+    // Encuentra el bot por su ID
+    $bot = Bot::find($botId);
+
+    // Si no se encuentra el bot, redirige con un mensaje de error
+    if (!$bot) {
+        return redirect()->back()->with('error', 'Bot no encontrado.');
+    }
+
+    // Pasar la información del bot a la vista assistant-info.blade.php
+    return view('bots.assistant-info', compact('bot'));
 }
 
 
