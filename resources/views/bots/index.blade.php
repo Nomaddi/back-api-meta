@@ -6,18 +6,19 @@
     <div class="row">
         <div class="col-lg-12 my-3">
             <div class="d-flex justify-content-end">
-                <a data-toggle="modal" data-target="#createBotModal" class="btn btn-primary btn-sm mb-2" title="Crear bot">
-                    <i class="fa fa-plus-circle"></i>
+                <a data-toggle="modal" data-target="#createBotModal" class="btn btn-primary btn-sm mb-2 mr-2"
+                    title="Importar BOT">
+                    <i class="fa fa-file-import"></i>
+                    Importar BOT
                 </a>
-            </div>
-            <div class="d-flex justify-content-end">
-                <a data-toggle="modal" data-target="#createAsistenteModal" class="btn btn-primary btn-sm mb-2" title="Crear Asistente">
+                <a data-toggle="modal" data-target="#createBotModal" class="btn btn-success btn-sm mb-2" title="Crear BOT">
                     <i class="fa fa-plus-circle"></i>
-                    agregar nuevo asistente
+                    Crear BOT
                 </a>
             </div>
         </div>
     </div>
+
 
     @if ($message = Session::get('success'))
         <div class="alert alert-success">
@@ -52,8 +53,12 @@
                         @endif
                     </td>
                     <td>
-                        <a data-toggle="modal" data-target="#modal-edit-{{ $bot->id }}"
+                        {{-- <a data-toggle="modal" data-target="#modal-edit-{{ $bot->id }}"
                             class="btn btn-success btn-sm mb-2" title="Editar">
+                            <i class="fa fa-edit"></i>
+                        </a> --}}
+                        <a data-toggle="modal" data-target="#modal-edit" class="btn btn-success btn-sm mb-2 editBot"
+                            data-botid="{{ $bot->id }}" data-openaiassistant="{{ $bot->id }}" title="Editar">
                             <i class="fa fa-edit"></i>
                         </a>
                         <button class="btn btn-danger btn-sm mb-2 deleteBot" data-botid="{{ $bot->id }}">
@@ -85,15 +90,20 @@
     </script>
     <script>
         $(document).ready(function() {
-            $('form[id^="editForm-"]').on('submit', function(e) {
-                e.preventDefault();
-                var botId = this.id.split('-')[1];
-                var formData = $(this).serialize();
+            // Capturar el evento de envío del formulario
+            $('#editForm').on('submit', function(e) {
+                e
+            .preventDefault(); // Prevenir el comportamiento por defecto del formulario (recarga de la página)
 
+                // Obtener el ID del bot que estamos editando
+                var botId = $('#botId').val();
+                var formData = $(this).serialize(); // Serializar los datos del formulario
+
+                // Enviar la solicitud AJAX para actualizar el bot
                 $.ajax({
-                    type: "POST",
-                    url: "bots/" + botId,
-                    data: formData,
+                    type: "PUT", // Usar el método PUT para actualizaciones
+                    url: "bots/" + botId, // URL para actualizar el bot
+                    data: formData, // Datos del formulario
                     success: function(response) {
                         if (response.data) {
                             Swal.fire({
@@ -103,7 +113,8 @@
                                 confirmButtonText: 'OK'
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    location.reload();
+                                    location
+                                .reload(); // Recargar la página para reflejar los cambios
                                 }
                             });
                         } else {
@@ -148,7 +159,8 @@
                             _token: $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(result) {
-                            row.remove();
+                            // row.remove();
+                            $('#botsTable').DataTable().ajax.reload(null, false);
                             Swal.fire(
                                 'Eliminado!',
                                 'El bot ha sido eliminado.',
@@ -156,9 +168,11 @@
                             );
                         },
                         error: function(request, status, error) {
+                            var errorMessage = request.responseJSON?.error ||
+                                'No se pudo eliminar el bot.';
                             Swal.fire(
                                 'Error!',
-                                'No se pudo eliminar el bot.',
+                                errorMessage,
                                 'error'
                             );
                         }
@@ -248,54 +262,134 @@
                 }
             });
         }
+        // recupera informacion para editar el bot
+        $(document).on('click', '.editBot', function() {
+            var botId = $(this).data('botid');
+            var openaiAssistantId = $(this).data('openaiassistant');
 
-        // crear asistente
-        $('#createFormAsistente').submit(function(e) {
-            e.preventDefault();
-            var formData = new FormData(this);
+            // Mostrar una alerta de carga mientras se obtienen los datos
+            Swal.fire({
+                title: 'Cargando...',
+                text: 'Por favor, espera mientras se cargan los datos.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading(); // Mostrar el spinner de carga
+                }
+            });
 
+            // Llamada AJAX para obtener la información del asistente desde la API de OpenAI
             $.ajax({
-                type: "POST",
-                url: "{{ route('bots.store.asistente') }}",
-                data: formData,
-                contentType: false,
-                processData: false,
+                url: 'bots/' + openaiAssistantId + '/assistant',
+                type: 'GET',
                 success: function(response) {
-                    if (response.data) {
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Creado!',
-                            text: 'bot creada con éxito',
-                            confirmButtonText: 'OK'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Recarga la página para reflejar los cambios
-                                location.reload();
-                            }
-                        });
-
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'No se pudo obtener la información de la bot.',
-                        });
-                    }
+                    // Llenar los campos del modal con la información de OpenAI
+                    $('#editBotName').val(response.data.name);
+                    $('#editAssistantInstructions').val(response.data.instructions);
+                    $('#editModel').val(response.data.model);
+                    $('#editTemperature').val(response.data.temperature);
+                    $('#editTopP').val(response.data.topP);
+                    $('#editResponseFormat').val(response.data.responseFormat);
                 },
-                error: function(error) {
-                    // Captura el mensaje de error devuelto por el servidor
-                    var errorMessage = error.responseJSON ? error.responseJSON.error :
-                        'Error al crear la bot';
+                error: function(request, status, error) {
+                    Swal.fire(
+                        'Error!',
+                        'No se pudo obtener la información del asistente de OpenAI.',
+                        'error'
+                    );
+                }
+            });
 
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: errorMessage, // Muestra el mensaje detallado
-                    });
+            // Llamada AJAX para obtener la información del bot desde la base de datos
+            $.ajax({
+                url: 'bots/' + botId + '/edit',
+                type: 'GET',
+                success: function(response) {
+                    // Llenar los campos del modal con la información del bot
+                    // $('#editBotName').val(response.data.nombre);
+                    //id del bot
+                    $('#botId').val(response.data.id);
+                    $('#editBotDescription').val(response.data.descripcion);
+                    $('#editOpenAIKey').val(response.data.openai_key);
+                    $('#editOpenAIOrg').val(response.data.openai_org);
+                    $('#editOpenAIAssistant').val(response.data.openai_assistant);
+                    $('#editAplicacionId').val(response.data
+                        .aplicacion_id); // Seleccionar la aplicación
+
+                    // Una vez que se hayan cargado los datos, cerrar la alerta de SweetAlert
+                    Swal.close();
+
+                    // Mostrar el modal de edición con los datos ya llenos
+                    $('#modal-edit').modal('show');
+                },
+                error: function(request, status, error) {
+                    Swal.fire(
+                        'Error!',
+                        'No se pudo obtener la información del bot.',
+                        'error'
+                    );
                 }
             });
         });
+
+
+        // crear asistente
+        // $('#createFormAsistente').submit(function(e) {
+        //     e.preventDefault();
+        //     var formData = new FormData(this);
+
+        //     $.ajax({
+        //         type: "POST",
+        //         url: "{{ route('bots.store.asistente') }}",
+        //         data: formData,
+        //         contentType: false,
+        //         processData: false,
+        //         success: function(response) {
+        //             if (response.data) {
+
+        //                 Swal.fire({
+        //                     icon: 'success',
+        //                     title: '¡Creado!',
+        //                     text: 'bot creada con éxito',
+        //                     confirmButtonText: 'OK'
+        //                 }).then((result) => {
+        //                     if (result.isConfirmed) {
+        //                         // Recarga la página para reflejar los cambios
+        //                         location.reload();
+        //                     }
+        //                 });
+
+        //             } else {
+        //                 Swal.fire({
+        //                     icon: 'error',
+        //                     title: 'Error',
+        //                     text: 'No se pudo obtener la información de la bot.',
+        //                 });
+        //             }
+        //         },
+        //         error: function(error) {
+        //             // Captura el mensaje de error devuelto por el servidor
+        //             var errorMessage = error.responseJSON ? error.responseJSON.error :
+        //                 'Error al crear la bot';
+
+        //             Swal.fire({
+        //                 icon: 'error',
+        //                 title: 'Error',
+        //                 text: errorMessage, // Muestra el mensaje detallado
+        //             });
+        //         }
+        //     });
+        // });
+    </script>
+
+    <!-- Funciones JavaScript para actualizar los valores -->
+    <script>
+        function updateTemperatureValue(value) {
+            document.getElementById('temperatureValue').textContent = parseFloat(value).toFixed(2);
+        }
+
+        function updateTopPValue(value) {
+            document.getElementById('topPValue').textContent = parseFloat(value).toFixed(2);
+        }
     </script>
 
 @stop

@@ -69,10 +69,52 @@ class BotController extends Controller
         // Asociar el nuevo bot con la aplicación en la tabla pivote
         $aplicacion->bot()->attach($bot->id);
 
+        // crear bot desde la apí de openai
+        $res = OpenAI::assistants()->create([
+            'instructions' => $request->descripcion,
+            'name' => 'Math Tutor',
+            'tools' => [
+                [
+                    'type' => 'code_interpreter',
+                ],
+            ],
+            'model' => 'gpt-4',
+        ]);
+
+
         return response()->json([
             'success' => 'Bot creado con éxito y asociado a la aplicación.',
             'data' => $bot
         ]);
+    }
+
+    // metodo editar bot
+    public function edit($id)
+    {
+        if (!Auth::check()) {
+            return response()->json([
+                'error' => 'Usuario no autenticado'
+            ], 401); // 401 Unauthorized
+        }
+
+        $bot = Bot::findOrFail($id);
+
+        // Obtener la primera aplicación asociada (si existe)
+        $aplicacion_id = $bot->aplicaciones->isNotEmpty() ? $bot->aplicaciones->first()->id : null;
+
+        return response()->json([
+            'success' => 'Bot recuperado con éxito.',
+            'data' => [
+                'id' => $bot->id,
+                'nombre' => $bot->nombre,
+                'descripcion' => $bot->descripcion,
+                'openai_key' => $bot->openai_key,
+                'openai_org' => $bot->openai_org,
+                'openai_assistant' => $bot->openai_assistant,
+                'aplicacion_id' => $aplicacion_id // Incluir aplicacion_id en la respuesta
+            ]
+        ]);
+
     }
 
     public function update(Request $request, $id)
@@ -110,6 +152,19 @@ class BotController extends Controller
         // Asociar la aplicación seleccionada al bot actual
         $aplicacion->bot()->sync([$bot->id]);
 
+        config(['openai.api_key' => $bot->openai_key]);
+        config(['openai.organization' => $bot->openai_org]);
+
+        OpenAI::assistants()->modify($bot->openai_assistant, [
+            'name' => $request->nombre,
+            'instructions' => $request->instructions,
+            'model' => $request->model,
+            'temperature' => floatval($request->temperature), // Convertir a decimal
+            'top_p' => floatval($request->top_p), // Convertir a decimal
+
+
+        ]);
+
         return response()->json([
             'success' => 'Bot actualizado con éxito.',
             'data' => $bot
@@ -120,25 +175,54 @@ class BotController extends Controller
 
     public function destroy($id)
     {
-        // Buscar el bot por ID
-        $bot = Bot::findOrFail($id);
+        try {
+            // Buscar el bot por ID
+            $bot = Bot::findOrFail($id);
 
-        // Verificar si el bot pertenece a una de las aplicaciones del usuario autenticado
-        if (
-            $bot->aplicaciones()->whereHas('users', function ($query) {
-                $query->where('user_id', Auth::id());
-            })->exists()
-        ) {
-            // Eliminar el bot
-            $bot->delete();
+            // Verificar si el bot pertenece a una de las aplicaciones del usuario autenticado
+            if (
+                $bot->aplicaciones()->whereHas('users', function ($query) {
+                    $query->where('user_id', Auth::id());
+                })->exists()
+            ) {
+                // Cambiar la clave API en tiempo de ejecución a la nueva clave necesaria
+                config(['openai.api_key' => $bot->openai_key]);
+                config(['openai.organization' => $bot->openai_org]);
+                // Intentar eliminar el bot en OpenAI
+                $response = OpenAI::assistants()->delete($bot->openai_assistant);
 
-            return response()->json(['success' => 'Bot eliminado con éxito.']);
-        } else {
+                // Verificar si se eliminó con éxito en OpenAI
+                if ($response->deleted) {
+                    // Eliminar el bot de la base de datos
+                    $bot->delete();
+
+                    return response()->json([
+                        'success' => 'Bot eliminado con éxito.',
+                        'data' => $response->toArray()
+                    ]);
+                } else {
+                    return response()->json([
+                        'error' => 'No se pudo eliminar el bot en OpenAI.'
+                    ], 500);
+                }
+            } else {
+                return response()->json([
+                    'error' => 'No tienes permiso para eliminar este bot.'
+                ], 403);
+            }
+        } catch (\OpenAI\Exceptions\ErrorException $e) {
+            // Capturar errores específicos de OpenAI y devolver el mensaje al frontend
             return response()->json([
-                'error' => 'No tienes permiso para eliminar este bot.'
-            ], 403);
+                'error' => $e->getMessage()
+            ], 500);
+        } catch (\Exception $e) {
+            // Capturar otros errores generales
+            return response()->json([
+                'error' => 'Ocurrió un error al intentar eliminar el bot.'
+            ], 500);
         }
     }
+
 
 
     // moetodo para crear bot con asistente openai
@@ -252,7 +336,17 @@ class BotController extends Controller
     // consultar asistente de openai
     public function BotOpenai($id)
     {
-        $data = OpenAI::assistants()->retrieve($id);
+        $bot = Bot::findOrFail($id);
+        if (
+            $bot->aplicaciones()->whereHas('users', function ($query) {
+                $query->where('user_id', Auth::id());
+            })->exists()
+        ) {
+
+            config(['openai.api_key' => $bot->openai_key]);
+            config(['openai.organization' => $bot->openai_org]);
+            $data = OpenAI::assistants()->retrieve($bot->openai_assistant);
+        }
 
         return response()->json([
             'success' => 'Asistente recuperado con éxito.',
