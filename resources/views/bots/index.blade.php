@@ -64,10 +64,15 @@
                         <button class="btn btn-danger btn-sm mb-2 deleteBot" data-botid="{{ $bot->id }}">
                             <i class="fa fa-trash"></i>
                         </button>
+                        <a data-toggle="modal" data-target="#modal-bot-{{ $bot->id }}"
+                            class="btn btn-primary btn-sm mb-2 Bot" title="Bot">
+                            <i class="fa fa-robot"></i>
+                        </a>
                     </td>
                 </tr>
                 {{-- Modal de edición --}}
                 @include('bots.modals.edit-modal', ['bot' => $bot])
+                @include('bots.modals.bot-modal', ['bot' => $bot])
             @endforeach
         </tbody>
     </table>
@@ -78,6 +83,43 @@
 @endsection
 @section('css')
     <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.bootstrap4.css">
+    <style>
+        .chat-box {
+            height: 400px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+        }
+
+        .bot-message {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: left;
+            max-width: 70%;
+        }
+
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: right;
+            max-width: 70%;
+            margin-left: auto;
+        }
+
+        #user-input {
+            width: calc(100% - 80px);
+        }
+    </style>
 @stop
 
 @section('js')
@@ -93,7 +135,7 @@
             // Capturar el evento de envío del formulario
             $('#editForm').on('submit', function(e) {
                 e
-            .preventDefault(); // Prevenir el comportamiento por defecto del formulario (recarga de la página)
+                    .preventDefault(); // Prevenir el comportamiento por defecto del formulario (recarga de la página)
 
                 // Obtener el ID del bot que estamos editando
                 var botId = $('#botId').val();
@@ -114,7 +156,7 @@
                             }).then((result) => {
                                 if (result.isConfirmed) {
                                     location
-                                .reload(); // Recargar la página para reflejar los cambios
+                                        .reload(); // Recargar la página para reflejar los cambios
                                 }
                             });
                         } else {
@@ -392,4 +434,47 @@
         }
     </script>
 
+    <script>
+        $(document).ready(function() {
+            $('#send-btn').click(function() {
+                var userInput = $('#user-input').val();
+
+                if (userInput.trim()) {
+                    var chatBox = $('#chat-box');
+
+                    // Agregar mensaje del usuario al chat
+                    chatBox.append(
+                        '<div class="chat-message user-message"><p>' + userInput + '</p></div>'
+                    );
+                    $('#user-input').val(''); // Limpiar el input
+
+                    // Enviar pregunta al servidor usando AJAX
+                    $.ajax({
+                        url: 'ask-bot', // La ruta que define en tu Laravel para interactuar con el controlador
+                        method: 'POST',
+                        data: {
+                            question: userInput,
+                            _token: '{{ csrf_token() }}', // No olvides pasar el token CSRF
+                            waId: '{{ Auth::user()->id }}', // Puedes usar el ID del usuario autenticado
+                            botId: '{{ $bot->id }}'
+                        },
+                        success: function(response) {
+                            // Agregar respuesta del bot al chat
+                            chatBox.append(
+                                '<div class="chat-message bot-message"><p>' + response
+                                .answer + '</p></div>'
+                            );
+                            chatBox.scrollTop(chatBox[0]
+                            .scrollHeight); // Desplazarse hacia el último mensaje
+                        },
+                        error: function() {
+                            chatBox.append(
+                                '<div class="chat-message bot-message"><p>Error al obtener respuesta, intenta de nuevo.</p></div>'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 @stop

@@ -2,25 +2,27 @@
 
 use App\Models\Reporte;
 use Illuminate\Support\Facades\DB;
+use OpenAI\Laravel\Facades\OpenAI;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\BotController;
 // use Illuminate\Support\Facades\Redis;
+use App\Http\Controllers\BotController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EnvioController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\ClocalController;
+use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\MessageController;
+
 use App\Http\Controllers\NumerosController;
 use App\Http\Controllers\PermisoController;
-
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
-use OpenAI\Laravel\Facades\OpenAI;
+use App\Http\Controllers\BotIA;
 
 Route::resource(
     'aplicaciones',
@@ -173,7 +175,7 @@ Route::get('json', function () {
     $data = OpenAI::assistants()->list([
         'limit' => 10,
     ]);
-    
+
     return response()->json([
         'success' => 'Bot actualizado con éxito.',
         'data' => $data
@@ -182,3 +184,5 @@ Route::get('json', function () {
 
 // ruta para consultar asistente de openai BotOpenai
 Route::get('bots/{botId}/assistant', [BotController::class, 'BotOpenai'])->name('bot-openai');
+
+Route::post('ask-bot', [BotIA::class, 'askBot']);
