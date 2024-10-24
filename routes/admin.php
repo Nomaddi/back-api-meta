@@ -168,12 +168,12 @@ Route::post('bots/crear', [BotController::class, 'createBot'])->name('bots.store
 //ruta json de ejemplo
 Route::get('json', function () {
 
-    // $data = OpenAI::assistants()->list([
-    //     'limit' => 10,
-    // ]);
-    $data = OpenAI::assistants()->retrieve('asst_sZVPfGo5sWWvNYNxFuNnsQaz');
-
-    // $response = OpenAI::assistants()->delete('asst_CeEU6f2CekLAK9QWgXJpw32N');
+    config(['openai.api_key' => '']);
+    config(['openai.organization' => '']);
+    $data = OpenAI::assistants()->list([
+        'limit' => 10,
+    ]);
+    
     return response()->json([
         'success' => 'Bot actualizado con éxito.',
         'data' => $data
