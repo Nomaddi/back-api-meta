@@ -15,6 +15,8 @@ class VerifyCsrfToken extends Middleware
         '/whatsapp-webhook',
         '/store-data',
         '/refresh-csrf',
-        '/check-session'
+        '/check-session',
+        '/ask-bot-embedded',
+        '/admin/ask-bot-embedded',
     ];
 }

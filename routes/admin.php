@@ -122,7 +122,7 @@ Route::get('download/{id}', function ($id) {
 Route::get('data', function () {
     try {
         $results = DB::select('CALL GetMessagesReport(?, ?)', ['2024-03-29', '2024-04-15']);
-        if (!empty ($results)) {
+        if (!empty($results)) {
             // foreach ($results as $result) {
             //     echo "Nombre: " . $result->contacto_nombre . ", Teléfono: " . $result->contacto_telefono . ", Estado: " . $result->estado . ", enviado: " . $result->distintivo_nombre . ", fecha: " . $result->created_at . "\n";
             // }
@@ -186,3 +186,6 @@ Route::get('json', function () {
 Route::get('bots/{botId}/assistant', [BotController::class, 'BotOpenai'])->name('bot-openai');
 
 Route::post('ask-bot', [BotIA::class, 'askBot']);
+
+Route::post('ask-bot-embedded', [BotIA::class, 'askBotForEmbed'])->middleware('cors.custom')->withoutMiddleware('auth');
+

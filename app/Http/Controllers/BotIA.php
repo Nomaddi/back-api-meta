@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Thread;
 use Illuminate\Http\Request;
 use OpenAI\Laravel\Facades\OpenAI;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use OpenAI\Responses\Threads\Runs\ThreadRunResponse;
 
@@ -162,4 +163,34 @@ class BotIA extends Controller
         // Asigna la respuesta obtenida del mensaje
         $this->answer = $messageList->data[0]->content[0]->text->value ?? 'No answer received';
     }
+
+    public function askBotForEmbed(Request $request)
+    {
+
+
+
+        try {
+            $botId = $request->input('botId');
+            if ($botId) {
+                // obtener el bot desde la base de datos
+                $bot = Bot::find($botId);
+                $question = $request->input('question');
+                $waId = 3105326598;  // Obtener el waId del usuario autenticado
+                $openai_key = $bot->openai_key;  // Usar el API Key desde el .env
+                $openai_org = $bot->openai_org;  // Usar la organización desde el .env
+                $openai_assistant = $bot->openai_assistant;  // Usar el assistant ID desde el .env
+                // Lógica para procesar la solicitud y obtener la respuesta del bot
+                $botResponse = $this->ask($question, $waId, $botId, $openai_key, $openai_org, $openai_assistant);
+            }
+
+
+            return response()->json(['answer' => $botResponse]);
+        } catch (\Exception $e) {
+            // Registra el error para depuración
+            \Log::error('Error en askBotForEmbed: ' . $e->getMessage());
+            return response()->json(['error' => 'Error interno en el servidor'], 500);
+        }
+    }
+
+
 }

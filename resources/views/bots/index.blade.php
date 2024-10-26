@@ -68,11 +68,16 @@
                             class="btn btn-primary btn-sm mb-2 Bot" title="Bot">
                             <i class="fa fa-robot"></i>
                         </a>
+                        <a data-toggle="modal" data-target="#modal-code-{{ $bot->id }}"
+                            class="btn btn-warning btn-sm mb-2 Bot" title="Bot">
+                            <i class="fas fa-code"></i>
+                        </a>
                     </td>
                 </tr>
                 {{-- Modal de edición --}}
                 @include('bots.modals.edit-modal', ['bot' => $bot])
                 @include('bots.modals.bot-modal', ['bot' => $bot])
+                @include('bots.modals.code-modal', ['bot' => $bot])
             @endforeach
         </tbody>
     </table>
@@ -465,7 +470,7 @@
                                 .answer + '</p></div>'
                             );
                             chatBox.scrollTop(chatBox[0]
-                            .scrollHeight); // Desplazarse hacia el último mensaje
+                                .scrollHeight); // Desplazarse hacia el último mensaje
                         },
                         error: function() {
                             chatBox.append(
@@ -476,5 +481,28 @@
                 }
             });
         });
+
+        function copyCode(containerId) {
+            // Obtener el contenedor del código
+            var codeContainer = document.getElementById(containerId);
+
+            // Obtener el texto dentro del contenedor de código
+            var codeText = codeContainer.innerText;
+
+            // Copiar el texto al portapapeles usando la API del portapapeles
+            navigator.clipboard.writeText(codeText).then(function() {
+                // Mostrar una alerta o mensaje de confirmación con sweetalert sin boton de confirmacion
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Copiado!',
+                    text: 'El código ha sido copiado al portapapeles.',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }).catch(function(err) {
+                // En caso de error, mostrar un mensaje
+                alert("Error al copiar el código: " + err);
+            });
+        }
     </script>
 @stop
