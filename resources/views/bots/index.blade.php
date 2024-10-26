@@ -6,7 +6,7 @@
     <div class="row">
         <div class="col-lg-12 my-3">
             <div class="d-flex justify-content-end">
-                <a data-toggle="modal" data-target="#createBotModal" class="btn btn-primary btn-sm mb-2 mr-2"
+                <a data-toggle="modal" data-target="#importBotModal" class="btn btn-primary btn-sm mb-2 mr-2"
                     title="Importar BOT">
                     <i class="fa fa-file-import"></i>
                     Importar BOT
@@ -30,11 +30,11 @@
             <tr>
                 <th>Bot</th>
                 <th>Descripción</th>
-                <th>OpenAI Key</th>
                 <th>OpenAI Org</th>
                 <th>OpenAI Assistant</th>
                 <th>Aplicación Asociada</th>
                 <th>Acciones</th>
+                <th>OpenAI Key</th>
             </tr>
         </thead>
         <tbody style="text-align: center">
@@ -42,7 +42,6 @@
                 <tr>
                     <td>{{ $bot->nombre }}</td>
                     <td>{{ $bot->descripcion }}</td>
-                    <td>{{ $bot->openai_key }}</td>
                     <td>{{ $bot->openai_org }}</td>
                     <td>{{ $bot->openai_assistant }}</td>
                     <td>
@@ -73,6 +72,7 @@
                             <i class="fas fa-code"></i>
                         </a>
                     </td>
+                    <td>{{ $bot->openai_key }}</td>
                 </tr>
                 {{-- Modal de edición --}}
                 @include('bots.modals.edit-modal', ['bot' => $bot])
@@ -84,7 +84,7 @@
 
     </div>
     @include('bots.modals.create-modal')
-    @include('bots.modals.create-modal-asistente')
+    @include('bots.modals.import-modal')
 @endsection
 @section('css')
     <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.1/css/responsive.bootstrap4.css">
@@ -128,6 +128,7 @@
 @stop
 
 @section('js')
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="//cdn.datatables.net/responsive/2.2.1/js/dataTables.responsive.min.js"></script>
     <script src="//cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap4.min.js"></script>
     <script>
@@ -206,13 +207,13 @@
                             _token: $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(result) {
-                            // row.remove();
-                            $('#botsTable').DataTable().ajax.reload(null, false);
                             Swal.fire(
                                 'Eliminado!',
                                 'El bot ha sido eliminado.',
                                 'success'
                             );
+                            // recargar pagina
+                            location.reload();
                         },
                         error: function(request, status, error) {
                             var errorMessage = request.responseJSON?.error ||
@@ -228,7 +229,7 @@
             });
         });
         // crear bot
-        $('#createForm').submit(function(e) {
+        $('#importForm').submit(function(e) {
             e.preventDefault();
             var formData = $(this).serialize();
 
@@ -335,7 +336,7 @@
                     $('#editModel').val(response.data.model);
                     $('#editTemperature').val(response.data.temperature);
                     $('#editTopP').val(response.data.topP);
-                    $('#editResponseFormat').val(response.data.responseFormat);
+                    $('#editResponseFormat').val(response.data.responseFormat.type);
                 },
                 error: function(request, status, error) {
                     Swal.fire(
@@ -378,54 +379,43 @@
             });
         });
 
+        $('#createForm').submit(function(e) {
+            e.preventDefault();
+            var formData = new FormData(this);
 
-        // crear asistente
-        // $('#createFormAsistente').submit(function(e) {
-        //     e.preventDefault();
-        //     var formData = new FormData(this);
+            $.ajax({
+                type: "POST",
+                url: "{{ route('bots.store.asistente') }}",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Creado!',
+                        text: 'Asistente creado con éxito',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Recarga la página para reflejar los cambios
+                            location.reload();
+                        }
+                    });
 
-        //     $.ajax({
-        //         type: "POST",
-        //         url: "{{ route('bots.store.asistente') }}",
-        //         data: formData,
-        //         contentType: false,
-        //         processData: false,
-        //         success: function(response) {
-        //             if (response.data) {
+                },
+                error: function(error) {
+                    // Captura el mensaje de error devuelto por el servidor
+                    var errorMessage = error.responseJSON ? error.responseJSON.error :
+                        'Error al crear la bot';
 
-        //                 Swal.fire({
-        //                     icon: 'success',
-        //                     title: '¡Creado!',
-        //                     text: 'bot creada con éxito',
-        //                     confirmButtonText: 'OK'
-        //                 }).then((result) => {
-        //                     if (result.isConfirmed) {
-        //                         // Recarga la página para reflejar los cambios
-        //                         location.reload();
-        //                     }
-        //                 });
-
-        //             } else {
-        //                 Swal.fire({
-        //                     icon: 'error',
-        //                     title: 'Error',
-        //                     text: 'No se pudo obtener la información de la bot.',
-        //                 });
-        //             }
-        //         },
-        //         error: function(error) {
-        //             // Captura el mensaje de error devuelto por el servidor
-        //             var errorMessage = error.responseJSON ? error.responseJSON.error :
-        //                 'Error al crear la bot';
-
-        //             Swal.fire({
-        //                 icon: 'error',
-        //                 title: 'Error',
-        //                 text: errorMessage, // Muestra el mensaje detallado
-        //             });
-        //         }
-        //     });
-        // });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMessage, // Muestra el mensaje detallado
+                    });
+                }
+            });
+        });
     </script>
 
     <!-- Funciones JavaScript para actualizar los valores -->
@@ -441,17 +431,30 @@
 
     <script>
         $(document).ready(function() {
-            $('#send-btn').click(function() {
-                var userInput = $('#user-input').val();
+            $('[id^=send-btn-]').click(function() {
+                sendMessage($(this).data('bot-id'));
+            });
+
+            $('[id^=user-input-]').keypress(function(e) {
+                if (e.which === 13) { // Detecta la tecla Enter (código 13)
+                    e.preventDefault(); // Evita el comportamiento por defecto del Enter en el formulario
+                    var botId = $(this).attr('id').split('-')[
+                        2]; // Obtiene el ID del bot del campo de entrada
+                    sendMessage(botId);
+                }
+            });
+
+            function sendMessage(botId) {
+                var userInput = $('#user-input-' + botId).val(); // Selecciona el input correcto
 
                 if (userInput.trim()) {
-                    var chatBox = $('#chat-box');
+                    var chatBox = $('#chat-box-' + botId); // Selecciona el chat-box correcto
 
                     // Agregar mensaje del usuario al chat
                     chatBox.append(
                         '<div class="chat-message user-message"><p>' + userInput + '</p></div>'
                     );
-                    $('#user-input').val(''); // Limpiar el input
+                    $('#user-input-' + botId).val(''); // Limpiar el input
 
                     // Enviar pregunta al servidor usando AJAX
                     $.ajax({
@@ -459,15 +462,18 @@
                         method: 'POST',
                         data: {
                             question: userInput,
-                            _token: '{{ csrf_token() }}', // No olvides pasar el token CSRF
-                            waId: '{{ Auth::user()->id }}', // Puedes usar el ID del usuario autenticado
-                            botId: '{{ $bot->id }}'
+                            _token: '{{ csrf_token() }}', // Token CSRF
+                            waId: '{{ Auth::user()->id }}', // ID del usuario autenticado
+                            botId: botId // Enviar el ID del bot específico
                         },
                         success: function(response) {
-                            // Agregar respuesta del bot al chat
+                            var chatBox = $('#chat-box-' + botId);
+
+                            // Usar `marked.parse` para convertir Markdown a HTML
+                            var htmlContent = marked.parse(response.answer);
+
                             chatBox.append(
-                                '<div class="chat-message bot-message"><p>' + response
-                                .answer + '</p></div>'
+                                `<div class="chat-message bot-message">${htmlContent}</div>`
                             );
                             chatBox.scrollTop(chatBox[0]
                                 .scrollHeight); // Desplazarse hacia el último mensaje
@@ -479,8 +485,10 @@
                         }
                     });
                 }
-            });
+            }
         });
+
+
 
         function copyCode(containerId) {
             // Obtener el contenedor del código

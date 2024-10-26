@@ -8,7 +8,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="chat-box" id="chat-box">
+                <div class="chat-box" id="chat-box-{{ $bot->id }}">
                     <div class="chat-message bot-message">
                         <p>¡Hola! ¿Cómo puedo ayudarte hoy?</p>
                     </div>
@@ -17,10 +17,10 @@
             <div class="modal-footer">
                 <div class="row w-100">
                     <div class="col-10">
-                        <input type="text" id="user-input" class="form-control" placeholder="Escribe un mensaje..." />
+                        <input type="text" id="user-input-{{ $bot->id }}" class="form-control" placeholder="Escribe un mensaje..." />
                     </div>
                     <div class="col-2">
-                        <button type="button" class="btn btn-primary w-100" id="send-btn">Enviar</button>
+                        <button type="button" class="btn btn-primary w-100" id="send-btn-{{ $bot->id }}" data-bot-id="{{ $bot->id }}">Enviar</button>
                     </div>
                 </div>
             </div>

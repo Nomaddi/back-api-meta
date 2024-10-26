@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bot;
+use OpenAI\Factory;
 use App\Models\Aplicaciones;
 use Illuminate\Http\Request;
 use OpenAI\Laravel\Facades\OpenAI;
@@ -69,24 +70,13 @@ class BotController extends Controller
         // Asociar el nuevo bot con la aplicación en la tabla pivote
         $aplicacion->bot()->attach($bot->id);
 
-        // crear bot desde la apí de openai
-        $res = OpenAI::assistants()->create([
-            'instructions' => $request->descripcion,
-            'name' => 'Math Tutor',
-            'tools' => [
-                [
-                    'type' => 'code_interpreter',
-                ],
-            ],
-            'model' => 'gpt-4',
-        ]);
-
 
         return response()->json([
             'success' => 'Bot creado con éxito y asociado a la aplicación.',
             'data' => $bot
         ]);
     }
+
 
     // metodo editar bot
     public function edit($id)
@@ -152,10 +142,13 @@ class BotController extends Controller
         // Asociar la aplicación seleccionada al bot actual
         $aplicacion->bot()->sync([$bot->id]);
 
-        config(['openai.api_key' => $bot->openai_key]);
-        config(['openai.organization' => $bot->openai_org]);
+        $openAI = (new Factory())
+            ->withApiKey($bot->openai_key)
+            ->withOrganization($bot->openai_org)
+            ->withHttpHeader('OpenAI-Beta', 'assistants=v2')
+            ->make();
 
-        OpenAI::assistants()->modify($bot->openai_assistant, [
+        $openAI->assistants()->modify($bot->openai_assistant, [
             'name' => $request->nombre,
             'instructions' => $request->instructions,
             'model' => $request->model,
@@ -181,15 +174,17 @@ class BotController extends Controller
 
             // Verificar si el bot pertenece a una de las aplicaciones del usuario autenticado
             if (
-                $bot->aplicaciones()->whereHas('users', function ($query) {
-                    $query->where('user_id', Auth::id());
-                })->exists()
+                // verificar si este bot le pernece al usuario autenticado
+                Auth::user()->bots->contains($bot)
             ) {
                 // Cambiar la clave API en tiempo de ejecución a la nueva clave necesaria
-                config(['openai.api_key' => $bot->openai_key]);
-                config(['openai.organization' => $bot->openai_org]);
-                // Intentar eliminar el bot en OpenAI
-                $response = OpenAI::assistants()->delete($bot->openai_assistant);
+                $openAI = (new Factory())
+                    ->withApiKey($bot->openai_key)
+                    ->withOrganization($bot->openai_org)
+                    ->withHttpHeader('OpenAI-Beta', 'assistants=v2')
+                    ->make();
+
+                $response = $openAI->assistants()->delete($bot->openai_assistant);
 
                 // Verificar si se eliminó con éxito en OpenAI
                 if ($response->deleted) {
@@ -238,17 +233,25 @@ class BotController extends Controller
             $request->validate([
                 'nombre' => 'required',
                 'descripcion' => 'required',
-                'archivos' => 'required',
-                'instrucciones' => 'required',
+                'archivos' => 'array',
+                'archivos.*' => 'mimetypes:text/x-c,text/x-c++,text/x-csharp,text/css,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/x-golang,text/html,text/x-java,text/javascript,application/json,text/markdown,application/pdf,text/x-php,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/x-python,text/x-script.python,text/x-ruby,application/x-sh,text/x-tex,application/typescript,text/plain',
                 'openai_key' => 'required',
                 'openai_org' => 'required',
-                'aplicacion_id' => 'required|exists:aplicaciones,id',
-            ]);
-            $data = OpenAI::assistants()->list([
-                'limit' => 10,
+                'instrucciones' => 'required',
+                'modelo' => 'required',
+                'temperature' => 'required|numeric',
+                'top_p' => 'required|numeric',
+                'aplicacion_id' => 'nullable|exists:aplicaciones,id',
             ]);
 
             $nombreCarpeta = $request->nombre;
+
+            // Crear una instancia personalizada de OpenAI con las credenciales del usuario y el encabezado requerido
+            $openAI = (new Factory())
+                ->withApiKey($request->openai_key)
+                ->withOrganization($request->openai_org)
+                ->withHttpHeader('OpenAI-Beta', 'assistants=v2') // Agregar el encabezado necesario
+                ->make();
 
             // Procesar los archivos
             if ($request->hasfile('archivos')) {
@@ -262,7 +265,7 @@ class BotController extends Controller
                     // Mover el archivo a la carpeta especificada
                     $archivo->move(public_path($rutaDestino), $nombreArchivo);
 
-                    $uploadedFile = OpenAI::files()->upload([
+                    $uploadedFile = $openAI->files()->upload([
                         'file' => fopen($rutaDestino . $nombreArchivo, 'r'),  // Abre el archivo como un stream
                         'purpose' => 'assistants',
                     ]);
@@ -272,40 +275,50 @@ class BotController extends Controller
 
 
                 }
+                //creacion de vector store
+                $vector = $openAI->vectorStores()->create([
+                    'file_ids' => $fileIds,
+                    'name' => 'vector-store-' . $nombreCarpeta,
+                ]);
+
+                // Crear el asistente utilizando todos los IDs de los archivos subidos
+                $assistant = $openAI->assistants()->create([
+                    'name' => $request->nombre,
+                    'tools' => [
+                        [
+                            'type' => 'file_search',
+                        ],
+                    ],
+                    'tool_resources' => [
+                        'file_search' => [
+                            'vector_store_ids' => [$vector->id],
+                        ],
+                    ],
+                    'instructions' => $request->instrucciones,
+                    'model' => $request->modelo,
+                    'temperature' => floatval($request->temperature), // Convertir a decimal
+                    'top_p' => floatval($request->top_p), // Convertir a decimal
+
+                ]);
             }
-            //creacion de vector store
-            $vector = OPENAI::vectorStores()->create([
-                'file_ids' => $fileIds,
-                'name' => 'My first Vector Store',
-            ]);
 
             // Crear el asistente utilizando todos los IDs de los archivos subidos
-            $assistant = OpenAI::assistants()->create([
+            $assistant = $openAI->assistants()->create([
                 'name' => $request->nombre,
-                'tools' => [
-                    [
-                        'type' => 'file_search',
-                    ],
-                ],
-                'tool_resources' => [
-                    'file_search' => [
-                        'vector_store_ids' => [$vector->id],
-                    ],
-                ],
                 'instructions' => $request->instrucciones,
-                'model' => 'gpt-4-1106-preview',
+                'model' => $request->modelo,
+                'temperature' => floatval($request->temperature), // Convertir a decimal
+                'top_p' => floatval($request->top_p), // Convertir a decimal
+
             ]);
 
-            // Obtener la aplicación
-            $aplicacion = Aplicaciones::findOrFail($request->aplicacion_id);
-            $user = Auth::user();
-
-            // Verificar si la aplicación ya tiene un bot asociado y desasociarlo
-            $botAnterior = $aplicacion->bot()->first();
-            if ($botAnterior) {
-                $aplicacion->bot()->detach($botAnterior->id); // Desasociar el bot anterior si existe
+            // Verifica que $assistant se haya creado correctamente antes de asignar openai_assistant
+            if (!$assistant || !isset($assistant->id)) {
+                return response()->json(['error' => 'No se pudo crear el asistente de OpenAI.'], 400);
             }
 
+            // Obtener la aplicación
+            $user = Auth::user();
             // Crear un nuevo bot
             $bot = Bot::create([
                 'user_id' => $user->id,
@@ -316,13 +329,18 @@ class BotController extends Controller
                 'openai_assistant' => $assistant->id,
             ]);
 
-
-            // Asociar el nuevo bot con la aplicación en la tabla pivote
-            $aplicacion->bot()->attach($bot->id);
+            // Asociar el bot con la aplicación solo si se seleccionó una aplicación
+            if ($request->filled('aplicacion_id')) {
+                $aplicacion = Aplicaciones::findOrFail($request->aplicacion_id);
+                $botAnterior = $aplicacion->bot()->first();
+                if ($botAnterior) {
+                    $aplicacion->bot()->detach($botAnterior->id);
+                }
+                $aplicacion->bot()->attach($bot->id);
+            }
 
             return response()->json([
-                'success' => 'Bot creado con éxito y asociado a la aplicación.',
-                'data' => $vector
+                'success' => 'Bot creado con éxito y asociado a la aplicación.'
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -337,21 +355,27 @@ class BotController extends Controller
     public function BotOpenai($id)
     {
         $bot = Bot::findOrFail($id);
-        if (
-            $bot->aplicaciones()->whereHas('users', function ($query) {
-                $query->where('user_id', Auth::id());
-            })->exists()
-        ) {
 
-            config(['openai.api_key' => $bot->openai_key]);
-            config(['openai.organization' => $bot->openai_org]);
-            $data = OpenAI::assistants()->retrieve($bot->openai_assistant);
+        // Verificar si el bot pertenece al usuario autenticado
+        if (Auth::user()->bots->contains($bot)) {
+            $openAI = (new Factory())
+                ->withApiKey($bot->openai_key)
+                ->withOrganization($bot->openai_org)
+                ->withHttpHeader('OpenAI-Beta', 'assistants=v2') // Agregar el encabezado necesario
+                ->make();
+            $data = $openAI->assistants()->retrieve($bot->openai_assistant);
+
+            return response()->json([
+                'success' => 'Asistente recuperado con éxito.',
+                'data' => $data
+            ]);
+        } else {
+            return response()->json([
+                'error' => 'El usuario no tiene acceso a este asistente.'
+            ], 403);
         }
-
-        return response()->json([
-            'success' => 'Asistente recuperado con éxito.',
-            'data' => $data
-        ]);
     }
+
+
 
 }

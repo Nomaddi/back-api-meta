@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Bot;
+use OpenAI\Factory;
 use App\Models\User;
 use App\Models\Thread;
 use Illuminate\Http\Request;
@@ -90,13 +91,13 @@ class BotIA extends Controller
     // Método para crear y ejecutar un nuevo hilo
     private function createAndRunThread($openai_key, $openai_org, $openai_assistant)
     {
+        $openAI = (new Factory())
+            ->withApiKey($openai_key)
+            ->withOrganization($openai_org)
+            ->withHttpHeader('OpenAI-Beta', 'assistants=v2')
+            ->make();
 
-
-        // Cambiar dinámicamente las credenciales de OpenAI
-        config(['openai.api_key' => $openai_key]);
-        config(['openai.organization' => $openai_org]);
-
-        return OpenAI::threads()->createAndRun([
+        return $openAI->threads()->createAndRun([
             'assistant_id' => $openai_assistant,
             'thread' => [
                 'messages' => [
@@ -112,22 +113,22 @@ class BotIA extends Controller
     // Método para continuar un hilo existente
     private function continueThread($threadId, $openai_key, $openai_org, $openai_assistant)
     {
-        // Cambiar dinámicamente las credenciales de OpenAI
-        config(['openai.api_key' => $openai_key]);
-        config(['openai.organization' => $openai_org]);
+        $openAI = (new Factory())
+            ->withApiKey($openai_key)
+            ->withOrganization($openai_org)
+            ->withHttpHeader('OpenAI-Beta', 'assistants=v2')
+            ->make();
 
-        // Primero, envía un mensaje al hilo existente
-        OpenAI::threads()->messages()->create(
-            $threadId, // Pasar el threadId como string
+        $openAI->threads()->messages()->create(
+            $threadId,
             [
                 'role' => 'user',
                 'content' => $this->question,
             ]
         );
 
-        // Luego, crea un run para continuar con el hilo
-        return OpenAI::threads()->runs()->create(
-            $threadId, // Pasar el threadId como string
+        return $openAI->threads()->runs()->create(
+            $threadId,
             [
                 'assistant_id' => $openai_assistant,
             ]
@@ -136,16 +137,16 @@ class BotIA extends Controller
 
 
     // Método para cargar la respuesta desde el hilo
-    // Método para cargar la respuesta desde el hilo
     private function loadAnswer($threadRun, $openai_key, $openai_org, $openai_assistant)
     {
-
-        // Cambiar dinámicamente las credenciales de OpenAI
-        config(['openai.api_key' => $openai_key]);
-        config(['openai.organization' => $openai_org]);
+        $openAI = (new Factory())
+            ->withApiKey($openai_key)
+            ->withOrganization($openai_org)
+            ->withHttpHeader('OpenAI-Beta', 'assistants=v2')
+            ->make();
 
         while (in_array($threadRun->status, ['queued', 'in_progress'])) {
-            $threadRun = OpenAI::threads()->runs()->retrieve(
+            $threadRun = $openAI->threads()->runs()->retrieve(
                 $threadRun->threadId,
                 $threadRun->id,
             );
@@ -156,19 +157,15 @@ class BotIA extends Controller
             return;
         }
 
-        $messageList = OpenAI::threads()->messages()->list(
+        $messageList = $openAI->threads()->messages()->list(
             $threadRun->threadId,
         );
 
-        // Asigna la respuesta obtenida del mensaje
         $this->answer = $messageList->data[0]->content[0]->text->value ?? 'No answer received';
     }
 
     public function askBotForEmbed(Request $request)
     {
-
-
-
         try {
             $botId = $request->input('botId');
             if ($botId) {

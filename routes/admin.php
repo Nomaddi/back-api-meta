@@ -172,12 +172,15 @@ Route::get('json', function () {
 
     config(['openai.api_key' => '']);
     config(['openai.organization' => '']);
-    $data = OpenAI::assistants()->list([
-        'limit' => 10,
-    ]);
+    // $data = OpenAI::assistants()->list([
+    //     'limit' => 10,
+    // ]);
+
+    // recuperar un asistente
+    $data= OpenAI::assistants()->retrieve('asst_hbfRFI397udQ4q5zBsgoQGAm');
 
     return response()->json([
-        'success' => 'Bot actualizado con éxito.',
+        'success' => 'Bot recuperado con éxito.',
         'data' => $data
     ]);
 })->middleware('can:json')->name('json');
