@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
         position: 'fixed',
         bottom: '20px',
         right: '20px',
-        backgroundColor: '#6200ea',  // Color morado
+        backgroundImage: 'linear-gradient(to right, #6200ea, #3700b3)',  // Color morado
         color: '#fff',
         border: 'none',
         borderRadius: '50px',
@@ -39,6 +39,14 @@ document.addEventListener('DOMContentLoaded', function () {
         zIndex: '1000',
         transition: 'transform 0.3s ease'
     });
+
+    chatButton.addEventListener('mouseenter', function () {
+        chatButton.style.transform = 'scale(1.05)';
+    });
+    chatButton.addEventListener('mouseleave', function () {
+        chatButton.style.transform = 'scale(1)';
+    });
+    
 
     // Crear el botón flotante de chat
     // var chatButton = document.createElement('button');
@@ -59,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Crear el contenedor del modal con estilos personalizados
     var chatModal = document.createElement('div');
     chatModal.innerHTML = `
-        <div class="modal" id="embedded-chat-modal" style="position: fixed; bottom: 20px; right: 20px; width: 360px; height: 500px; background: #ffffff; border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,0.3); display: none; z-index: 1001;">
+        <div class="modal" id="embedded-chat-modal" style="position: fixed; bottom: 20px; right: 20px; width: 90vw; height: 80vh; max-width: 400px; background: #ffffff; border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,0.3); display: none; z-index: 1001;">
             <div class="modal-header" style="padding: 16px; background-color: #0052cc; color: #fff; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
                 <h5 class="modal-title" id="chatModalLabel" style="margin: 0; font-size: 18px;">Chat con ${botNombre || 'Asistente'}</h5>
                 <button type="button" class="close" style="background: none; border: none; color: white; font-size: 20px;" onclick="document.getElementById('embedded-chat-modal').style.display='none'">
@@ -96,10 +104,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Enviar mensaje del usuario
     var sendButton = document.getElementById('send-btn');
-    if (sendButton) {
+    var userInput = document.getElementById('user-input'); // Define userInput aquí
+
+    if (sendButton && userInput) {
+        // Evento para enviar al hacer click en el boton de envio
         sendButton.addEventListener('click', function () {
-            var userInput = document.getElementById('user-input');
-            if (userInput && userInput.value.trim()) {
+            if (userInput.value.trim()) {
                 var chatBox = document.getElementById('chat-box');
                 if (chatBox) {
                     var userMessageValue = userInput.value.trim();
@@ -118,12 +128,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     userMessage.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.15)'; 
                     chatBox.appendChild(userMessage);
                     userInput.value = ''; // Limpiar input
+                    userInput.focus(); // mantener el foco en el campo de entrada
 
                     var loadingIndicator = document.createElement('div');
                     loadingIndicator.classList.add('loading-indicator');
                     loadingIndicator.innerHTML = 'Escribiendo...';
                     loadingIndicator.style = 'text-align: center; color: #bbb; font-size: 12px; padding: 5px;';
-                    chatBox.appendChild(loadingIndicator);
 
                     // Enviar mensaje al servidor
                     fetch('http://127.0.0.1:8000/admin/ask-bot-embedded', {
@@ -166,6 +176,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Input de usuario no encontrado o está vacío.');
             }
         });
+
+        // Evento para enviar al presionar la tecla Enter
+        userInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+
     } else {
         console.error('No se pudo encontrar el botón de envío en el DOM.');
     }
