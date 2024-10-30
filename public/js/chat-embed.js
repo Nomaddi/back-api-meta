@@ -24,38 +24,57 @@ document.addEventListener('DOMContentLoaded', function () {
     // Crear el botón flotante de chat
     var chatButton = document.createElement('button');
     chatButton.innerHTML = `Chat con ${botNombre || 'Asistente'}`;
-    chatButton.style.position = 'fixed';
-    chatButton.style.bottom = '20px';
-    chatButton.style.right = '20px';
-    chatButton.style.backgroundColor = '#007bff';
-    chatButton.style.color = '#fff';
-    chatButton.style.border = 'none';
-    chatButton.style.borderRadius = '50px';
-    chatButton.style.padding = '10px 20px';
-    chatButton.style.boxShadow = '0px 2px 5px rgba(0,0,0,0.3)';
-    chatButton.style.cursor = 'pointer';
-    chatButton.style.zIndex = '1000';
+    Object.assign(chatButton.style, {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        backgroundColor: '#6200ea',  // Color morado
+        color: '#fff',
+        border: 'none',
+        borderRadius: '50px',
+        padding: '12px 25px',
+        boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
+        fontSize: '16px',  // Tamaño de fuente ajustado
+        cursor: 'pointer',
+        zIndex: '1000'
+    });
+
+    // Crear el botón flotante de chat
+    // var chatButton = document.createElement('button');
+    // chatButton.innerHTML = `Chat con ${botNombre || 'Asistente'}`;
+    // chatButton.style.position = 'fixed';
+    // chatButton.style.bottom = '20px';
+    // chatButton.style.right = '20px';
+    // chatButton.style.backgroundColor = '#007bff';
+    // chatButton.style.color = '#fff';
+    // chatButton.style.border = 'none';
+    // chatButton.style.borderRadius = '50px';
+    // chatButton.style.padding = '10px 20px';
+    // chatButton.style.boxShadow = '0px 2px 5px rgba(0,0,0,0.3)';
+    // chatButton.style.cursor = 'pointer';
+    // chatButton.style.zIndex = '1000';
     document.body.appendChild(chatButton);
 
-    // Crear el contenedor del modal con el nombre del bot
+    // Crear el contenedor del modal con estilos personalizados
     var chatModal = document.createElement('div');
     chatModal.innerHTML = `
-        <div class="modal" id="embedded-chat-modal" style="position: fixed; bottom: 20px; right: 20px; width: 350px; height: 500px; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); display: none; z-index: 1001;">
-            <div class="modal-header" style="padding: 10px; background-color: #007bff; color: #fff; border-top-left-radius: 10px; border-top-right-radius: 10px;">
-                <h5 class="modal-title" id="chatModalLabel" style="margin: 0; font-size: 16px;">Chat con ${botNombre || 'Asistente'}</h5>
-                <button type="button" class="close" style="background: none; border: none; color: white; font-size: 20px;" onclick="document.getElementById('embedded-chat-modal').style.display='none'">&times;</button>
+        <div class="modal" id="embedded-chat-modal" style="position: fixed; bottom: 20px; right: 20px; width: 400px; height: 500px; background: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; z-index: 1001;">
+            <div class="modal-header" style="padding: 15px; background-color: #6200ea; color: #fff; border-top-left-radius: 10px; border-top-right-radius: 10px;">
+                <h5 class="modal-title" id="chatModalLabel" style="margin: 0; font-size: 18px;">Chat con ${botNombre || 'Asistente'}</h5>
+                <button type="button" class="close" style="background: none; border: none; color: white; font-size: 24px;" onclick="document.getElementById('embedded-chat-modal').style.display='none'">&times;</button>
             </div>
-            <div class="modal-body" style="padding: 10px; height: 350px; overflow-y: auto; background-color: #f9f9f9;" id="chat-box">
-                <div class="chat-message bot-message" style="background: #e9ecef; padding: 10px; margin-bottom: 10px; border-radius: 20px 20px 20px 0px; max-width: 80%; font-size: 14px;">
+            <div class="modal-body" style="padding: 15px; height: 350px; overflow-y: auto; background-color: #f2f5f7;" id="chat-box">
+                <div class="chat-message bot-message" style="background: #e9ecef; padding: 12px; margin-bottom: 12px; border-radius: 20px 20px 20px 0px; max-width: 80%; font-size: 15px;">
                     <p style="margin: 0;">¡Hola! ¿Cómo puedo ayudarte hoy?</p>
                 </div>
             </div>
             <div class="modal-footer" style="padding: 10px; background-color: #f1f1f1; display: flex;">
-                <input type="text" id="user-input" name="user-input" class="form-control" placeholder="Escribe un mensaje..." style="flex-grow: 1; border-radius: 20px; padding: 10px;" />
-                <button type="button" class="btn btn-primary" id="send-btn" style="margin-left: 5px; background-color: #007bff; border: none; border-radius: 50px; padding: 10px 20px;">Enviar</button>
+                <input type="text" id="user-input" name="user-input" class="form-control" placeholder="Escribe un mensaje..." style="flex-grow: 1; border-radius: 20px; padding: 12px; font-size: 14px;" />
+                <button type="button" class="btn btn-primary" id="send-btn" style="margin-left: 8px; background-color: #6200ea; border: none; border-radius: 50px; padding: 10px 20px; color: #fff; font-size: 14px;">Enviar</button>
             </div>
         </div>
     `;
+    
     document.body.appendChild(chatModal);
 
     // Mostrar el modal cuando se haga clic en el botón
