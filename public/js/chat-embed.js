@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
         fontSize: '16px',  // Tamaño de fuente ajustado
         cursor: 'pointer',
         zIndex: '1000',
-        transition: 'tranform 0.3s ease'
+        transition: 'transform 0.3s ease'
     });
 
     // Crear el botón flotante de chat
@@ -62,10 +62,12 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="modal" id="embedded-chat-modal" style="position: fixed; bottom: 20px; right: 20px; width: 360px; height: 500px; background: #ffffff; border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,0.3); display: none; z-index: 1001;">
             <div class="modal-header" style="padding: 16px; background-color: #0052cc; color: #fff; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
                 <h5 class="modal-title" id="chatModalLabel" style="margin: 0; font-size: 18px;">Chat con ${botNombre || 'Asistente'}</h5>
-                <button type="button" class="close" style="background: none; border: none; color: white; font-size: 20px;" onclick="document.getElementById('embedded-chat-modal').style.display='none'">&times;</button>
+                <button type="button" class="close" style="background: none; border: none; color: white; font-size: 20px;" onclick="document.getElementById('embedded-chat-modal').style.display='none'">
+                    <svg width="24" height="24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
             </div>
             <div class="modal-body" style="padding: 15px; height: 360px; overflow-y: auto; background-color: #f7f9fc;" id="chat-box">
-                <div class="chat-message bot-message" style="background: #e0e7ff padding: 12px; margin-bottom: 12px; border-radius: 10px; max-width: 75%; font-size: 14px;">
+                <div class="chat-message bot-message" style="background: #e0e7ff; padding: 12px; margin-bottom: 12px; border-radius: 10px; max-width: 75%; font-size: 14px;">
                     <p style="margin: 0;">¡Hola! ¿Cómo puedo ayudarte hoy?</p>
                 </div>
             </div>
@@ -83,6 +85,10 @@ document.addEventListener('DOMContentLoaded', function () {
         var modal = document.getElementById('embedded-chat-modal');
         if (modal) {
             modal.style.display = 'block';
+            setTimeout(() => {
+                modal.style.opacity = '1';
+                modal.style.transform = 'translateY(0)';
+            }, 50);
         } else {
             console.error('No se pudo encontrar el modal en el DOM.');
         }
@@ -109,8 +115,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     userMessage.style.borderRadius = '10px';
                     userMessage.style.textAlign = 'right';
                     userMessage.style.maxWidth = '75%';
+                    userMessage.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.15)'; 
                     chatBox.appendChild(userMessage);
                     userInput.value = ''; // Limpiar input
+
+                    var loadingIndicator = document.createElement('div');
+                    loadingIndicator.classList.add('loading-indicator');
+                    loadingIndicator.innerHTML = 'Escribiendo...';
+                    loadingIndicator.style = 'text-align: center; color: #bbb; font-size: 12px; padding: 5px;';
+                    chatBox.appendChild(loadingIndicator);
 
                     // Enviar mensaje al servidor
                     fetch('http://127.0.0.1:8000/admin/ask-bot-embedded', {
@@ -125,6 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .then(response => response.json())
                     .then(data => {
+                        sendButton.disabled = false;
                         if (data.answer) {
                             var botMessage = document.createElement('div');
                             botMessage.classList.add('chat-message', 'bot-message');
@@ -135,6 +149,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             botMessage.style.borderRadius = '10px';
                             botMessage.style.maxWidth = '75%';
                             chatBox.appendChild(botMessage);
+                            botMessage.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.15)';
+
 
                             // Desplazar hacia abajo para mostrar el mensaje más reciente
                             chatBox.scrollTop = chatBox.scrollHeight;
