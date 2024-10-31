@@ -91,10 +91,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // Añadir el mensaje del usuario al chat
                     var userMessage = document.createElement('div');
-
-
                     userMessage.classList.add('chat-message', 'user-message');
-                    userMessage.innerHTML = '<p>' + userMessageValue + '</p>';
+                    userMessage.innerHTML = `<i class="fas fa-user" style="margin-right: 8px;"></i><p>${userMessageValue}</p>`;
                     chatBox.appendChild(userMessage);
                     userInput.value = ''; // Limpiar input
                     userInput.focus(); // mantener el foco en el campo de entrada
