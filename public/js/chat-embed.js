@@ -95,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     userInput.value = ''; // Limpiar input
                     userInput.focus(); // mantener el foco en el campo de entrada
 
+                    // Crear el indicador de carga
                     var loadingIndicator = document.createElement('div');
                     loadingIndicator.classList.add('loading-indicator');
                     loadingIndicator.innerHTML = 'Escribiendo...';
@@ -113,7 +114,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .then(response => response.json())
                     .then(data => {
-                        sendButton.disabled = false;
+                        // Eliminar el indicador de carga después de recibir la respuesta
+                        chatBox.removeChild(loadingIndicator);
+
                         if (data.answer) {
                             var botMessage = document.createElement('div');
                             botMessage.classList.add('chat-message', 'bot-message');
@@ -123,8 +126,8 @@ document.addEventListener('DOMContentLoaded', function () {
                             botMessage.style.marginBottom = '10px';
                             botMessage.style.borderRadius = '10px';
                             botMessage.style.maxWidth = '75%';
-                            chatBox.appendChild(botMessage);
                             botMessage.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.15)';
+                            chatBox.appendChild(botMessage);
 
 
                             // Desplazar hacia abajo para mostrar el mensaje más reciente
@@ -132,6 +135,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     })
                     .catch(error => {
+                        // Manejo de errores: eliminar el indicador de carga y loguear el error
+                        chatBox.removeChild(loadingIndicator);
                         console.error('Error al enviar la solicitud:', error);
                     });
                 } else {
