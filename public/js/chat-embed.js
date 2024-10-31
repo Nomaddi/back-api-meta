@@ -91,6 +91,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     // Añadir el mensaje del usuario al chat
                     var userMessage = document.createElement('div');
+
+
                     userMessage.classList.add('chat-message', 'user-message');
                     userMessage.innerHTML = '<p>' + userMessageValue + '</p>';
                     chatBox.appendChild(userMessage);
@@ -122,8 +124,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (data.answer) {
                             var botMessage = document.createElement('div');
                             botMessage.classList.add('chat-message', 'bot-message');
-                            botMessage.innerHTML = '<p>' + data.answer + '</p>';
+                            botMessage.innerHTML = `<i class="fas fa-robot" style="margin-right: 8px;"></i><p>${data.answer}</p>`;
                             chatBox.appendChild(botMessage);
+                            chatBox.scrollTop = chatBox.scrollHeight;
 
 
                             // Desplazar hacia abajo para mostrar el mensaje más reciente

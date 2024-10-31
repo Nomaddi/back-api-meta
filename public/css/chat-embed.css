@@ -79,6 +79,7 @@
     line-height: 1.5;
     max-width: 90%; /* Ancho máximo para que no ocupe toda la línea */
     color: #333; /* Texto en color neutro */
+    
 }
 
 /* Mensajes del bot alineados a la izquierda */
@@ -153,4 +154,3 @@
         font-size: 12px;        
     }
 }
-
