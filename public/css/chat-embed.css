@@ -17,7 +17,7 @@
 
 /* Efecto hover para el botón */
 #chat-button:hover {
-    transform: scale(1.1);
+    transform: none;
     background-color: #5a00e5;
 }
 
@@ -35,8 +35,8 @@
     box-shadow: 0 6px 16px rgba(0,0,0,0.3);
     display: none;
     z-index: 1001;
+    transform: translateY(20px) scale(0.98);
     opacity: 0;
-    transform: translateY(20px);
     transition: opacity 0.4s ease;
 }
 
@@ -71,17 +71,31 @@
     background-color: #f7f9fc;
 }
 
-.chat-message.bot-message {
-    background: #e0e7ff;
-    padding: 12px;
-    margin-bottom: 12px;
-    border-radius: 10px;
-    max-width: 75%;
+/* Estilos compactos para las burbujas de mensajes */
+.chat-message {
+    margin: 4px 0; /* Espacio entre mensajes */
+    padding: 0; /* Sin padding para evitar aspecto de burbuja */
     font-size: 14px;
+    line-height: 1.5;
+    max-width: 90%; /* Ancho máximo para que no ocupe toda la línea */
+    color: #333; /* Texto en color neutro */
 }
 
+/* Mensajes del bot alineados a la izquierda */
+.chat-message.bot-message {
+    text-align: left;
+    margin-right: auto; /* Empuja a la izquierda */
+}
+
+/* Mensajes del usuario alineados a la derecha */
+.chat-message.user-message {
+    text-align: right;
+    margin-left: auto; /* Empuja a la derecha */
+}
+
+
 .modal-footer {
-    padding: 12px;
+    padding: 4px 6px;
     background-color: #f1f1f1;
     display: flex;
     align-items: center;
@@ -89,27 +103,27 @@
 
 #user-input {
     flex-grow: 1;
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 14px;
+    padding: 5px 8px;
+    font-size: 13px;
     border: 1px solid #ccc;
 }
 
 #send-btn {
-    margin-left: 8px;
+    margin-left: 6px;
+    padding: 5px 10px;
     background-color: #0052cc;
     border: none;
-    border-radius: 8px;
-    padding: 10px 18px;
+    border-radius: 5px;
     color: #fff;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
 }
+
 
 /* Clase para mostrar el modal */
 #embedded-chat-modal.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
     display: block;
 }
 
@@ -121,10 +135,22 @@
     padding: 5px;
 }
 
-/* EStilo del indicador de carga */
-.loading-indicator {
-    text-align: center;
-    color: #bbb;
-    font-size: 12px;
-    padding: 5px;
+@media (max-width: 768px) {
+    #embedded-chat-modal {
+        padding: 5px; /* Pequeño espacio interno para mejor apariencia en móviles */
+    }
+
+    .modal-footer, .modal-header {
+        padding: 4px 8px;  /* Espaciado menor en móvil */
+    }
+
+    .modal-title {
+        font-size: 16px;
+    }
+
+    #user-input, #send-btn {
+        padding: 4px 8px;
+        font-size: 12px;        
+    }
 }
+

@@ -93,14 +93,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     var userMessage = document.createElement('div');
                     userMessage.classList.add('chat-message', 'user-message');
                     userMessage.innerHTML = '<p>' + userMessageValue + '</p>';
-                    userMessage.style.background = '#0052cc';
-                    userMessage.style.color = 'white';
-                    userMessage.style.padding = '10px';
-                    userMessage.style.marginBottom = '10px';
-                    userMessage.style.borderRadius = '10px';
-                    userMessage.style.textAlign = 'right';
-                    userMessage.style.maxWidth = '75%';
-                    userMessage.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.15)'; 
                     chatBox.appendChild(userMessage);
                     userInput.value = ''; // Limpiar input
                     userInput.focus(); // mantener el foco en el campo de entrada
@@ -131,12 +123,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             var botMessage = document.createElement('div');
                             botMessage.classList.add('chat-message', 'bot-message');
                             botMessage.innerHTML = '<p>' + data.answer + '</p>';
-                            botMessage.style.background = '#e0e7ff';
-                            botMessage.style.padding = '10px';
-                            botMessage.style.marginBottom = '10px';
-                            botMessage.style.borderRadius = '10px';
-                            botMessage.style.maxWidth = '75%';
-                            botMessage.style.boxShadow = '0px 2px 5px rgba(0, 0, 0, 0.15)';
                             chatBox.appendChild(botMessage);
 
 
@@ -160,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Evento para enviar al presionar la tecla Enter
         userInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
+                e.preventDefault();  // Prevenir salto de línea
                 sendButton.click();
             }
         });
