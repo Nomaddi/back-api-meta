@@ -73,27 +73,37 @@
 
 /* Estilos compactos para las burbujas de mensajes */
 .chat-message {
-    margin: 4px 0; /* Espacio entre mensajes */
-    padding: 0; /* Sin padding para evitar aspecto de burbuja */
+    display: flex;
+    align-items: center;
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 15px;
+    max-width: 80%;
     font-size: 14px;
     line-height: 1.5;
-    max-width: 90%; /* Ancho máximo para que no ocupe toda la línea */
-    color: #333; /* Texto en color neutro */
     
+}
+
+.chat-message i {
+    margin-right: 8px;
+    font-size: 20px;
 }
 
 /* Mensajes del bot alineados a la izquierda */
 .chat-message.bot-message {
+    background-color: #f1f8e9; /* Fondo para el bot */
+    color: #33691e;
+    margin-right: auto; /* Alinea a la izquierda */
     text-align: left;
-    margin-right: auto; /* Empuja a la izquierda */
 }
 
 /* Mensajes del usuario alineados a la derecha */
 .chat-message.user-message {
+    background-color: #e0f7fa; /* Fondo para el usuario */
+    color: #00796b;
+    margin-left: auto; /* Alinea a la derecha */
     text-align: right;
-    margin-left: auto; /* Empuja a la derecha */
 }
-
 
 .modal-footer {
     padding: 4px 6px;
