@@ -63,9 +63,19 @@ document.addEventListener('DOMContentLoaded', function () {
     chatButton.addEventListener('click', function () {
         var modal = document.getElementById('embedded-chat-modal');
         if (modal) {
+            modal.style.display = 'block';
             modal.classList.add('show'); // Añade la clase 'show' que contiene la animación en CSS
         }        
     });
+
+    //funcion para cerrar el modal
+    window.closeChatModal = function () {
+        var modal = document.getElementById('embedded-chat-modal');
+        if (modal) {
+            modal.style.display = 'none';   // Oculta el modal
+            modal.classList.remove('show'); // Elimina la clase 'show' para reiniciar el estado
+        }
+    };
 
     // Enviar mensaje del usuario
     var sendButton = document.getElementById('send-btn');
