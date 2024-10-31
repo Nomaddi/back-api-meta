@@ -17,28 +17,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var { botId, botNombre } = getBotDataFromScript();
 
     if (!botId) {
-        console.error('Bot ID no encontrado en la URL del script');
+        console.warn('Bot ID no encontrado en la URL del script');
         return;
     }
 
-    // Crear el botón flotante de chat
     var chatButton = document.createElement('button');
+    chatButton.id = 'chat-button';  // Asigna un id al botón
     chatButton.innerHTML = `<span style="margin-right: 8px;">💬</span> Chat con ${botNombre || 'Asistente'}`;
-    Object.assign(chatButton.style, {
-        position: 'fixed',
-        bottom: '20px',
-        right: '20px',
-        backgroundImage: 'linear-gradient(to right, #6200ea, #3700b3)',  // Color morado
-        color: '#fff',
-        border: 'none',
-        borderRadius: '50px',
-        padding: '12px 25px',
-        boxShadow: '0px 4px 8px rgba(0,0,0,0.2)',
-        fontSize: '16px',  // Tamaño de fuente ajustado
-        cursor: 'pointer',
-        zIndex: '1000',
-        transition: 'transform 0.3s ease'
-    });
 
     chatButton.addEventListener('mouseenter', function () {
         chatButton.style.transform = 'scale(1.05)';
@@ -46,42 +31,28 @@ document.addEventListener('DOMContentLoaded', function () {
     chatButton.addEventListener('mouseleave', function () {
         chatButton.style.transform = 'scale(1)';
     });
-    
 
-    // Crear el botón flotante de chat
-    // var chatButton = document.createElement('button');
-    // chatButton.innerHTML = `Chat con ${botNombre || 'Asistente'}`;
-    // chatButton.style.position = 'fixed';
-    // chatButton.style.bottom = '20px';
-    // chatButton.style.right = '20px';
-    // chatButton.style.backgroundColor = '#007bff';
-    // chatButton.style.color = '#fff';
-    // chatButton.style.border = 'none';
-    // chatButton.style.borderRadius = '50px';
-    // chatButton.style.padding = '10px 20px';
-    // chatButton.style.boxShadow = '0px 2px 5px rgba(0,0,0,0.3)';
-    // chatButton.style.cursor = 'pointer';
-    // chatButton.style.zIndex = '1000';
+    
     document.body.appendChild(chatButton);
 
     // Crear el contenedor del modal con estilos personalizados
     var chatModal = document.createElement('div');
     chatModal.innerHTML = `
-        <div class="modal" id="embedded-chat-modal" style="position: fixed; bottom: 20px; right: 20px; width: 90vw; height: 80vh; max-width: 400px; background: #ffffff; border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,0.3); display: none; z-index: 1001;">
-            <div class="modal-header" style="padding: 16px; background-color: #0052cc; color: #fff; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; align-items: center; justify-content: space-between;">
-                <h5 class="modal-title" id="chatModalLabel" style="margin: 0; font-size: 18px;">Chat con ${botNombre || 'Asistente'}</h5>
-                <button type="button" class="close" style="background: none; border: none; color: white; font-size: 20px;" onclick="document.getElementById('embedded-chat-modal').style.display='none'">
+        <div class="modal" id="embedded-chat-modal"> 
+            <div class="modal-header"> 
+                <h5 class="modal-title" id="chatModalLabel">Chat con ${botNombre || 'Asistente'}</h5>
+                <button type="button" class="close" onclick="document.getElementById('embedded-chat-modal').style.display='none'">
                     <svg width="24" height="24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
             </div>
-            <div class="modal-body" style="padding: 15px; height: 360px; overflow-y: auto; background-color: #f7f9fc;" id="chat-box">
-                <div class="chat-message bot-message" style="background: #e0e7ff; padding: 12px; margin-bottom: 12px; border-radius: 10px; max-width: 75%; font-size: 14px;">
-                    <p style="margin: 0;">¡Hola! ¿Cómo puedo ayudarte hoy?</p>
+            <div class="modal-body" id="chat-box">
+                <div class="chat-message bot-message"> 
+                    <p>¡Hola! ¿Cómo puedo ayudarte hoy?</p>
                 </div>
             </div>
-            <div class="modal-footer" style="padding: 12px; background-color: #f1f1f1; display: flex; align-item: center;">
-                <input type="text" id="user-input" name="user-input" class="form-control" placeholder="Escribe un mensaje..." style="flex-grow: 1; border-radius: 8px; padding: 10px; font-size: 14px; border: 1px solid #ccc; " />
-                <button type="button" class="btn btn-primary" id="send-btn" style="margin-left: 8px; background-color: #0052cc; border: none; border-radius: 8px; padding: 10px 18px; color: #fff; font-size: 14px;">Enviar</button>
+            <div class="modal-footer">
+                <input type="text" id="user-input" name="user-input" class="form-control" placeholder="Escribe un mensaje..." /> 
+                <button type="button" class="btn btn-primary" id="send-btn">Enviar</button>
             </div>
         </div>
     `;
@@ -92,14 +63,8 @@ document.addEventListener('DOMContentLoaded', function () {
     chatButton.addEventListener('click', function () {
         var modal = document.getElementById('embedded-chat-modal');
         if (modal) {
-            modal.style.display = 'block';
-            setTimeout(() => {
-                modal.style.opacity = '1';
-                modal.style.transform = 'translateY(0)';
-            }, 50);
-        } else {
-            console.error('No se pudo encontrar el modal en el DOM.');
-        }
+            modal.classList.add('show'); // Añade la clase 'show' que contiene la animación en CSS
+        }        
     });
 
     // Enviar mensaje del usuario
@@ -133,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     var loadingIndicator = document.createElement('div');
                     loadingIndicator.classList.add('loading-indicator');
                     loadingIndicator.innerHTML = 'Escribiendo...';
-                    loadingIndicator.style = 'text-align: center; color: #bbb; font-size: 12px; padding: 5px;';
+                    chatBox.appendChild(loadingIndicator);
 
                     // Enviar mensaje al servidor
                     fetch('http://127.0.0.1:8000/admin/ask-bot-embedded', {

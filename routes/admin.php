@@ -192,3 +192,6 @@ Route::post('ask-bot', [BotIA::class, 'askBot']);
 
 Route::post('ask-bot-embedded', [BotIA::class, 'askBotForEmbed'])->middleware('cors.custom')->withoutMiddleware('auth');
 
+
+
+
