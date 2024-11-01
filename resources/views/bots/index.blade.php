@@ -336,7 +336,7 @@
                     $('#editModel').val(response.data.model);
                     $('#editTemperature').val(response.data.temperature);
                     $('#editTopP').val(response.data.topP);
-                    $('#editResponseFormat').val(response.data.responseFormat.type);
+                    $('#editResponseFormat').val(response.data.responseFormat);
                 },
                 error: function(request, status, error) {
                     Swal.fire(

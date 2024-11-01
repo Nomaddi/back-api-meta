@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bot;
 use OpenAI\Factory;
+use App\Models\Lead;
 use App\Models\User;
 use App\Models\Thread;
 use Illuminate\Http\Request;
@@ -48,11 +49,40 @@ class BotIA extends Controller
             // Llamar a la función ask para obtener la respuesta del bot
             $botResponse = $this->ask($question, $waId, $botId, $openai_key, $openai_org, $openai_assistant);
 
+
+
             return response()->json([
                 'answer' => $botResponse,  // Devolver la respuesta del bot en formato JSON
             ]);
         }
 
+    }
+
+
+
+    public function handleFunctionCall($functionName, $parameters, $botId)
+    {
+        try {
+            // Use firstOrCreate to avoid duplicate entry issues
+            Lead::firstOrCreate(
+                ['email' => $parameters['email']], // Unique field to check
+                [
+                    'nombre' => $parameters['nombre'],
+                    'telefono' => $parameters['telefono'],
+                    'bot_id' => $botId,
+                    'detalles' => 'Lead creado desde el chatbot',
+                    'estado' => 'nuevo',
+                ]
+            );
+
+            return 'tus datos han sido guardados correctamente';
+
+        } catch (\Illuminate\Database\QueryException $exception) {
+            \Log::error('Failed to create lead: ' . $exception->getMessage());
+            // Additional handling if needed, like returning a specific response
+        }
+
+        return 'Ha ocurrido un error al guardar tus datos';
     }
 
     public function ask($question, $waId, $botId, $openai_key, $openai_org, $openai_assistant)
@@ -80,14 +110,11 @@ class BotIA extends Controller
         }
 
         // Cargar la respuesta del hilo
-        $this->loadAnswer($threadRun, $openai_key, $openai_org, $openai_assistant);
+        $this->loadAnswer($threadRun, $openai_key, $openai_org, $openai_assistant, $botId);
 
         return $this->answer;
     }
 
-
-
-    // Método para crear y ejecutar un nuevo hilo
     // Método para crear y ejecutar un nuevo hilo
     private function createAndRunThread($openai_key, $openai_org, $openai_assistant)
     {
@@ -108,6 +135,7 @@ class BotIA extends Controller
                 ],
             ],
         ]);
+
     }
 
     // Método para continuar un hilo existente
@@ -119,7 +147,7 @@ class BotIA extends Controller
             ->withHttpHeader('OpenAI-Beta', 'assistants=v2')
             ->make();
 
-        $openAI->threads()->messages()->create(
+        $respuesta = $openAI->threads()->messages()->create(
             $threadId,
             [
                 'role' => 'user',
@@ -137,7 +165,7 @@ class BotIA extends Controller
 
 
     // Método para cargar la respuesta desde el hilo
-    private function loadAnswer($threadRun, $openai_key, $openai_org, $openai_assistant)
+    private function loadAnswer($threadRun, $openai_key, $openai_org, $openai_assistant, $botId)
     {
         $openAI = (new Factory())
             ->withApiKey($openai_key)
@@ -152,9 +180,50 @@ class BotIA extends Controller
             );
         }
 
-        if ($threadRun->status !== 'completed') {
+        if ($threadRun->status !== 'completed' && $threadRun->status !== 'requires_action') {
             $this->error = 'Request failed, please try again';
             return;
+        }
+
+        if (isset($threadRun->status) && $threadRun->status === 'requires_action') {
+            $tools_to_call = $threadRun->requiredAction->submitToolOutputs->toolCalls ?? [];
+            $tools_output_array = []; // Initialize outside the loop
+
+            foreach ($tools_to_call as $tool_call) {
+                if ($tool_call->function->name === 'create_lead') {
+                    $respuesta = $this->handleFunctionCall($tool_call->function->name, json_decode($tool_call->function->arguments, true), $botId);
+                    $tools_output_array = [
+                        'tool_outputs' => [
+                            [
+                                'tool_call_id' => $tool_call->id,  // Cambiado de 'tools_call_id' a 'tool_call_id'
+                                'output' => $respuesta,
+                            ],
+                        ]
+                    ];
+                }
+
+            }
+            // Submit all tool outputs at once after the loop
+            if (!empty($tools_output_array)) {
+                // Pasar como un objeto, no como un arreglo
+                $openAI->threads()->runs()->submitToolOutputs(
+                    $threadRun->threadId,
+                    $threadRun->id,
+                    $tools_output_array
+                );
+                while (in_array($threadRun->status, ['completed', 'failed', 'requires_action'])) {
+                    // Recupera el estado actual de la tarea
+                    $threadRun = $openAI->threads()->runs()->retrieve(
+                        $threadRun->threadId,
+                        $threadRun->id
+                    );
+                    // Espera 10 segundos antes de la próxima verificación
+                    sleep(5);
+                }
+
+                // Imprime el estado final después de que se complete el proceso
+                \Log::info("Estado final de la tarea: " . $threadRun->status);
+            }
         }
 
         $messageList = $openAI->threads()->messages()->list(
@@ -183,8 +252,6 @@ class BotIA extends Controller
 
             return response()->json(['answer' => $botResponse]);
         } catch (\Exception $e) {
-            // Registra el error para depuración
-            \Log::error('Error en askBotForEmbed: ' . $e->getMessage());
             return response()->json(['error' => 'Error interno en el servidor'], 500);
         }
     }

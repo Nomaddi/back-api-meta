@@ -177,7 +177,15 @@ Route::get('json', function () {
     // ]);
 
     // recuperar un asistente
-    $data= OpenAI::assistants()->retrieve('asst_hbfRFI397udQ4q5zBsgoQGAm');
+    $data= OpenAI::assistants()->retrieve('');
+    // $data = OpenAI::threads()->runs()->retrieve(
+    //     'thread_8wxAlo5zskcpcGHMJrUPF8JB',
+    //     'run_4RCYyYzX9m41WQicoJtUQAb8',
+    // );
+
+    // $data= OpenAI::threads()->messages()->list('thread_PfcaAuavmdFl1EZUEjldxeuV', [
+    //     'limit' => 20,
+    // ]);
 
     return response()->json([
         'success' => 'Bot recuperado con éxito.',
