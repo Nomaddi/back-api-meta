@@ -1,0 +1,169 @@
+:root {     /* Definición de variables CSS para personalización de colores, sombras y otros estilos */
+    --primary-color: #0052cc;
+    --secondary-color: #f4f6f8;
+    --bot-bg: #e0f7fa;
+    --user-bg: #f1f8e9;
+    --modal-bg: #ffffff;
+    --shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    --border-radius: 12px;
+    --font-family: Arial, sans-serif;
+    --font-size: 16px;
+    --text-color: #333;
+}
+
+* { /* Aplica el tamaño de caja "border-box" a todos los elementos, asegurando que el padding y border estén dentro del ancho y alto del elemento */
+    box-sizing: border-box;
+    font-family: var(--font-family);/* Aplica la fuente definida en la variable a todos los elementos */
+}
+
+/* Estilos compartidos para el botón de chat y el botón de envío */
+#chat-button, #send-btn {
+    background: var(--primary-color); /* Color de fondo primario */
+    color: #fff; /* Texto en blanco */
+    border: none; /* Sin borde */
+    border-radius: 50px; /* Borde redondeado */
+    cursor: pointer; /* Cursor tipo "pointer" al pasar sobre el botón */
+}
+
+#chat-button {
+    /* Posición fija en la esquina inferior derecha de la pantalla */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 12px 25px; /* Espaciado interno del botón */
+    font-size: var(--font-size); /* Tamaño de fuente definido */
+    z-index: 1000; /* Coloca el botón sobre otros elementos en el eje Z */
+}
+
+
+#embedded-chat-modal {
+    /* Modal de chat con posición fija en la esquina inferior derecha */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 90vw; /* Ancho de 90% de la ventana de visualización */
+    height: 50vh; /* Altura de 50% de la ventana de visualización */
+    max-width: 400px; /* Ancho máximo de 400px */
+    background: var(--modal-bg); /* Color de fondo del modal */
+    border-radius: var(--border-radius); /* Borde redondeado */
+    display: none; /* Oculto por defecto */
+    z-index: 1001; /* Coloca el modal sobre otros elementos, incluido el botón */
+}
+
+#embedded-chat-modal.show {
+    /* Al mostrar el modal, opacidad completa y sin desplazamiento ni escalado */
+    display: block;
+}
+
+/* Estilos para el encabezado y pie de página del modal */
+.modal-header, .modal-footer {
+    display: flex; /* Alinea el contenido en un contenedor flexible */
+    align-items: center; /* Centra los elementos verticalmente */
+    padding: 10px; /* Espaciado interno */
+    background: var(--primary-color); /* Color de fondo primario */
+    color: #fff; /* Texto en blanco */
+}
+
+.modal-header {
+    justify-content: space-between; /* Distribuye los elementos del encabezado */
+}
+
+.modal-body {
+    /* Área principal del chat que muestra los mensajes */
+    padding: 10px; /* Espaciado interno */
+    height: 360px; /* Altura fija del cuerpo del modal */
+    overflow-y: auto; /* Permite el desplazamiento vertical si el contenido supera la altura */
+    background: var(--secondary-color); /* Color de fondo secundario */
+}
+
+.modal-title, .close {
+    margin: 0; /* Sin márgenes */
+    font-size: var(--font-size); /* Tamaño de fuente principal */
+    color: inherit; /* Hereda el color del contenedor padre */
+}
+
+.close {
+    /* Estilos específicos para el botón de cierre */
+    background: none;
+    border: none;
+    cursor: pointer; /* Cambia el cursor a pointer para indicar clic */
+}
+
+/* Estilos generales para los mensajes del chat */
+.chat-message {
+    display: flex; /* Alinea los elementos de forma flexible */
+    align-items: center; /* Centra verticalmente el contenido */
+    margin: 8px 0; /* Espacio entre mensajes */
+    padding: 10px; /* Espaciado interno en cada mensaje */
+    border-radius: 10px; /* Borde redondeado */
+    max-width: 100%; /* Limita el ancho del mensaje al 80% del contenedor */
+    font-size: 14px; /* Tamaño de fuente del mensaje */
+}
+
+
+.chat-message.bot-message {
+    background: var(--bot-bg); /* Fondo para mensajes del bot */
+    color: #33691e; /* Color de texto para mensajes del bot */
+    margin-right: auto; /* Alinea a la izquierda */
+    max-width: 100%; /* Asegura que los mensajes no excedan el 80% del ancho */
+    word-wrap: break-word; /* Permite que el texto se ajuste en el ancho máximo */
+    overflow-wrap: break-word; /* Ajuste de palabras para evitar desbordamiento */
+}
+
+#chat-box {
+    overflow-wrap: break-word; /* Ajuste de palabras para todo el chat */
+}
+
+.bot-message-content {
+    max-width: 100%; /* Ajusta el ancho máximo del contenido dentro del mensaje del bot */
+    word-wrap: break-word; /* Permite que las palabras largas se dividan para evitar el desbordamiento */
+    overflow-wrap: break-word; /* Hace que las palabras muy largas se ajusten al ancho disponible */
+}
+
+
+
+.chat-message.user-message {
+    background: var(--user-bg); /* Fondo para mensajes del usuario */
+    color: #00796b; /* Color de texto para mensajes del usuario */
+    margin-left: auto; /* Alinea a la derecha */
+    flex-direction: row-reverse; /* Invierte el orden para poner el ícono a la derecha */
+}
+
+.chat-message i {
+    margin: 0 8px; /* Espaciado del ícono respecto al texto */
+    font-size: 20px; /* Tamaño de fuente para ícono */
+}
+
+
+#user-input {
+    /* Estilos para el campo de entrada de texto */
+    flex-grow: 1; /* Ocupa todo el espacio disponible en el pie de página */
+    padding: 5px 8px; /* Espaciado interno */
+    border: 1px solid #ccc; /* Borde gris */
+    border-radius: 5px; /* Borde redondeado */
+    outline: none; /* Sin contorno al enfocar */
+    font-size: 14px; /* Tamaño de fuente */
+    background: #f4f6f8; /* Color de fondo claro */
+}
+
+.loading-indicator {
+    /* Indicador de carga de texto */
+    text-align: center; /* Centra el texto */
+    color: #bbb; /* Color de texto gris claro */
+    font-size: 12px; /* Tamaño de fuente reducido */
+    padding: 5px; /* Espaciado interno */
+}
+
+/* Media query para dispositivos con ancho de 768px o menos */
+@media (max-width: 768px) {
+    #chat-button, #send-btn {
+        padding: 10px; /* Ajuste de espaciado para botones */
+        font-size: 14px; /* Ajuste de tamaño de fuente */
+    }
+    .modal-title {
+        font-size: 14px; /* Ajuste de tamaño de fuente para el título */
+    }
+    #user-input {
+        padding: 4px; /* Reducción de espaciado para el campo de entrada */
+    }
+}
