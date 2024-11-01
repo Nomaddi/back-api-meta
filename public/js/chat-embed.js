@@ -17,43 +17,33 @@ document.addEventListener('DOMContentLoaded', function () {
     var { botId, botNombre } = getBotDataFromScript();
 
     if (!botId) {
-        console.warn('Bot ID no encontrado en la URL del script');
+        console.error('Bot ID no encontrado en la URL del script');
         return;
     }
 
+   // Añadir clase al botón de chat
     var chatButton = document.createElement('button');
-    chatButton.id = 'chat-button';  // Asigna un id al botón
-    chatButton.innerHTML = `<span style="margin-right: 8px;">💬</span> Chat con ${botNombre || 'Asistente'}`;
-
-    chatButton.addEventListener('mouseenter', function () {
-        chatButton.style.transform = 'scale(1.05)';
-    });
-    chatButton.addEventListener('mouseleave', function () {
-        chatButton.style.transform = 'scale(1)';
-    });
-
-    
+    chatButton.classList.add('chat-button-style');
+    chatButton.innerHTML = `Chat con ${botNombre || 'Asistente'}`;
     document.body.appendChild(chatButton);
 
-    // Crear el contenedor del modal con estilos personalizados
+    // Añadir clases al modal y sus componentes
     var chatModal = document.createElement('div');
+
+    chatModal.classList.add('modal-style');
     chatModal.innerHTML = `
-        <div class="modal" id="embedded-chat-modal"> 
-            <div class="modal-header"> 
-                <h5 class="modal-title" id="chatModalLabel">Chat con ${botNombre || 'Asistente'}</h5>
-                <button type="button" class="close" onclick="document.getElementById('embedded-chat-modal').style.display='none'">
-                    <svg width="24" height="24" fill="white" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
+        <div class="modal-header modal-header-style">
+            <h5 class="modal-title">Chat con ${botNombre || 'Asistente'}</h5>
+            <button type="button" class="close" onclick="document.getElementById('embedded-chat-modal').style.display='none'">✖️</button>
+        </div>
+        <div class="modal-body modal-body-style" id="chat-box">
+            <div class="chat-message bot-message"> 
+                <p>¡Hola! ¿Cómo puedo ayudarte hoy?</p>
             </div>
-            <div class="modal-body" id="chat-box">
-                <div class="chat-message bot-message"> 
-                    <p>¡Hola! ¿Cómo puedo ayudarte hoy?</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <input type="text" id="user-input" name="user-input" class="form-control" placeholder="Escribe un mensaje..." /> 
-                <button type="button" class="btn btn-primary" id="send-btn">Enviar</button>
-            </div>
+        </div>
+        <div class="modal-footer modal-footer-style">
+            <input type="text" id="user-input" placeholder="Escribe un mensaje...">
+            <button type="button" id="send-btn">Enviar</button>
         </div>
     `;
 
@@ -64,27 +54,17 @@ document.addEventListener('DOMContentLoaded', function () {
         var modal = document.getElementById('embedded-chat-modal');
         if (modal) {
             modal.style.display = 'block';
-            modal.classList.add('show'); // Añade la clase 'show' que contiene la animación en CSS
-        }        
-    });
-
-    //funcion para cerrar el modal
-    window.closeChatModal = function () {
-        var modal = document.getElementById('embedded-chat-modal');
-        if (modal) {
-            modal.style.display = 'none';   // Oculta el modal
-            modal.classList.remove('show'); // Elimina la clase 'show' para reiniciar el estado
+        } else {
+            console.error('No se pudo encontrar el modal en el DOM.');
         }
-    };
+    });
 
     // Enviar mensaje del usuario
     var sendButton = document.getElementById('send-btn');
-    var userInput = document.getElementById('user-input'); // Define userInput aquí
-
-    if (sendButton && userInput) {
-        // Evento para enviar al hacer click en el boton de envio
+    if (sendButton) {
         sendButton.addEventListener('click', function () {
-            if (userInput.value.trim()) {
+            var userInput = document.getElementById('user-input');
+            if (userInput && userInput.value.trim()) {
                 var chatBox = document.getElementById('chat-box');
                 if (chatBox) {
                     var userMessageValue = userInput.value.trim();
@@ -92,16 +72,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Añadir el mensaje del usuario al chat
                     var userMessage = document.createElement('div');
                     userMessage.classList.add('chat-message', 'user-message');
-                    userMessage.innerHTML = `<i class="fas fa-user" style="margin-right: 8px;"></i><p>${userMessageValue}</p>`;
+                    userMessage.innerHTML = '<p>' + userMessageValue + '</p>';
+                    userMessage.style.background = '#007bff';
+                    userMessage.style.color = 'white';
+                    userMessage.style.padding = '10px';
+                    userMessage.style.marginBottom = '10px';
+                    userMessage.style.borderRadius = '20px 20px 0px 20px';
+                    userMessage.style.textAlign = 'right';
+                    userMessage.style.maxWidth = '80%';
                     chatBox.appendChild(userMessage);
                     userInput.value = ''; // Limpiar input
-                    userInput.focus(); // mantener el foco en el campo de entrada
-
-                    // Crear el indicador de carga
-                    var loadingIndicator = document.createElement('div');
-                    loadingIndicator.classList.add('loading-indicator');
-                    loadingIndicator.innerHTML = 'Escribiendo...';
-                    chatBox.appendChild(loadingIndicator);
 
                     // Enviar mensaje al servidor
                     fetch('http://127.0.0.1:8000/admin/ask-bot-embedded', {
@@ -116,24 +96,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .then(response => response.json())
                     .then(data => {
-                        // Eliminar el indicador de carga después de recibir la respuesta
-                        chatBox.removeChild(loadingIndicator);
-
                         if (data.answer) {
                             var botMessage = document.createElement('div');
                             botMessage.classList.add('chat-message', 'bot-message');
-                            botMessage.innerHTML = `<i class="fas fa-robot" style="margin-right: 8px;"></i><p>${data.answer}</p>`;
+                            botMessage.innerHTML = '<p>' + data.answer + '</p>';
+                            botMessage.style.background = '#e9ecef';
+                            botMessage.style.padding = '10px';
+                            botMessage.style.marginBottom = '10px';
+                            botMessage.style.borderRadius = '20px 20px 20px 0px';
+                            botMessage.style.maxWidth = '80%';
                             chatBox.appendChild(botMessage);
-                            chatBox.scrollTop = chatBox.scrollHeight;
-
 
                             // Desplazar hacia abajo para mostrar el mensaje más reciente
                             chatBox.scrollTop = chatBox.scrollHeight;
                         }
                     })
                     .catch(error => {
-                        // Manejo de errores: eliminar el indicador de carga y loguear el error
-                        chatBox.removeChild(loadingIndicator);
                         console.error('Error al enviar la solicitud:', error);
                     });
                 } else {
@@ -143,15 +121,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Input de usuario no encontrado o está vacío.');
             }
         });
-
-        // Evento para enviar al presionar la tecla Enter
-        userInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();  // Prevenir salto de línea
-                sendButton.click();
-            }
-        });
-
     } else {
         console.error('No se pudo encontrar el botón de envío en el DOM.');
     }
