@@ -67,10 +67,11 @@ class BotIA extends Controller
             Lead::firstOrCreate(
                 ['email' => $parameters['email']], // Unique field to check
                 [
+                    'bot_id' => $botId,
                     'nombre' => $parameters['nombre'],
                     'telefono' => $parameters['telefono'],
-                    'bot_id' => $botId,
-                    'detalles' => 'Lead creado desde el chatbot',
+                    'detalles' => $parameters['detalles'],
+                    'calificacion' => $parameters['calificacion'],
                     'estado' => 'nuevo',
                 ]
             );

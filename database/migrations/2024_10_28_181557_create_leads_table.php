@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('leads', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('bot_id')->constrained()->onDelete('cascade'); // Relaciona con la tabla de Bots
             $table->string('nombre');
             $table->string('email')->unique();
             $table->string('telefono')->nullable();
-            $table->foreignId('bot_id')->constrained()->onDelete('cascade'); // Relaciona con la tabla de Bots
-            $table->timestamp('fecha_creacion')->default(now());
             $table->json('detalles')->nullable(); // Información adicional
+            // calificación del lead
+            $table->enum('calificacion', ['caliente', 'tibio', 'frio'])->default('frio');
             $table->string('estado')->default('nuevo'); // Estado del lead
             $table->timestamps();
         });
