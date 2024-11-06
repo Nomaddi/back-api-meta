@@ -88,13 +88,13 @@ class SendMessage implements ShouldQueue
                     $wam->wam_id = $fbtrace_id;
                     $wam->phone_id = $this->phone_id;
                     $wam->status = 'failed';
-                    $wam->caption = '';
+                    $wam->caption = $errorJsonString;
                     $wam->data = serialize($this->messageData);
                     $wam->distintivo = $this->distintivo;
                     $wam->code = $errorCode;
                     $wam->save();
-                    
-                    Log::error("Error al enviar el mensaje: " . $errorJsonString);
+
+                    Log::info("Error al enviar el mensaje: " . $errorJsonString);
 
                 } else {
                     // Manejo de error si la respuesta no contiene el formato esperado o la decodificación falló
