@@ -93,6 +93,8 @@ class SendMessage implements ShouldQueue
                     $wam->distintivo = $this->distintivo;
                     $wam->code = $errorCode;
                     $wam->save();
+                    
+                    Log::error("Error al enviar el mensaje: " . $errorJsonString);
 
                 } else {
                     // Manejo de error si la respuesta no contiene el formato esperado o la decodificación falló
