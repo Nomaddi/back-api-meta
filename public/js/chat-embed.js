@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Agregar una hoja de estilos externa al DOM
     var link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'http://127.0.0.1:8000/css/chat-embed.css'; // Cambia 'ruta/a/tu/archivo/styles.css' por la ruta de tu archivo CSS
+    // link.href = 'http://127.0.0.1:8000/css/chat-embed.css'; // Cambia 'ruta/a/tu/archivo/styles.css' por la ruta de tu archivo CSS
+    link.href = 'https://maddigo.com.co/css/chat-embed.css'; //produccion
     document.head.appendChild(link);
 
     var link = document.createElement('link');
@@ -14,6 +15,25 @@ document.addEventListener('DOMContentLoaded', function () {
     var script = document.createElement('script');
     script.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
     document.head.appendChild(script);
+
+    // Función para generar un UUID
+    function generateUUID() {
+        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    }
+
+    // Obtener o crear el UUID del usuario
+    function getUserIdentifier() {
+        let userId = localStorage.getItem('userIdentifier');
+        if (!userId) {
+            userId = generateUUID();
+            localStorage.setItem('userIdentifier', userId);
+        }
+        return userId;
+    }
+
+    const userIdentifier = getUserIdentifier(); // Obtén el identificador del usuario
 
     function getBotDataFromScript() {
         var scripts = document.getElementsByTagName('script');
@@ -109,14 +129,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     userInput.value = ''; // Limpiar input
 
                     // Enviar mensaje al servidor
-                    fetch('http://127.0.0.1:8000/admin/ask-bot-embedded', {
+                    // local
+                    // fetch('http://127.0.0.1:8000/admin/ask-bot-embedded', {
+                    // producción
+                    fetch('https://maddigo.com.co/admin/ask-bot-embedded', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
                             question: userMessageValue,
-                            botId: botId
+                            botId: botId,
+                            userIdentifier: userIdentifier
                         })
                     })
                         .then(response => response.json())

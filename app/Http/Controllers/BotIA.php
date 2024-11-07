@@ -242,20 +242,16 @@ class BotIA extends Controller
                 // obtener el bot desde la base de datos
                 $bot = Bot::find($botId);
                 $question = $request->input('question');
-                $waId = 3105326598;  // Obtener el waId del usuario autenticado
+                $waId = $request->input('userIdentifier');  // Obtener el waId del usuario autenticado
                 $openai_key = $bot->openai_key;  // Usar el API Key desde el .env
                 $openai_org = $bot->openai_org;  // Usar la organización desde el .env
                 $openai_assistant = $bot->openai_assistant;  // Usar el assistant ID desde el .env
                 // Lógica para procesar la solicitud y obtener la respuesta del bot
                 $botResponse = $this->ask($question, $waId, $botId, $openai_key, $openai_org, $openai_assistant);
             }
-
-
             return response()->json(['answer' => $botResponse]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error interno en el servidor'], 500);
         }
     }
-
-
 }
