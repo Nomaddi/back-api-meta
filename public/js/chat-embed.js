@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Crear el botón flotante de chat
     var chatButton = document.createElement('button');
     chatButton.className = 'chat-embed-button';
-    chatButton.innerHTML = `Chat con ${botNombre || 'Asistente'}`;
+    chatButton.innerHTML = `Preguntale a ${botNombre || 'Asistente'}`;
     document.body.appendChild(chatButton);
 
     // Crear el contenedor principal para el chat
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
     chatEmbedContainer.innerHTML = `
         <div class="chat-embed-modal" id="embedded-chat-modal" style="display: none;">
             <div class="chat-embed-modal-header">
-                <h5 class="chat-embed-modal-title" id="chatModalLabel">Chat con ${botNombre || 'Asistente'}</h5>
+                <h5 class="chat-embed-modal-title" id="chatModalLabel">  ${botNombre || 'Asistente'}</h5>
                 <button type="button" class="chat-embed-close" onclick="document.getElementById('embedded-chat-modal').style.display='none'">&times;</button>
             </div>
             <div class="chat-embed-modal-body" id="chat-box">
