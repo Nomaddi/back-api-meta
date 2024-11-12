@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var link = document.createElement('link');
     link.rel = 'stylesheet';
     // local
-    link.href = 'http://127.0.0.1:8000/css/chat-embed.css'; // producción
-    // link.href = 'https://maddigo.com.co/css/chat-embed.css'; // producción
+    // link.href = 'http://127.0.0.1:8000/css/chat-embed.css';
+    link.href = 'https://maddigo.com.co/css/chat-embed.css'; // producción
     document.head.appendChild(link);
 
     var faLink = document.createElement('link');
@@ -116,8 +116,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     userInput.value = ''; // Limpiar input
 
                     // Enviar mensaje al servidor
-                    fetch('http://127.0.0.1:8000/admin/ask-bot-embedded', {
-                    // fetch('https://maddigo.com.co/admin/ask-bot-embedded', {
+                    // fetch('http://127.0.0.1:8000/admin/ask-bot-embedded', {
+                    fetch('https://maddigo.com.co/admin/ask-bot-embedded', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
