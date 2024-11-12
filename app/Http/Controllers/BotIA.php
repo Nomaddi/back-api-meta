@@ -254,4 +254,30 @@ class BotIA extends Controller
             return response()->json(['error' => 'Error interno en el servidor'], 500);
         }
     }
+    // delete thread
+    public function deleteThread(Request $request)
+    {
+        $bot_id = $request->input('id');
+        // obtener el bot con el id
+        $bot = Bot::find($bot_id);
+        // obtener el usuario autenticado
+        $user = Auth::user();
+        // validar que en thread exista un registro con el wa_id del usuario y el bot_id
+        $thread = Thread::where('wa_id', $user->phone)
+            ->where('bot_id', $bot_id)
+            ->first();
+        if (!$thread) {
+            return response()->json(['message' => 'No existe un hilo asociado aun']);
+        }
+
+        $openAI = (new Factory())
+            ->withApiKey($bot->openai_key)
+            ->withOrganization($bot->openai_org)
+            ->withHttpHeader('OpenAI-Beta', 'assistants=v2')
+            ->make();
+        $openAI->threads()->delete($thread->thread_id);
+        // eliminar de la base de datos
+        $thread->delete();
+        return response()->json(['message' => 'Hilo eliminado con éxito']);
+    }
 }

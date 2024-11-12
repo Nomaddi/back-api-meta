@@ -395,6 +395,11 @@ return [
                     'text'  => 'Bots',
                     'route' => 'bots.index',
                     'icon'  => 'fas fa-fw fa-robot',
+                ],
+                [
+                    'text'  => 'Leads',
+                    'route' => 'leads',
+                    'icon'  => 'fas fa-fw fa-headset',
                 ]
             ],
         ],

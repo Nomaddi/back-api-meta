@@ -33,4 +33,9 @@ class Bot extends Model
         // Relación muchos a muchos con las aplicaciones, usando la tabla pivote
         return $this->belongsToMany(Aplicaciones::class, 'aplicacion_bot', 'bot_id', 'aplicacion_id')->withTimestamps();
     }
+
+    public function leads()
+    {
+        return $this->hasMany(Lead::class);
+    }
 }

@@ -186,8 +186,8 @@
         // Eliminar bot
         $('#botsTable').on('click', '.deleteBot', function() {
             var botId = $(this).data('botid');
-            var row = $(this).parents('tr');
 
+            // Primer cuadro de diálogo de confirmación
             Swal.fire({
                 title: '¿Estás seguro?',
                 text: "No podrás revertir esto!",
@@ -199,35 +199,62 @@
                 cancelButtonText: 'No, cancelar!',
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: 'bots/' + botId,
-                        type: 'POST',
-                        data: {
-                            _method: 'DELETE',
-                            _token: $('meta[name="csrf-token"]').attr('content')
+                    // Segundo cuadro de diálogo para seleccionar dónde eliminar
+                    Swal.fire({
+                        title: '¿Dónde deseas eliminar el bot?',
+                        icon: 'question',
+                        input: 'radio',
+                        inputOptions: {
+                            'database': 'Solo en la base de datos',
+                            'both': 'Base de datos y OpenAI'
                         },
-                        success: function(result) {
-                            Swal.fire(
-                                'Eliminado!',
-                                'El bot ha sido eliminado.',
-                                'success'
-                            );
-                            // recargar pagina
-                            location.reload();
+                        inputValidator: (value) => {
+                            if (!value) {
+                                return 'Debes seleccionar una opción'
+                            }
                         },
-                        error: function(request, status, error) {
-                            var errorMessage = request.responseJSON?.error ||
-                                'No se pudo eliminar el bot.';
-                            Swal.fire(
-                                'Error!',
-                                errorMessage,
-                                'error'
-                            );
+                        showCancelButton: true,
+                        confirmButtonText: 'Eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((choice) => {
+                        if (choice.isConfirmed) {
+                            // Opciones de eliminación seleccionadas
+                            var deleteOption = choice.value;
+
+                            // Realizar la solicitud AJAX
+                            $.ajax({
+                                url: 'bots/' + botId,
+                                type: 'POST',
+                                data: {
+                                    _method: 'DELETE',
+                                    _token: $('meta[name="csrf-token"]').attr('content'),
+                                    deleteOption: deleteOption
+                                },
+                                success: function(result) {
+                                    Swal.fire(
+                                        'Eliminado!',
+                                        'El bot ha sido eliminado.',
+                                        'success'
+                                    );
+                                    // Recargar la página
+                                    location.reload();
+                                },
+                                error: function(request, status, error) {
+                                    var errorMessage = request.responseJSON?.error ||
+                                        'No se pudo eliminar el bot.';
+                                    Swal.fire(
+                                        'Error!',
+                                        errorMessage,
+                                        'error'
+                                    );
+                                }
+                            });
                         }
                     });
                 }
             });
         });
+
         // crear bot
         $('#importForm').submit(function(e) {
             e.preventDefault();
@@ -454,6 +481,8 @@
                     chatBox.append(
                         '<div class="chat-message user-message"><p>' + userInput + '</p></div>'
                     );
+                    chatBox.scrollTop(chatBox[0]
+                        .scrollHeight); // Desplazarse hacia el último mensaje
                     $('#user-input-' + botId).val(''); // Limpiar el input
 
                     // Enviar pregunta al servidor usando AJAX
@@ -512,5 +541,55 @@
                 alert("Error al copiar el código: " + err);
             });
         }
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            // Capturar el clic en el botón "Limpiar chat"
+            $('.modal-header').on('click', '.clear-chat', function() {
+                var botId = $(this).data('bot-id');
+
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: "Esto eliminará todo el hilo de conversación.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sí, limpiar chat!',
+                    cancelButtonText: 'No, cancelar!',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: "{{ route('deleteThread') }}",
+                            type: 'DELETE',
+                            data: {
+                                _token: $('meta[name="csrf-token"]').attr('content'),
+                                id: botId
+                            },
+                            success: function(response) {
+                                Swal.fire(
+                                    'Limpio!',
+                                    response.message,
+                                    'success'
+                                );
+                                // Limpia el contenido del chat en la interfaz
+                                $('#chat-box-' + botId).empty().append(
+                                    '<div class="chat-message bot-message"><p>¡Hola! ¿Cómo puedo ayudarte hoy?</p></div>'
+                                );
+                            },
+                            error: function(xhr, status, error) {
+                                Swal.fire(
+                                    'Error!',
+                                    xhr.responseJSON?.message ||
+                                    'No se pudo eliminar el hilo de conversación.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+        });
     </script>
 @stop

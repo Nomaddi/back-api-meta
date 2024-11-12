@@ -45,8 +45,7 @@
                             <!-- Lista desplegable para seleccionar la aplicación -->
                             <div class="form-group">
                                 <label for="editAplicacionId">Aplicación Asociada</label>
-                                <select class="form-control form-control-sm" id="editAplicacionId" name="aplicacion_id"
-                                    required>
+                                <select class="form-control form-control-sm" id="editAplicacionId" name="aplicacion_id">
                                     <option value="">Selecciona una aplicación</option>
                                     @foreach ($aplicaciones as $aplicacion)
                                         <option value="{{ $aplicacion->id }}">{{ $aplicacion->nombre }}</option>

@@ -1,19 +1,21 @@
 <?php
 
 use App\Models\Reporte;
+use App\Http\Controllers\BotIA;
 use Illuminate\Support\Facades\DB;
 use OpenAI\Laravel\Facades\OpenAI;
-use Illuminate\Support\Facades\Route;
 // use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BotController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EnvioController;
+use App\Http\Controllers\LeadsController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\ClocalController;
+
 use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\MessageController;
-
 use App\Http\Controllers\NumerosController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\ContactoController;
@@ -22,7 +24,6 @@ use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
 use App\Http\Controllers\ProgramadosControllers;
-use App\Http\Controllers\BotIA;
 
 Route::resource(
     'aplicaciones',
@@ -164,6 +165,10 @@ Route::resource(
     BotController::class,
 )->names('bots')->middleware('auth');
 
+// ruta de bot, bots.leads
+Route::get('leads', [LeadsController::class, 'index'])->name('leads');
+Route::post('update-status', [LeadsController::class, 'updateStatus'])->name('update.status');
+
 // crear ruta para crear bot bots.crear.index
 Route::post('bots/crear', [BotController::class, 'createBot'])->name('bots.store.asistente');
 
@@ -200,3 +205,5 @@ Route::post('ask-bot', [BotIA::class, 'askBot']);
 
 Route::post('ask-bot-embedded', [BotIA::class, 'askBotForEmbed'])->middleware('cors.custom')->withoutMiddleware('auth');
 
+// borrar hilo deleteThread
+Route::delete('delete-thread', [BotIA::class, 'deleteThread'])->name('deleteThread');

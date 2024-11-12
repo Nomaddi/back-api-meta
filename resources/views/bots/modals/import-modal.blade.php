@@ -32,7 +32,7 @@
                     </div>
                     <div class="form-group">
                         <label for="aplicacion_id">Aplicación</label>
-                        <select class="form-control" id="aplicacion_id" name="aplicacion_id" required>
+                        <select class="form-control" id="aplicacion_id" name="aplicacion_id">
                             <option value="">Selecciona una aplicación</option>
                             @foreach ($aplicaciones as $aplicacion)
                                 <option value="{{ $aplicacion->id }}">{{ $aplicacion->nombre }}</option>

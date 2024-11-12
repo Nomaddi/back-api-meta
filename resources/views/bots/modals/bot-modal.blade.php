@@ -1,12 +1,14 @@
 <div class="modal fade" id="modal-bot-{{ $bot->id }}" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Chat con Asistente</h5>
+                <button type="button" class="btn btn-secondary btn-sm mr-2 clear-chat" style="margin-left: auto;" data-bot-id="{{ $bot->id }}">Limpiar chat</button>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
-            </div>
+            </div>   
             <div class="modal-body">
                 <div class="chat-box" id="chat-box-{{ $bot->id }}">
                     <div class="chat-message bot-message">
