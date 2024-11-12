@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://maddigo.com.co/js/chat-embed.js?botId=9&botNombre=Maddigo"></script>
+    {{-- <script src="http://127.0.0.1:8000/js/chat-embed.js?botId=20&botNombre=Dina"></script> --}}
 
 </head>
 

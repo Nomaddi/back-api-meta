@@ -134,6 +134,7 @@
     background: var(--chat-modal-bg);
     border-bottom-left-radius: var(--chat-border-radius);
     border-bottom-right-radius: var(--chat-border-radius);
+    transform: translateY(-10px);
 }
 
 /* Estilos específicos para el input de texto */
