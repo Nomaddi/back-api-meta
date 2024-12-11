@@ -32,7 +32,7 @@ class CorsMiddleware
 
         // Añadimos los encabezados CORS a la respuesta
         foreach ($headers as $key => $value) {
-            $response->header($key, $value);
+            $response->headers->set($key, $value);
         }
 
         return $response;
