@@ -99,7 +99,8 @@
     <script src="//cdn.datatables.net/responsive/2.2.1/js/responsive.bootstrap4.min.js"></script>
     <script>
         var table = $('#leasdTable').DataTable({
-            responsive: true
+            responsive: true,
+            order: [[0, 'desc']],
         });
     </script>
     <script>
@@ -121,47 +122,43 @@
         });
     </script>
     <script>
-        $(document).ready(function() {
-            $('.status-select').change(function() {
-                var estado = $(this).val();
-                var id = $(this).data('id');
-                var statusUrl = "{{ route('update.status') }}";
+        $(document).on('change', '.status-select', function() {
+            var estado = $(this).val();
+            var id = $(this).data('id');
+            var statusUrl = "{{ route('update.status') }}";
 
-                $.ajax({
-                    url: statusUrl,
-                    type: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        id: id,
-                        estado: estado
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // Actualizar el color del select después de la actualización exitosa
-                            updateSelectColor(document.querySelector(`[data-id="${id}"]`));
-
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Estado actualizado',
-                                text: response.message,
-                                timer: 1500
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: response.message
-                            });
-                        }
-                    },
-                    error: function(xhr, status, error) {
+            $.ajax({
+                url: statusUrl,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    id: id,
+                    estado: estado
+                },
+                success: function(response) {
+                    if (response.success) {
+                        updateSelectColor(document.querySelector(`[data-id="${id}"]`));
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Estado actualizado',
+                            text: response.message,
+                            timer: 1500
+                        });
+                    } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: 'Ocurrió un error al actualizar el estado.'
+                            text: response.message
                         });
                     }
-                });
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Ocurrió un error al actualizar el estado.'
+                    });
+                }
             });
         });
     </script>
