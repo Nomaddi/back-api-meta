@@ -41,3 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/statistics', [MessageController::class, 'getStatistics']);
 });
 
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok'], 200);
+});
+
