@@ -5,7 +5,7 @@
     "keywords": ["framework", "laravel"],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0",
+        "php": "^8.2",
         "arcanedev/log-viewer": "^10.1",
         "aws/aws-sdk-php": "^3.322",
         "doctrine/dbal": "^3.9",
