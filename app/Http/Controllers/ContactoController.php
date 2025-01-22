@@ -23,14 +23,15 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class ContactoController extends Controller
 {
     public function index(Request $request)
-    {
+{
+    try {
         $user = Auth::user();
         $customFields = $user->customFields;
-        if ($request->ajax()) {
 
+        if ($request->ajax()) {
             $data = $user->contactos()->with([
                 'tags' => function ($query) use ($user) {
-                    $query->where('user_id', $user->id);  // Filtrar los tags por el usuario actual
+                    $query->where('user_id', $user->id);
                 }
             ])->get();
 
@@ -50,10 +51,15 @@ class ContactoController extends Controller
                 ->make(true);
         }
 
-        // Solo tags asociados al usuario
         $tags = $user->tags()->get();
         return view('contactos.index', compact(['tags', 'customFields']));
+
+    } catch (Exception $e) {
+        Log::error('Error en el controlador Contactos: ' . $e->getMessage());
+        return response()->json(['error' => 'Ocurrió un error inesperado.'], 500);
     }
+}
+
 
 
 
