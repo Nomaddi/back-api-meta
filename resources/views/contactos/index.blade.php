@@ -58,8 +58,14 @@
         $(document).ready(function() {
             $('#contactosTable').DataTable({
                 processing: true,
-                serverSide: true, // Aquí se habilita la paginación y búsqueda del lado del servidor
-                ajax: '{{ route('contactos.index') }}',
+                serverSide: true,
+                ajax: {
+                    url: '{{ route('contactos.index') }}',
+                    type: 'GET',
+                    error: function(xhr) {
+                        console.error('Error en DataTables:', xhr.responseText);
+                    }
+                },
                 columns: [{
                         data: 'id'
                     },
@@ -81,6 +87,7 @@
                     },
                 ]
             });
+
         });
 
         $(document).on('click', '.edit', function(event) {
