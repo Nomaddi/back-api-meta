@@ -23,42 +23,75 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class ContactoController extends Controller
 {
     public function index(Request $request)
-{
-    try {
-        $user = Auth::user();
-        $customFields = $user->customFields;
+    {
+        try {
+            // Validar si el usuario está autenticado
+            $user = Auth::user();
+            if (!$user) {
+                Log::error('Usuario no autenticado intentando acceder a contactos.');
+                return response()->json(['error' => 'Usuario no autenticado.'], 401);
+            }
 
-        if ($request->ajax()) {
-            $data = $user->contactos()->with([
-                'tags' => function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
+            // Obtener campos personalizados
+            $customFields = $user->customFields;
+
+            // Procesar solicitud Ajax
+            if ($request->ajax()) {
+                // Depuración inicial: Validar datos básicos del usuario
+                Log::info('Usuario autenticado:', ['id' => $user->id, 'email' => $user->email]);
+
+                // Obtener contactos con las etiquetas del usuario actual
+                $data = $user->contactos()->with([
+                    'tags' => function ($query) use ($user) {
+                        $query->where('user_id', $user->id);
+                    }
+                ])->get();
+
+                // Depuración: Validar datos obtenidos
+                if ($data->isEmpty()) {
+                    Log::warning('El usuario no tiene contactos asociados.');
+                } else {
+                    Log::info('Contactos obtenidos:', ['count' => $data->count()]);
                 }
-            ])->get();
 
-            return DataTables::of($data)
-                ->addIndexColumn()
-                ->addColumn('tags', function ($contacto) {
-                    return $contacto->tags->map(function ($tag) {
-                        return '<span style="background-color: ' . $tag->color . '; padding: 5px; border-radius: 4px;">' . $tag->nombre . '</span>';
-                    })->implode(' ');
-                })
-                ->addColumn('action', function ($data) {
-                    $button = '<button type="button" name="edit" id="' . $data->id . '" class="edit btn btn-primary btn-sm" style="margin-right: 8px;"> <i class="fa fa-edit"></i></button>';
-                    $button .= '<button type="button" name="delete" id="' . $data->id . '" class="delete btn btn-danger btn-sm"> <i class="fa fa-trash"></i></button>';
-                    return $button;
-                })
-                ->rawColumns(['tags', 'action'])
-                ->make(true);
+                // Retornar datos en formato DataTables
+                return DataTables::of($data)
+                    ->addIndexColumn()
+                    ->addColumn('tags', function ($contacto) {
+                        return $contacto->tags->map(function ($tag) {
+                            return '<span style="background-color: ' . e($tag->color) . '; padding: 5px; border-radius: 4px;">' . e($tag->nombre) . '</span>';
+                        })->implode(' ');
+                    })
+                    ->addColumn('action', function ($data) {
+                        $button = '<button type="button" name="edit" id="' . e($data->id) . '" class="edit btn btn-primary btn-sm" style="margin-right: 8px;"> <i class="fa fa-edit"></i></button>';
+                        $button .= '<button type="button" name="delete" id="' . e($data->id) . '" class="delete btn btn-danger btn-sm"> <i class="fa fa-trash"></i></button>';
+                        return $button;
+                    })
+                    ->rawColumns(['tags', 'action'])
+                    ->make(true);
+            }
+
+            // Obtener etiquetas asociadas al usuario
+            $tags = $user->tags()->get();
+
+            // Depuración: Validar si las etiquetas están disponibles
+            if ($tags->isEmpty()) {
+                Log::warning('El usuario no tiene etiquetas asociadas.');
+            }
+
+            // Retornar vista
+            return view('contactos.index', compact(['tags', 'customFields']));
+        } catch (Exception $e) {
+            // Registrar el error y retornar respuesta genérica
+            Log::error('Error en el controlador Contactos:', [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Ocurrió un error inesperado.'], 500);
         }
-
-        $tags = $user->tags()->get();
-        return view('contactos.index', compact(['tags', 'customFields']));
-
-    } catch (Exception $e) {
-        Log::error('Error en el controlador Contactos: ' . $e->getMessage());
-        return response()->json(['error' => 'Ocurrió un error inesperado.'], 500);
     }
-}
 
 
 
