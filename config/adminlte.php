@@ -310,114 +310,124 @@ return [
             'can' => 'manage-blog',
         ],
         [
-            'text' => 'WhatsApp',
-            'icon' => 'fab fa-fw fa-whatsapp',
+            'text' => 'Gestión WhatsApp',
+            'icon' => 'fas fa-fw fa-layer-group',
             'submenu' => [
                 [
-                    'text'  => 'Chats',
-                    'route' => 'admin.chat',
-                    'can'   => 'admin.chat',
-                    'icon'  => 'fab fa-fw fa-whatsapp',
+                    'text' => 'WhatsApp',
+                    'icon' => 'fab fa-fw fa-whatsapp',
+                    'submenu' => [
+                        [
+                            'text' => 'Chats',
+                            'route' => 'admin.chat',
+                            'can' => 'admin.chat',
+                            'icon' => 'fab fa-fw fa-whatsapp',
+                        ],
+                        [
+                            'text' => 'Plantillas',
+                            'route' => 'plantillas',
+                            'can' => 'plantillas',
+                            'icon' => 'fas fa-fw fa-file-invoice',
+                        ],
+                        [
+                            'text' => 'Programados',
+                            'route' => 'programados',
+                            'can' => 'programados',
+                            'icon' => 'fas fa-fw fa-clock',
+                        ],
+                    ],
+                ],
+
+                // Contratación Local Section
+                [
+                    'text' => 'Contratación Local',
+                    'icon' => 'fas fa-fw fa-check',
+                    'submenu' => [
+                        [
+                            'text' => 'Solicitudes',
+                            'route' => 'solicitudes',
+                            'can' => 'solicitudes',
+                            'icon' => 'fab fa-fw fa-readme',
+                        ],
+                    ],
+                ],
+                // Contactos Section
+                [
+                    'text' => 'Contactos',
+                    'icon' => 'fas fa-fw fa-user',
+                    'submenu' => [
+                        [
+                            'text' => 'Agenda',
+                            'route' => 'contactos.index',
+                            'can' => 'contactos.index',
+                            'icon' => 'fas fa-fw fa-users',
+                        ],
+                        [
+                            'text' => 'Campos personalizados',
+                            'route' => 'custom_fields.index',
+                            'can' => 'custom_fields.index',
+                            'icon' => 'fas fa-fw fa-tags',
+                        ],
+                        [
+                            'text' => 'Etiquetas',
+                            'route' => 'tags.index',
+                            'can' => 'tags.index',
+                            'icon' => 'fas fa-fw fa-tags',
+                        ],
+                    ],
+                ],
+                // Informes Section
+                [
+                    'text' => 'Informes',
+                    'icon' => 'fas fa-fw fa-flag',
+                    'submenu' => [
+                        [
+                            'text' => 'Estadisticas',
+                            'route' => 'estadisticas',
+                            'can' => 'estadisticas',
+                            'icon' => 'fas fa-fw fa-chart-line',
+                        ],
+                        [
+                            'text' => 'Envios plantilla',
+                            'route' => 'envios-plantillas',
+                            'can' => 'envios-plantillas',
+                            'icon' => 'fas fa-fw fa-chart-line',
+                        ],
+                    ],
                 ],
                 [
-                    'text'  => 'Plantillas',
-                    'route' => 'plantillas',
-                    'can'   => 'plantillas',
-                    'icon'  => 'fas fa-fw fa-file-invoice',
+                    'text' => 'Bots',
+                    'icon' => 'fas fa-fw fa-robot',
+                    'submenu' => [
+                        [
+                            'text' => 'Bots',
+                            'route' => 'bots.index',
+                            'icon' => 'fas fa-fw fa-robot',
+                        ],
+                        [
+                            'text' => 'Leads',
+                            'route' => 'leads',
+                            'icon' => 'fas fa-fw fa-headset',
+                        ]
+                    ],
                 ],
                 [
-                    'text'  => 'Programados',
-                    'route' => 'programados',
-                    'can'   => 'programados',
-                    'icon'  => 'fas fa-fw fa-clock',
-                ],
-            ],
-        ],
-        [
-            'text' => 'Contratación Local',
-            'icon' => 'fas fa-fw fa-check',
-            'submenu' => [
-                [
-                    'text'  => 'Solicitudes',
-                    'route' => 'solicitudes',
-                    'can'   => 'solicitudes',
-                    'icon'  => 'fab fa-fw fa-readme',
-                ],
-            ],
-        ],
-        [
-            'text' => 'Contactos',
-            'icon' => 'fas fa-fw fa-user',
-            'submenu' => [
-                [
-                    'text'  => 'Agenda',
-                    'route' => 'contactos.index',
-                    'can'   => 'contactos.index',
-                    'icon'  => 'fas fa-fw fa-users',
-                ],
-                [
-                    'text'   => 'Campos personalizados',
-                    'route'  => 'custom_fields.index',
-                    'can'    => 'custom_fields.index',
-                    'icon'   => 'fas fa-fw fa-tags',
-                ],
-                [
-                    'text'   => 'Etiquetas',
-                    'route'  => 'tags.index',
-                    'can'    => 'tags.index',
-                    'icon'   => 'fas fa-fw fa-tags',
-                ],
-            ],
-        ],
-        [
-            'text' => 'Informes',
-            'icon' => 'fas fa-fw fa-flag',
-            'submenu' => [
-                [
-                    'text'  => 'Estadisticas',
-                    'route' => 'estadisticas',
-                    'can'   => 'estadisticas',
-                    'icon'  => 'fas fa-fw fa-chart-line',
-                ],
-                [
-                    'text'   => 'Envios plantilla',
-                    'route'  => 'envios-plantillas',
-                    'can'    => 'envios-plantillas',
-                    'icon'   => 'fas fa-fw fa-chart-line',
-                ],
-            ],
-        ],
-        [
-            'text' => 'Bots',
-            'icon' => 'fas fa-fw fa-robot',
-            'submenu' => [
-                [
-                    'text'  => 'Bots',
-                    'route' => 'bots.index',
-                    'icon'  => 'fas fa-fw fa-robot',
-                ],
-                [
-                    'text'  => 'Leads',
-                    'route' => 'leads',
-                    'icon'  => 'fas fa-fw fa-headset',
-                ]
-            ],
-        ],
-        [
-            'text' => 'Configuración',
-            'icon' => 'fas fa-fw fa-wrench',
-            'submenu' => [
-                [
-                    'text'  => 'Aplicaciones',
-                    'route' => 'aplicaciones.index',
-                    'can'   => 'aplicaciones.index',
-                    'icon'  => 'fas fa-fw fa-window-restore',
-                ],
-                [
-                    'text'  => 'Numeros',
-                    'route' => 'numeros.index',
-                    'can'   => 'numeros.index',
-                    'icon'  => 'fas fa-fw fa-mobile',
+                    'text' => 'Configuración',
+                    'icon' => 'fas fa-fw fa-wrench',
+                    'submenu' => [
+                        [
+                            'text' => 'Aplicaciones',
+                            'route' => 'aplicaciones.index',
+                            'can' => 'aplicaciones.index',
+                            'icon' => 'fas fa-fw fa-window-restore',
+                        ],
+                        [
+                            'text' => 'Numeros',
+                            'route' => 'numeros.index',
+                            'can' => 'numeros.index',
+                            'icon' => 'fas fa-fw fa-mobile',
+                        ],
+                    ],
                 ],
             ],
         ],
@@ -426,32 +436,68 @@ return [
             'icon' => 'fas fa-fw fa-cogs',
             'submenu' => [
                 [
-                    'text'   => 'Usuarios',
-                    'route'  => 'users.index',
-                    'can'    => 'users.index',
-                    'icon'   => 'fas fa-fw fa-users',
+                    'text' => 'Usuarios',
+                    'route' => 'users.index',
+                    'can' => 'users.index',
+                    'icon' => 'fas fa-fw fa-users',
                 ],
                 [
-                    'text'  => 'Roles',
+                    'text' => 'Roles',
                     'route' => 'roles.index',
-                    'can'   => 'roles.index',
-                    'icon'  => 'fas fa-fw fa-window-restore',
+                    'can' => 'roles.index',
+                    'icon' => 'fas fa-fw fa-window-restore',
                 ],
                 [
-                    'text'  => 'Permisos',
+                    'text' => 'Permisos',
                     'route' => 'permisos.index',
-                    'can'   => 'permisos.index',
-                    'icon'  => 'fas fa-fw fa-mobile',
+                    'can' => 'permisos.index',
+                    'icon' => 'fas fa-fw fa-mobile',
                 ],
                 [
                     'text' => 'Logs',
                     'url' => 'log-viewer',
-                    'can'  => 'log-viewer',
+                    'can' => 'log-viewer',
                     'icon' => 'fas fa-exclamation-triangle',
                 ],
-
             ],
         ],
+        [
+            'text' => 'Gestión Correos',
+            'icon' => 'fas fa-fw fa-envelope-open-text', // Puedes cambiar el ícono
+            'submenu' => [
+                [
+                    'text' => 'Grupos Mails',
+                    'route' => 'groups.index',
+                    'icon' => 'fas fa-fw fa-users',
+                ],
+                [
+                    'text' => 'Boletines',
+                    'route' => 'plantillas',
+                    'icon' => 'fas fa-fw fa-newspaper',
+                ],
+                [
+                    'text' => 'Estadisticas',
+                    'route' => 'programados',
+                    'icon' => 'fas fa-fw fa-poll',
+                ],
+                [
+                    'text' => 'Reportes',
+                    'route' => 'programados',
+                    'icon' => 'fas fa-fw fa-chart-bar',
+                ],
+                [
+                    'text' => 'Busqueda de mails',
+                    'route' => 'programados',
+                    'icon' => 'fas fa-fw fa-search',
+                ],
+                [
+                    'text' => 'Mails Bloqueados',
+                    'route' => 'programados',
+                    'icon' => 'fas fa-fw fa-inbox',
+                ],
+            ],
+        ],
+
     ],
 
     /*

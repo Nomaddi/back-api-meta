@@ -753,7 +753,7 @@ class MessageController extends Controller
                         ];
                     }
 
-                    SendMessage::dispatch($tokenApp, $phone_id, $payload, $personalizedBody, $messageData, $distintivo);
+                    SendMessage::dispatch($tokenApp, $phone_id, $payload, $personalizedBody, $messageData, $distintivo)->onQueue('whatsapp-queue');
                 }
 
                 $envio = new Envio();

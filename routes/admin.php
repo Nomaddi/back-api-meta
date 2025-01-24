@@ -9,11 +9,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BotController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EnvioController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\LeadsController;
 use App\Http\Controllers\RolesController;
-use App\Http\Controllers\ClocalController;
 
+use App\Http\Controllers\ClocalController;
 use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\NumerosController;
@@ -159,6 +161,25 @@ Route::get('refresh-csrf', function () {
 
 Route::get('descargar-plantilla', [ContactoController::class, 'descargarPlantilla'])->name('descargar-plantilla');
 
+// enviar correo
+// -------------------------------------------
+Route::get('/send-email', function () {
+    return view('emails.send-email');
+})->name('send.email.form');
+Route::post('/send-email', [EmailController::class, 'sendEmail'])->name('send.email');
+
+Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
+Route::get('/groups/create', [GroupController::class, 'create'])->name('groups.create');
+Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
+Route::get('/groups/{group}/edit', [GroupController::class, 'edit'])->name('groups.edit');
+Route::put('/groups/{group}', [GroupController::class, 'update'])->name('groups.update');
+Route::delete('/groups/{group}', [GroupController::class, 'destroy'])->name('groups.destroy');
+Route::get('/groups/{group}/emails', [GroupController::class, 'showEmails'])->name('groups.showEmails');
+Route::post('/groups/{group}/add-recipient', [GroupController::class, 'addRecipient'])->name('groups.addRecipient');
+Route::delete('/groups/{group}/remove-recipient/{recipient}', [GroupController::class, 'removeRecipient'])->name('groups.removeRecipient');
+Route::get('/groups/{group}/recipients/{recipient}/edit', [GroupController::class, 'editRecipient'])->name('groups.editRecipient');
+Route::put('/groups/{group}/recipients/{recipient}', [GroupController::class, 'updateRecipient'])->name('groups.updateRecipient');
+// -------------------------------------------
 // bot
 Route::resource(
     'bots',
@@ -182,7 +203,7 @@ Route::get('json', function () {
     // ]);
 
     // recuperar un asistente
-    $data= OpenAI::assistants()->retrieve('');
+    $data = OpenAI::assistants()->retrieve('');
     // $data = OpenAI::threads()->runs()->retrieve(
     //     'thread_8wxAlo5zskcpcGHMJrUPF8JB',
     //     'run_4RCYyYzX9m41WQicoJtUQAb8',
