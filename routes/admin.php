@@ -1,10 +1,11 @@
 <?php
 
 use App\Models\Reporte;
+use App\Livewire\Contactos;
 use App\Http\Controllers\BotIA;
 use Illuminate\Support\Facades\DB;
-use OpenAI\Laravel\Facades\OpenAI;
 // use Illuminate\Support\Facades\Redis;
+use OpenAI\Laravel\Facades\OpenAI;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BotController;
 use App\Http\Controllers\TagController;
@@ -13,8 +14,8 @@ use App\Http\Controllers\EmailController;
 use App\Http\Controllers\EnvioController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\LeadsController;
-use App\Http\Controllers\RolesController;
 
+use App\Http\Controllers\RolesController;
 use App\Http\Controllers\ClocalController;
 use App\Http\Controllers\ChatBotController;
 use App\Http\Controllers\MessageController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\NumerosController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\ContactoController;
 use App\Http\Controllers\ErrorLogController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\CustomFieldController;
 use App\Http\Controllers\AplicacionesController;
 use App\Http\Controllers\EstadisticasController;
@@ -49,7 +51,8 @@ Route::post('contactos', [ContactoController::class, 'store'])->name('contactos.
 Route::get('contactos/edit/{id}', [ContactoController::class, 'edit']); //obtener datos para editar un registro
 Route::post('contactos/update', [ContactoController::class, 'update'])->name('contactos.update'); //actualizare un registro
 Route::get('contactos/delete/{id}', [ContactoController::class, 'destroy'])->name('contactos.delete'); //actualizare un registro
-
+// ruta de contacto con componente de livewire
+Route::get('contact', Contactos::class)->name('contact.index');
 // Tags
 Route::get('tags', [TagController::class, 'index'])->middleware('can:tags.index')->name('tags.index'); //mostrar todos los registros
 Route::post('tags', [TagController::class, 'store'])->name('tags.store'); //crear un registro
@@ -179,6 +182,11 @@ Route::post('/groups/{group}/add-recipient', [GroupController::class, 'addRecipi
 Route::delete('/groups/{group}/remove-recipient/{recipient}', [GroupController::class, 'removeRecipient'])->name('groups.removeRecipient');
 Route::get('/groups/{group}/recipients/{recipient}/edit', [GroupController::class, 'editRecipient'])->name('groups.editRecipient');
 Route::put('/groups/{group}/recipients/{recipient}', [GroupController::class, 'updateRecipient'])->name('groups.updateRecipient');
+Route::post('newsletters/{newsletter}/send-test', [NewsletterController::class, 'sendTest'])->name('newsletters.sendTest');
+Route::post('newsletters/{newsletter}/send', [NewsletterController::class, 'send'])->name('newsletters.send');
+
+
+Route::resource('newsletters', NewsletterController::class);
 // -------------------------------------------
 // bot
 Route::resource(

@@ -309,6 +309,32 @@ return [
             'url' => 'admin/blog',
             'can' => 'manage-blog',
         ],
+
+        // Contactos Section
+        [
+            'text' => 'Contactos',
+            'icon' => 'fas fa-fw fa-user',
+            'submenu' => [
+                [
+                    'text' => 'Agenda',
+                    'route' => 'contactos.index',
+                    'can' => 'contactos.index',
+                    'icon' => 'fas fa-fw fa-users',
+                ],
+                [
+                    'text' => 'Campos personalizados',
+                    'route' => 'custom_fields.index',
+                    'can' => 'custom_fields.index',
+                    'icon' => 'fas fa-fw fa-tags',
+                ],
+                [
+                    'text' => 'Etiquetas',
+                    'route' => 'tags.index',
+                    'can' => 'tags.index',
+                    'icon' => 'fas fa-fw fa-tags',
+                ],
+            ],
+        ],
         [
             'text' => 'Gestión WhatsApp',
             'icon' => 'fas fa-fw fa-layer-group',
@@ -348,31 +374,6 @@ return [
                             'route' => 'solicitudes',
                             'can' => 'solicitudes',
                             'icon' => 'fab fa-fw fa-readme',
-                        ],
-                    ],
-                ],
-                // Contactos Section
-                [
-                    'text' => 'Contactos',
-                    'icon' => 'fas fa-fw fa-user',
-                    'submenu' => [
-                        [
-                            'text' => 'Agenda',
-                            'route' => 'contactos.index',
-                            'can' => 'contactos.index',
-                            'icon' => 'fas fa-fw fa-users',
-                        ],
-                        [
-                            'text' => 'Campos personalizados',
-                            'route' => 'custom_fields.index',
-                            'can' => 'custom_fields.index',
-                            'icon' => 'fas fa-fw fa-tags',
-                        ],
-                        [
-                            'text' => 'Etiquetas',
-                            'route' => 'tags.index',
-                            'can' => 'tags.index',
-                            'icon' => 'fas fa-fw fa-tags',
                         ],
                     ],
                 ],
@@ -472,7 +473,7 @@ return [
                 ],
                 [
                     'text' => 'Boletines',
-                    'route' => 'plantillas',
+                    'route' => 'newsletters.index',
                     'icon' => 'fas fa-fw fa-newspaper',
                 ],
                 [
@@ -652,5 +653,5 @@ return [
     |
     */
 
-    'livewire' => false,
+    'livewire' => true,
 ];
